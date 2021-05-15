@@ -32,7 +32,7 @@ use crate::{
 /// Generic game context
 #[derive(Debug)]
 pub struct Ice {
-    /// Clears target (frame buffer) with cornflower blue color
+    /// Clears target (frame buffer by default) with cornflower blue color
     pa_blue: rg::PassAction,
     /// 2D renderer
     pub snow: Snow2d,
@@ -100,7 +100,7 @@ impl Ice {
         self.snow.post_render(dt);
     }
 
-    /// Debug render?
+    /// TODO: Debug render?
     pub fn render(&mut self) {
         // debug render?
     }

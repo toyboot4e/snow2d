@@ -1,4 +1,8 @@
-//! [`xdl`] re-exported
+/*!
+Input module
+
+That is, [`xdl`] re-exported
+*/
 
 pub use xdl::{utils, Dir4, Dir8, Input, Key, Keyboard, Sign};
 

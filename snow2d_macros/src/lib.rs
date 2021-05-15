@@ -1,5 +1,7 @@
 //! Just for placing macros in somewhere other than crate root
 
+/// Create `InputBundle` from literals
+///
 /// TODO: handle C-K or such that
 #[macro_export]
 macro_rules! keys {
@@ -10,7 +12,7 @@ macro_rules! keys {
     }
 }
 
-/// Implements `From` and `Into` using `SerdeRepr` method
+/// Implements `From` and `Into` using `SerdeRepr` methods
 #[macro_export]
 macro_rules! connect_repr_target {
     // T: TypeObject, U: From<TypeObject>

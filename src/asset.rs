@@ -1,24 +1,30 @@
 /*!
-Cached data that can be referred to by path
+Asset management
 
-[`Asset<T>`] is a reference-counted reference to an asset item. It might be rare in rustic context.
+# Asset types
 
-[`AssetCacheAny`] contains [`AssetLoader`] s. Each type of asset is stored in [`AssetCacheT`].
+[`Asset<T>`] is a shared reference to an asset item. Each type of `Asset` is stored in
+[`AssetCacheT`]. [`AssetCacheAny`] stores all [`AssetCacheT`].
+
+# Asset directory
+
+Asset directory is assumed to be at `manifest_dir/assets`. [`AssetKey`] is a relative path from
+the asset directory. TODO: Add asset key with scheme: `img:gorira`
 
 # Serde support
 
-1. [`AssetDeState`] has thread-local pointer for binding an [`AssetCacheAny`]. Use it to not make
-duplicates whle seriailizing.
-2. Asset data should be serialized as `PathBuf`. TODO: copy-free asset key
+Bind your [`AssetCacheAny`] to [`AssetDeState`] while deserializing.
 
-# TODO
+Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`]. Since [`Asset`] is a
+shared pointer, we need to take care to not create duplicates. But `serde` doesn't let us to use
+states while serializing/deserializing. So we need a thread-local pointer for deserialization.
+
+# TODOs
 
 * async loading
 * hot reloading (tiled map, actor image, etc.)
-
-# FIXME
-
-* `Deref` is a bad idea. It can't implement traits that the underlying data implements
+* fix static asset path
+* `Asset` implements `Deref`, but they don't implement traits that the underlying data implements
 */
 
 #![allow(dead_code)]
@@ -57,6 +63,7 @@ pub fn path(path: impl AsRef<Path>) -> PathBuf {
     asset_root.join(path)
 }
 
+/// Deserialize asset path as a RON file
 pub fn deserialize_ron<'a, T: serde::de::DeserializeOwned>(
     key: impl Into<AssetKey<'a>>,
 ) -> anyhow::Result<T> {
@@ -64,6 +71,7 @@ pub fn deserialize_ron<'a, T: serde::de::DeserializeOwned>(
 
     let path = path(key.into().deref());
     log::trace!("deserializing `{}`", path.display());
+
     let s = fs::read_to_string(&path)
         .map_err(anyhow::Error::msg)
         .with_context(|| format!("Unable to read asset file at `{}`", path.display()))?;
@@ -78,30 +86,31 @@ pub fn deserialize_ron<'a, T: serde::de::DeserializeOwned>(
         })
 }
 
-/// `"scheme:path"` or `"relative_path"`
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Inspect)]
-pub struct StringWithScheme {
-    raw: String,
-    /// Byte offset of `:` character
-    scheme_offset: Option<usize>,
-}
-
-/// Maps scheme to relative path from asset root directory
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SchemeHolder {
-    schemes: Vec<(String, String)>,
-}
-
-impl StringWithScheme {
-    pub fn as_scheme(&self) -> Option<&str> {
-        self.scheme_offset.map(|offset| &self.raw[offset..])
-    }
-
-    pub fn as_body(&self) -> &str {
-        let offset = self.scheme_offset.map(|offset| offset + 1).unwrap_or(0);
-        &self.raw[offset..]
-    }
-}
+// TODO: scheme support
+// /// `"scheme:path"` or `"relative_path"`
+// #[derive(Debug, Clone, PartialEq, Eq, Hash, Inspect)]
+// pub struct StringWithScheme {
+//     raw: String,
+//     /// Byte offset of `:` character
+//     scheme_offset: Option<usize>,
+// }
+//
+// /// Maps scheme to relative path from asset root directory
+// #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+// pub struct SchemeHolder {
+//     schemes: Vec<(String, String)>,
+// }
+//
+// impl StringWithScheme {
+//     pub fn as_scheme(&self) -> Option<&str> {
+//         self.scheme_offset.map(|offset| &self.raw[offset..])
+//     }
+//
+//     pub fn as_body(&self) -> &str {
+//         let offset = self.scheme_offset.map(|offset| offset + 1).unwrap_or(0);
+//         &self.raw[offset..]
+//     }
+// }
 
 /// Data that can be used as an asset
 pub trait AssetItem: fmt::Debug + Sized + 'static {
@@ -242,7 +251,7 @@ struct AssetCacheEntry<T: AssetItem> {
     asset: Asset<T>,
 }
 
-/// Cache of a specific [`AssetItem`] type
+/// Cache of items of a specific [`AssetItem`] type
 #[derive(Debug)]
 pub struct AssetCacheT<T: AssetItem> {
     entries: Vec<AssetCacheEntry<T>>,

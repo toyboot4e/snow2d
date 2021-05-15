@@ -1,5 +1,7 @@
 /*!
-Text rendering
+(Not so) rich text rendering
+
+This is **not ready!** Use `crate::ui::node::Text`.
 */
 
 pub mod font;

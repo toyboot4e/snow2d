@@ -24,7 +24,7 @@ use crate::gfx::{
 static WHITE_DOT: OnceCell<Texture2dDrop> = OnceCell::new();
 
 pub(crate) fn init() {
-    let dot = include_bytes!("white_dot.png");
+    let dot = include_bytes!("draw/white_dot.png");
     let tex = TextureBuilder::from_encoded_bytes(dot)
         .unwrap()
         .build_texture();

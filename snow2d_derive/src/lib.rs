@@ -16,18 +16,17 @@ use {
 };
 
 /// Implements `Inspect` trait
-#[cfg(not(feature = "dummy"))]
 #[proc_macro_derive(Inspect, attributes(inspect))]
 pub fn inspect(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as DeriveInput);
-    TokenStream::from(inspect::impl_inspect(ast))
-}
-
-/// Implements `Inspect` trait
-#[cfg(feature = "dummy")]
-#[proc_macro_derive(Inspect, attributes(inspect))]
-pub fn inspect(input: TokenStream) -> TokenStream {
-    TokenStream::new()
+    #[cfg(feature = "dummy")]
+    {
+        TokenStream::new()
+    }
+    #[cfg(not(feature = "dummy"))]
+    {
+        let ast = parse_macro_input!(input as DeriveInput);
+        TokenStream::from(inspect::impl_inspect(ast))
+    }
 }
 
 /// Implements `TypeObject` trait

@@ -1,4 +1,4 @@
-//! Shaders
+//! Builtin shaders
 
 #![allow(unused)]
 
@@ -23,8 +23,8 @@ macro_rules! c_str {
 macro_rules! def_shd {
     ($file:expr) => {
         [
-            concat!(include_str!(concat!("glsl/", $file, ".vs")), "\0").to_string(),
-            concat!(include_str!(concat!("glsl/", $file, ".fs")), "\0").to_string(),
+            concat!(include_str!(concat!("shaders/glsl/", $file, ".vs")), "\0").to_string(),
+            concat!(include_str!(concat!("shaders/glsl/", $file, ".fs")), "\0").to_string(),
         ]
     };
 }
@@ -39,7 +39,12 @@ macro_rules! def_shd {
 
         // NOTE: `file!` is relative path from CARGO_MANIFEST_DIR
         let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
-        let dir = root.join(PathBuf::from(file!()).parent().unwrap().join("glsl"));
+        let dir = root.join(
+            PathBuf::from(file!())
+                .parent()
+                .unwrap()
+                .join("shaders/glsl"),
+        );
 
         let vs_path = dir.join($file).with_extension("vs");
         let mut vert = fs::read_to_string(&vs_path)
