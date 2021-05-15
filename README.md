@@ -2,7 +2,7 @@
 
 `snow2d` is a 2D framework built on top of `rokol`.
 
-It’s a 2D framework specific for my roguelike game. Probably **it doesn’t meet others’ needs**.
+`snow2d` is just for my roguelike game; **it doesn’t meet others’ needs**.
 
 ## Status
 

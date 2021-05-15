@@ -1,7 +1,7 @@
 /*!
 `snow2d` ❄️ framework
 
-It's a 2D framework specific for my roguelike game. Probably it doesn't meet others' needs.
+It's a 2D framework specific for my roguelike game. **It doesn't meet others' needs**.
 */
 
 #![feature(drain_filter)]
