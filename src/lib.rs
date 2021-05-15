@@ -17,9 +17,10 @@ pub mod prelude;
 pub mod ui;
 pub mod utils;
 
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use rokol::gfx as rg;
+use sdl2::event::{Event, WindowEvent};
 
 use crate::{
     asset::AssetCacheAny,
@@ -107,5 +108,89 @@ impl Ice {
     pub fn on_end_frame(&mut self) {
         self.assets.free_unused();
         self.input.on_end_frame();
+    }
+}
+
+/// Utility for updating the game at 60 FPS durling the window has focus
+#[derive(Debug)]
+pub struct GameRunner {
+    target_dt: Duration,
+    now: Instant,
+    accum: Duration,
+    focus: [bool; 2],
+}
+
+impl GameRunner {
+    pub fn new() -> Self {
+        Self {
+            target_dt: Duration::from_nanos(1_000_000_000 / 60),
+            now: Instant::now(),
+            accum: Duration::default(),
+            focus: [false, false],
+        }
+    }
+
+    pub fn dt(&self) -> Duration {
+        self.target_dt
+    }
+}
+
+/// Lifecycle
+impl GameRunner {
+    pub fn event(&mut self, ev: &Event) {
+        match ev {
+            Event::Window {
+                // main `window_id` is `1`
+                // window_id,
+                win_event,
+                ..
+            } => match win_event {
+                // keyborad focus
+                WindowEvent::FocusLost => {
+                    // log::trace!("focus lost: {:?}", window_id);
+                    self.focus[1] = false;
+                }
+                WindowEvent::FocusGained => {
+                    // log::trace!("gain: {:?}", window_id);
+                    self.focus[1] = true;
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+    }
+
+    /// Returns if the game should be updated this frame
+    pub fn update(&mut self) -> bool {
+        let update = match (self.focus[0], self.focus[1]) {
+            (false, true) => {
+                // gain focus
+                self.accum = Duration::default();
+                self.now = Instant::now();
+
+                false
+            }
+            (true, false) => {
+                // lose focus
+                self.accum = Duration::default();
+                self.now = Instant::now();
+
+                false
+            }
+            (true, true) => {
+                // been focused
+                let new_now = Instant::now();
+                self.accum += new_now - self.now;
+                self.now = new_now;
+
+                true
+            }
+            (false, false) => {
+                // been unfocused: stop the game
+                false
+            }
+        };
+        self.focus[0] = self.focus[1];
+        update
     }
 }

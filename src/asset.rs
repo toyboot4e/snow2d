@@ -3,7 +3,7 @@ Asset management
 
 # Asset types
 
-[`Asset<T>`] is a shared reference to an asset item. Each type of `Asset` is stored in
+[`Asset<T>`] is a shared reference of an asset item. Each type of `Asset` is stored in
 [`AssetCacheT`]. [`AssetCacheAny`] stores all [`AssetCacheT`].
 
 # Asset directory
