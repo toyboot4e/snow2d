@@ -1,7 +1,7 @@
 /*!
 Graphics
 
-[`Snow2d`] is the context and the primary API.
+[`Snow2d`] is the graphics context and the primary rendering API.
 
 # Coordinate system
 

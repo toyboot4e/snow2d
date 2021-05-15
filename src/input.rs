@@ -1,7 +1,7 @@
 /*!
 Input module
 
-That is, [`xdl`] re-exported
+That is, [`xdl`] re-exported. TODO: gamepad and mouse
 */
 
 pub use xdl::{utils, Dir4, Dir8, Input, Key, Keyboard, Sign};

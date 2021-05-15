@@ -46,8 +46,6 @@ pub struct Ice {
     /// Delta time from last frame
     dt: Duration,
     frame_count: u64,
-    /// When the game started
-    pub start_time: Instant,
 }
 
 impl Ice {
@@ -64,7 +62,6 @@ impl Ice {
             input: Input::new(),
             dt: Duration::new(0, 0),
             frame_count: 0,
-            start_time: Instant::now(),
         }
     }
 
@@ -72,6 +69,7 @@ impl Ice {
         self.dt
     }
 
+    /// How many times did we call [`pre_update`](Self::pre_update)
     pub fn frame_count(&self) -> u64 {
         self.frame_count
     }
