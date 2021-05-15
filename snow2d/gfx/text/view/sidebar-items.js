@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["LineSpanView","Span of styled text"],["LineView","One line of text"],["QuadSpan","`[from, to)`; same as “text”[from..to]"],["TextView","Multiple lines of text"]],"type":[["QuadIx",""]]});

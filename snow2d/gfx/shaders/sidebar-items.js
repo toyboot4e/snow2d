@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["default_offscreen",""],["default_screen",""],["gauss","Tow-pass gaussian blur for ping pong frame buffers"],["snow",""]],"struct":[["DefaultVertex","Position, color and uv"],["PosUvVert",""]]});

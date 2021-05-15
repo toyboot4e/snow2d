@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AnimGen",""],["AnimInsertLog","Shorthand for multiple `vec.push(anims.insert( .. ));`"],["AnimSeq",""],["Delta","Internaly utility for providing fluent API of tweens"]]});

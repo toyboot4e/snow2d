@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Drain","See [`Arena::drain`]."],["DrainFilter","See [`Arena::drain_filter`]."],["IntoIter","Iterator typed used when an Arena is turned [`IntoIterator`]."],["Iter","See `Arena::iter`."],["IterMut","See `Arena::iter_mut`."],["ValuesIter","See `Arena::values`."],["ValuesIterMut","See `Arena::values_mut`."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"derive":[["Inspect","Implements `Inspect` trait"]],"fn":[["inspect_seq",""],["nest",""]],"trait":[["Inspect","Derive ImGUI runtime inspector"]]});

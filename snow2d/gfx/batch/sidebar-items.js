@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["N_QUADS","Number of quads in batcher, which is long enough to not be saturated"]],"struct":[["Batch","Queue of quads and quad push parameters"],["BatchData","Queue of quads"],["QuadData","`snow2d` quad data type"]]});

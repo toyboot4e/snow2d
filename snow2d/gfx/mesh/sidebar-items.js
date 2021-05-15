@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DynamicMesh","Wrapper of dynamic buffers"],["StaticMesh","Wrapper of immutable buffers"]]});

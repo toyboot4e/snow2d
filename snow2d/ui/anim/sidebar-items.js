@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AlphaTween",""],["ColorTween",""],["DynAnim","TODO: does it work?"],["PosTween",""],["RotTween",""],["SizeTween",""],["XTween",""],["YTween",""]],"trait":[["AnimFn","Animation function that implements basic traits"],["AnimImpl","Common animation lifecycle"]]});

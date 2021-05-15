@@ -1,0 +1,3 @@
+var N = null;var sourcesIndex = {};
+sourcesIndex["snow2d"] = {"name":"","dirs":[{"name":"gfx","dirs":[{"name":"draw","files":["builder.rs","params.rs"]},{"name":"text","files":["font.rs","render.rs","style.rs","view.rs"]}],"files":["batch.rs","draw.rs","geom2d.rs","mesh.rs","pass.rs","shaders.rs","tex.rs","text.rs"]},{"name":"ui","files":["anim.rs","anim_builder.rs","node.rs"]},{"name":"utils","dirs":[{"name":"inspect","files":["crate_impls.rs","std_impls.rs"]}],"files":["cheat.rs","ez.rs","inspect.rs","pool.rs","tyobj.rs"]}],"files":["asset.rs","audio.rs","gfx.rs","input.rs","lib.rs","prelude.rs","ui.rs","utils.rs"]};
+createSourceSidebar();

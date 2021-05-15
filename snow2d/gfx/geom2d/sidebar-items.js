@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Scaled",""]],"struct":[["Flips",""],["Mat2f","Column-major 2x3 matrix, which represents 3x3 matrix"],["Rect2f","2D rectangle"],["Skew2f","Skew matrix"],["Vec2f","2D vector, intended for both positions and sizes"]]});

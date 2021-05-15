@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["register_asset_loaders","Adds audio asset loaders to [`AssetCacheAny`]"]],"struct":[["AudioLoader","[`AssetLoader`] for most of the audio source types"],["MusicPlayer","Background music player"],["Playback","Playback handle for [`MusicPlayer`]"]]});

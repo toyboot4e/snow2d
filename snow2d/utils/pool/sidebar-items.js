@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["iters","Iterator types of the `pool` module"]],"struct":[["Handle","Owing index to an item in a [`Pool`]"],["Pool","Dynamic array with reference-counted [`Handle`]s"],["Slot","Newtype of `u32`"],["WeakHandle","Non-owing index to an item in a [`Pool`]"]]});
