@@ -17,7 +17,7 @@ pub mod prelude;
 pub mod ui;
 pub mod utils;
 
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use rokol::gfx as rg;
 

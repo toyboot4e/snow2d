@@ -50,7 +50,7 @@ use downcast_rs::{impl_downcast, Downcast};
 use once_cell::sync::OnceCell;
 use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
 
-use crate::utils::{Cheat, Inspect};
+use crate::utils::Cheat;
 
 /// Generational index or identity of assets
 type Gen = u32;
