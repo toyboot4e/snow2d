@@ -1,7 +1,7 @@
 /*!
 (Not so) rich text rendering
 
-This is **not ready!** Use `crate::ui::node::Text`.
+This module is **not ready!** Use `crate::ui::node::Text`.
 */
 
 pub mod font;
@@ -91,9 +91,10 @@ pub fn render_line<'a>(
 
     // TODO: use quad buffer in text renderer?
     // TODO: use non-immediate batcher?
-
+    // TODO: text size
     // TODO: use font set, also in talk.rs
     // TODO: efficient rich text layout
+
     let font_set = &fb.storage[font_set];
     fb.tex.set_font(font_set.regular.ix);
     let regular_quads = fb.tex.text_iter(text).unwrap().collect::<Vec<_>>();

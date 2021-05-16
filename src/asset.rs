@@ -208,7 +208,7 @@ impl AssetKey<'static> {
     /// Create static asset key with static path
     ///
     /// ```
-    /// Requires `#![const_raw_ptr_deref]`
+    /// /// Requires `#![const_raw_ptr_deref]`
     /// const fn as_path(s:&'static str) -> &'static Path {
     ///     unsafe { &*(s as *const str as *const OsStr as *const Path) }
     /// }
