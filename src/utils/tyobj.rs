@@ -4,8 +4,6 @@
 [to]: https://gameprogrammingpatterns.com/type-object.html
 
 The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] for each [`TypeObject`].
-
-NOTE: We can't implement `From` and `Into` using generics due to the orphan rule. Use macros instead.
 */
 
 use std::{

@@ -280,11 +280,8 @@ pub struct Snow2d {
 
 /// Lifeycle
 impl Snow2d {
-    /// Call when rokol is ready
+    /// Call after rokol is ready
     pub unsafe fn new(window: WindowState) -> Self {
-        // create white dot image
-        crate::gfx::draw::init();
-
         Self {
             window,
             clock: GameClock::new(),
@@ -399,26 +396,21 @@ impl<'a> RenderPass<'a> {
 
     // pub fn txt(&mut self, pos: impl Into<Vec2f>, text: &str) {
 
-    /// Renders multiple lines of text
-    pub fn text(&mut self, pos: impl Into<Vec2f>, text: &str) {
-        // NOTE: Be sure to use non-premultiplied alpha blending
-
-        // we have to draw text line by line
-        let fontsize = 20.0; // really?
-                             // TODO: read configuration
-        let nl_space = 2.0;
+    /// Immediate-mode rendering of multiple lines of text
+    pub fn text(&mut self, pos: impl Into<Vec2f>, text: &str, fontsize: f32, ln_space: f32) {
+        self.snow.fontbook.tex.set_size(fontsize);
 
         let pos = pos.into();
-        let nl_offset = fontsize + nl_space;
+        let ln_offset = fontsize + ln_space;
 
         if let Some(shadow_offset) = Some(Vec2f::new(2.0, 2.0)) {
             for (i, line) in text.lines().enumerate() {
-                let pos = pos + Vec2f::new(0.0, nl_offset * i as f32);
+                let pos = pos + Vec2f::new(0.0, ln_offset * i as f32);
                 self.text_line_with_shadow(line, pos, shadow_offset);
             }
         } else {
             for (i, line) in text.lines().enumerate() {
-                let pos = pos + Vec2f::new(0.0, nl_offset * i as f32);
+                let pos = pos + Vec2f::new(0.0, ln_offset * i as f32);
                 self.text_line(line, pos);
             }
         }

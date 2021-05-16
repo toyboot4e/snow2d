@@ -10,16 +10,17 @@ UI nodes (renderables)
 `Draw` variants -> `Draw` -> `Node`
 */
 
+// Re-exported as [`Node`] variants
+pub use crate::gfx::tex::{NineSliceSprite, SpriteData};
+
+use imgui::{im_str, Ui};
+use rokol::fons::FontTexture;
+
 use crate::{
     gfx::{draw::*, geom2d::*, Color},
     ui::Node,
     utils::Inspect,
 };
-
-use imgui::{im_str, Ui};
-
-// Re-exported as [`Node`] variants
-pub use crate::gfx::tex::{NineSliceSprite, SpriteData};
 
 /// Rendering order [0, 1] (the higher, the latter)
 pub type Order = f32;
@@ -115,15 +116,68 @@ impl_into_draw!(NineSliceSprite, NineSlice);
 impl_into_draw!(Text, Text);
 
 /// [`Draw`] variant
-#[derive(Debug, Clone, PartialEq, Eq, Inspect)]
+#[derive(Debug, Clone, PartialEq, Inspect)]
 pub struct Text {
     pub txt: String,
-    // TODO: size of text
+    // TODO: batch these types?
+    pub fontsize: f32,
+    pub ln_space: f32,
+    // `size` and `origin` is set in `DrawParams`
     // TODO: decoration information (spans for colors, etc)
 }
 
+#[derive(Debug, Clone)]
+pub struct TextBuilder<'a> {
+    /// Measure text with default or user-defined parameters
+    tex: &'a FontTexture,
+    text: Text,
+    origin: Vec2f,
+}
+
+impl<'a> TextBuilder<'a> {
+    pub fn new(txt: String, tex: &'a FontTexture) -> Self {
+        Self {
+            tex,
+            text: Text {
+                txt,
+                fontsize: 20.0,
+                ln_space: 4.0,
+            },
+            origin: Vec2f::ZERO,
+        }
+    }
+
+    pub fn build(self) -> Node {
+        let size =
+            self.tex
+                .text_size_multiline(&self.text.txt, self.text.fontsize, self.text.ln_space);
+
+        let mut node = Node::from(self.text);
+        node.params.size = Vec2f::from(size);
+        node.params.origin = Some(self.origin);
+        node
+    }
+
+    pub fn fontsize(&mut self, fontsize: f32) -> &mut Self {
+        self.text.fontsize = fontsize;
+        self
+    }
+
+    pub fn ln_space(&mut self, ln_space: f32) -> &mut Self {
+        self.text.ln_space = ln_space;
+        self
+    }
+
+    pub fn origin(&mut self, origin: impl Into<Vec2f>) -> &mut Self {
+        self.origin = origin.into();
+        self
+    }
+
+    // pub fn style(&mut self, style: FontStyle) -> &mut Self
+}
+
 impl Text {
-    pub fn new(txt: String) -> Self {
-        Self { txt }
+    pub fn builder(text: String, tex: &FontTexture) -> TextBuilder {
+        TextBuilder::new(text, tex)
     }
 }

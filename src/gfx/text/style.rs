@@ -10,7 +10,7 @@ use crate::gfx::geom2d::Vec2f;
 pub struct FontStyle {
     pub font_ix: FontIx,
     pub fontsize: f32,
-    pub line_spacing: f32,
+    pub ln_space: f32,
     // pub is_bold: bool,
     // pub is_italic: bool,
     // pub shadow: TextShadowStyle

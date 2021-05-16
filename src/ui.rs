@@ -12,7 +12,7 @@ pub mod node;
 use std::time::Duration;
 
 use crate::{
-    gfx::{draw::*, RenderPass},
+    gfx::{draw::*, geom2d::Vec2f, RenderPass},
     utils::{
         arena::Arena,
         enum_dispatch, ez, inspect,
@@ -107,8 +107,9 @@ impl Node {
                 params.setup_quad(&mut pass.sprite(x));
             }
             Draw::Text(ref x) => {
-                // TODO: custom position
-                pass.text(params.pos, &x.txt);
+                let origin = params.origin.unwrap_or(Vec2f::ZERO);
+                let pos = params.pos + params.size * origin;
+                pass.text(pos, &x.txt, x.fontsize, x.ln_space);
             }
             Draw::None => {}
         }
