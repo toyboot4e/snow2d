@@ -23,11 +23,13 @@ use crate::gfx::{
 
 static WHITE_DOT: OnceCell<Texture2dDrop> = OnceCell::new();
 
+/// Allocates white dot image
 pub(crate) fn init() {
     let dot = include_bytes!("draw/white_dot.png");
     let tex = TextureBuilder::from_encoded_bytes(dot)
         .unwrap()
         .build_texture();
+
     WHITE_DOT.set(tex).unwrap();
 }
 

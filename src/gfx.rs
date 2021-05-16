@@ -282,6 +282,8 @@ pub struct Snow2d {
 impl Snow2d {
     /// Call after rokol is ready
     pub unsafe fn new(window: WindowState) -> Self {
+        self::draw::init();
+
         Self {
             window,
             clock: GameClock::new(),

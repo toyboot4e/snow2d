@@ -181,8 +181,6 @@ impl<T: AssetItem> Asset<T> {
 }
 
 /// Key to load asset
-///
-/// TODO: use newtype struct while enabling static construction (or use IntoAssetKey)
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(from = "PathBuf")]
 #[serde(into = "PathBuf")]
@@ -206,6 +204,32 @@ impl<'a> AssetKey<'a> {
     }
 }
 
+impl AssetKey<'static> {
+    /// Create static asset key with static path
+    ///
+    /// ```
+    /// Requires `#![const_raw_ptr_deref]`
+    /// const fn as_path(s:&'static str) -> &'static Path {
+    ///     unsafe { &*(s as *const str as *const OsStr as *const Path) }
+    /// }
+    /// ```
+    pub const fn new_const(p: Cow<'static, Path>) -> Self {
+        AssetKey(p)
+    }
+}
+
+impl Into<AssetKey<'static>> for &'static AssetKey<'static> {
+    fn into(self) -> AssetKey<'static> {
+        self.clone()
+    }
+}
+
+impl<'a> AsRef<Path> for AssetKey<'a> {
+    fn as_ref(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+
 impl<'a> std::ops::Deref for AssetKey<'a> {
     type Target = Path;
     fn deref(&self) -> &Self::Target {
@@ -214,6 +238,8 @@ impl<'a> std::ops::Deref for AssetKey<'a> {
 }
 
 /// Key to load asset (allocated statically)
+///
+/// See also: [`AssetKey::new_const`]
 #[derive(Clone, Copy)]
 pub struct StaticAssetKey(pub &'static str);
 
