@@ -16,13 +16,22 @@
 <span id="13">13</span>
 <span id="14">14</span>
 <span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
 </pre><pre class="rust">
-<span class="doccomment">//! Primary types in `snow2d`</span>
+<span class="doccomment">/*!
+Primary types in `snow2d`
+*/</span>
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="prelude-ty">Result</span>, <span class="kw-2">*</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">asset</span>::{<span class="self">self</span>, <span class="ident">Asset</span>, <span class="ident">AssetCacheAny</span>, <span class="ident">AssetCacheT</span>},
     <span class="ident">audio</span>::{<span class="self">self</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>, <span class="ident">Audio</span>},
-    <span class="ident">gfx</span>::{<span class="ident">draw</span>::<span class="kw-2">*</span>, <span class="ident">tex</span>::<span class="kw-2">*</span>, <span class="ident">Color</span>, <span class="ident">Snow2d</span>},
+    <span class="ident">gfx</span>::{<span class="ident">draw</span>::<span class="kw-2">*</span>, <span class="ident">tex</span>::<span class="kw-2">*</span>, <span class="ident">Color</span>, <span class="ident">Snow2d</span>, <span class="ident">WindowState</span>},
     <span class="ident">input</span>::{<span class="ident">vi</span>, <span class="ident">Dir4</span>, <span class="ident">Dir8</span>, <span class="ident">Input</span>, <span class="ident">Key</span>, <span class="ident">Keyboard</span>, <span class="ident">Sign</span>},
     <span class="ident">ui</span>::{<span class="ident">node</span>::<span class="kw-2">*</span>, <span class="ident">Anim</span>, <span class="ident">AnimIndex</span>, <span class="ident">Layer</span>},
     <span class="ident">utils</span>::{
@@ -31,6 +40,7 @@
         <span class="ident">tyobj</span>::{<span class="ident">SerdeViaTyObj</span>, <span class="ident">TypeObject</span>},
         <span class="ident">Derivative</span>, <span class="ident">Inspect</span>,
     },
+    <span class="ident">Ice</span>,
 };
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="snow2d" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

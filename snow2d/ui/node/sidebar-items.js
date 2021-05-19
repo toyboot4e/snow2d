@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Draw","[`Node`] surface"]],"struct":[["DrawParams","Common geometry data that animations can operate on"],["Text","[`Draw`] variant"]],"type":[["Order","Rendering order [0, 1] (the higher, the latter)"]]});
+initSidebarItems({"enum":[["Draw","[`Node`] surface"]],"struct":[["DrawParams","Common geometry data that animations can operate on"],["Text","[`Draw`] variant"],["TextBuilder",""]],"type":[["Order","Rendering order [0, 1] (the higher, the latter)"]]});

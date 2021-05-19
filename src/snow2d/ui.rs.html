@@ -432,6 +432,7 @@
 <span id="429">429</span>
 <span id="430">430</span>
 <span id="431">431</span>
+<span id="432">432</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 UI or scene graph: container of sprites and animations
@@ -447,7 +448,7 @@ UI or scene graph: container of sprites and animations
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">gfx</span>::{<span class="ident">draw</span>::<span class="kw-2">*</span>, <span class="ident">RenderPass</span>},
+    <span class="ident">gfx</span>::{<span class="ident">draw</span>::<span class="kw-2">*</span>, <span class="ident">geom2d::Vec2f</span>, <span class="ident">RenderPass</span>},
     <span class="ident">utils</span>::{
         <span class="ident">arena::Arena</span>,
         <span class="ident">enum_dispatch</span>, <span class="ident">ez</span>, <span class="ident">inspect</span>,
@@ -542,8 +543,9 @@ UI or scene graph: container of sprites and animations
                 <span class="ident">params</span>.<span class="ident">setup_quad</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pass</span>.<span class="ident">sprite</span>(<span class="ident">x</span>));
             }
             <span class="ident">Draw::Text</span>(<span class="kw-2">ref</span> <span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="comment">// TODO: custom position</span>
-                <span class="ident">pass</span>.<span class="ident">text</span>(<span class="ident">params</span>.<span class="ident">pos</span>, <span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">txt</span>);
+                <span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="ident">params</span>.<span class="ident">origin</span>.<span class="ident">unwrap_or</span>(<span class="ident">Vec2f::ZERO</span>);
+                <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">params</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">params</span>.<span class="ident">size</span> <span class="op">*</span> <span class="ident">origin</span>;
+                <span class="ident">pass</span>.<span class="ident">text</span>(<span class="ident">pos</span>, <span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">txt</span>, <span class="ident">x</span>.<span class="ident">fontsize</span>, <span class="ident">x</span>.<span class="ident">ln_space</span>);
             }
             <span class="ident">Draw::None</span> <span class="op">=</span><span class="op">&gt;</span> {}
         }

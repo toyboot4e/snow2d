@@ -106,6 +106,8 @@
 <span id="103">103</span>
 <span id="104">104</span>
 <span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 Fluent drawing API based on the quad batcher
@@ -132,11 +134,13 @@ User only need to know [`DrawApi`]. Others are used under the hood.
 
 <span class="kw">static</span> <span class="ident">WHITE_DOT</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">Texture2dDrop</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
 
+<span class="doccomment">/// Allocates white dot image</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">init</span>() {
     <span class="kw">let</span> <span class="ident">dot</span> <span class="op">=</span> <span class="macro">include_bytes!</span>(<span class="string">&quot;draw/white_dot.png&quot;</span>);
     <span class="kw">let</span> <span class="ident">tex</span> <span class="op">=</span> <span class="ident">TextureBuilder::from_encoded_bytes</span>(<span class="ident">dot</span>)
         .<span class="ident">unwrap</span>()
         .<span class="ident">build_texture</span>();
+
     <span class="ident">WHITE_DOT</span>.<span class="ident">set</span>(<span class="ident">tex</span>).<span class="ident">unwrap</span>();
 }
 

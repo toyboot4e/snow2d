@@ -480,13 +480,39 @@
 <span id="477">477</span>
 <span id="478">478</span>
 <span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 Asset management
 
 # Asset types
 
-[`Asset&lt;T&gt;`] is a shared reference to an asset item. Each type of `Asset` is stored in
+[`Asset&lt;T&gt;`] is a shared reference of an asset item. Each type of `Asset` is stored in
 [`AssetCacheT`]. [`AssetCacheAny`] stores all [`AssetCacheT`].
 
 # Asset directory
@@ -533,7 +559,7 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="kw">use</span> <span class="ident">once_cell::sync::OnceCell</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">de::Deserializer</span>, <span class="ident">ser::Serializer</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils</span>::{<span class="ident">Cheat</span>, <span class="ident">Inspect</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils::Cheat</span>;
 
 <span class="doccomment">/// Generational index or identity of assets</span>
 <span class="kw">type</span> <span class="ident">Gen</span> <span class="op">=</span> <span class="ident">u32</span>;
@@ -664,8 +690,6 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 }
 
 <span class="doccomment">/// Key to load asset</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// TODO: use newtype struct while enabling static construction (or use IntoAssetKey)</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">from</span> <span class="op">=</span> <span class="string">&quot;PathBuf&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">into</span> <span class="op">=</span> <span class="string">&quot;PathBuf&quot;</span>)]</span>
@@ -689,6 +713,32 @@ states while serializing/deserializing. So we need a thread-local pointer for de
     }
 }
 
+<span class="kw">impl</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Create static asset key with static path</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// /// Requires `#![const_raw_ptr_deref]`</span>
+    <span class="doccomment">/// const fn as_path(s:&amp;&#39;static str) -&gt; &amp;&#39;static Path {</span>
+    <span class="doccomment">///     unsafe { &amp;*(s as *const str as *const OsStr as *const Path) }</span>
+    <span class="doccomment">/// }</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">p</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">Path</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">AssetKey</span>(<span class="ident">p</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">clone</span>()
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Path</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()
+    }
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">std::ops::Deref</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">Path</span>;
     <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Target</span> {
@@ -697,6 +747,8 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 }
 
 <span class="doccomment">/// Key to load asset (allocated statically)</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See also: [`AssetKey::new_const`]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StaticAssetKey</span>(<span class="kw">pub</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>);
 
