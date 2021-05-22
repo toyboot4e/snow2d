@@ -14,10 +14,10 @@ UI nodes (renderables)
 pub use crate::gfx::tex::{NineSliceSprite, SpriteData};
 
 use imgui::{im_str, Ui};
-use rokol::fons::FontTexture;
+use rokol::fons::{fontstash::FontIx, FontTexture};
 
 use crate::{
-    gfx::{draw::*, geom2d::*, Color},
+    gfx::{draw::*, geom2d::*, text::FontHandle, Color},
     ui::Node,
     utils::Inspect,
 };
@@ -120,10 +120,11 @@ impl_into_draw!(Text, Text);
 pub struct Text {
     pub txt: String,
     // TODO: batch these types?
+    #[inspect(skip)]
+    pub font: FontHandle,
     pub fontsize: f32,
     pub ln_space: f32,
-    // `size` and `origin` is set in `DrawParams`
-    // TODO: decoration information (spans for colors, etc)
+    // TODO: color
 }
 
 #[derive(Debug, Clone)]
@@ -142,6 +143,7 @@ impl<'a> TextBuilder<'a> {
                 txt,
                 fontsize: 20.0,
                 ln_space: 4.0,
+                font: FontHandle::from_ix(unsafe { FontIx::from_raw(0) }),
             },
             origin: Vec2f::ZERO,
         }
@@ -156,6 +158,11 @@ impl<'a> TextBuilder<'a> {
         node.params.size = Vec2f::from(size);
         node.params.origin = Some(self.origin);
         node
+    }
+
+    pub fn font(&mut self, font: FontHandle) -> &mut Self {
+        self.text.font = font;
+        self
     }
 
     pub fn fontsize(&mut self, fontsize: f32) -> &mut Self {

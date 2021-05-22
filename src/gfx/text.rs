@@ -18,11 +18,25 @@ use crate::{
 
 use self::font::*;
 
-#[derive(Debug, Clone, Copy)]
+/// Handle of a specific font
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FontHandle {
-    pub ix: FontIx,
+    ix: FontIx,
 }
 
+/// Internal utilities
+impl FontHandle {
+    pub fn from_ix(ix: FontIx) -> Self {
+        Self { ix }
+    }
+
+    /// Actually font index for rendering
+    pub fn font_ix(&self) -> FontIx {
+        self.ix
+    }
+}
+
+/// Fontface for a font family
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FontFace {
     Regular,
@@ -30,39 +44,59 @@ pub enum FontFace {
     Italic,
 }
 
+/// Set of [`FontHandle`] that covers one family
 #[derive(Debug, Clone)]
-pub struct FontSetHandle {
-    pub name: String,
-    pub regular: FontHandle,
-    pub bold: Option<FontHandle>,
-    pub italic: Option<FontHandle>,
+pub struct FontFamilyHandle {
+    name: String,
+    regular: FontHandle,
+    bold: Option<FontHandle>,
+    italic: Option<FontHandle>,
+}
+
+impl FontFamilyHandle {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn regular(&self) -> FontHandle {
+        self.regular
+    }
+
+    pub fn bold(&self) -> FontHandle {
+        self.bold.unwrap_or(self.regular)
+    }
+
+    pub fn italic(&self) -> FontHandle {
+        self.italic.unwrap_or(self.regular)
+    }
 }
 
 /// Bundle of font texture and font storage
 #[derive(Debug)]
 pub struct FontBook {
     pub tex: FontTexture,
-    pub storage: Arena<FontSetHandle>,
+    pub families: Arena<FontFamilyHandle>,
 }
 
 impl FontBook {
-    pub fn load_family(&mut self, font_set: &FontSetDesc) -> Result<Index<FontSetHandle>> {
-        let set = FontSetHandle {
-            name: font_set.name.clone(),
-            regular: self.load_font(&font_set.regular)?,
-            bold: if let Some(font) = &font_set.bold {
+    /// Loads a set of fonts from storage
+    pub fn load_family(&mut self, font_family: &FontFamilyDesc) -> Result<Index<FontFamilyHandle>> {
+        let set = FontFamilyHandle {
+            name: font_family.name.clone(),
+            regular: self.load_font(&font_family.regular)?,
+            bold: if let Some(font) = &font_family.bold {
                 Some(self.load_font(font)?)
             } else {
                 None
             },
-            italic: if let Some(font) = &font_set.italic {
+            italic: if let Some(font) = &font_family.italic {
                 Some(self.load_font(font)?)
             } else {
                 None
             },
         };
 
-        let key = self.storage.insert(set);
+        let key = self.families.insert(set);
 
         Ok(key)
     }

@@ -27,6 +27,12 @@ use self::{
     node::{DrawParams, Order, Surface},
 };
 
+/// Index of [`Node`] in expected collection (i.e., pool)
+pub type NodeHandle = crate::utils::pool::Handle<Node>;
+
+/// Index of [`Anim`] in expected collection (i.e., generational arena)
+pub type AnimIndex = crate::utils::arena::Index<Anim>;
+
 #[derive(Debug, Clone, Copy, PartialEq, Hash, Inspect)]
 pub enum CoordSystem {
     /// Use fixed position to the screen
@@ -47,7 +53,7 @@ pub struct Layer {
 /// Visible object in a UI layer
 #[derive(Debug, Clone, PartialEq, Inspect)]
 pub struct Node {
-    pub draw: Surface,
+    pub surface: Surface,
     /// Common geometry data
     pub params: DrawParams,
     /// Draw parameter calculated befre rendering
@@ -77,12 +83,12 @@ impl From<Surface> for Node {
         };
 
         Node {
-            draw,
+            surface: draw,
             params: params.clone(),
             cache: params.clone(),
             layer: Layer {
                 coord: CoordSystem::Screen,
-                z_order: 1.0,
+                z_order: 0.989,
             },
             z_order: 1.0,
             children: vec![],
@@ -99,17 +105,22 @@ impl Node {
 
     pub fn render(&mut self, pass: &mut RenderPass<'_>) {
         let params = &self.cache;
-        match self.draw {
+        match self.surface {
             Surface::Sprite(ref x) => {
                 params.setup_quad(&mut pass.sprite(x));
             }
             Surface::NineSlice(ref x) => {
                 params.setup_quad(&mut pass.sprite(x));
             }
-            Surface::Text(ref x) => {
+            Surface::Text(ref text) => {
                 let origin = params.origin.unwrap_or(Vec2f::ZERO);
                 let pos = params.pos + params.size * origin;
-                pass.text(pos, &x.txt, x.fontsize, x.ln_space);
+
+                let fb = pass.fontbook();
+                fb.tex.set_font(text.font.font_ix());
+                fb.tex.set_size(text.fontsize);
+
+                pass.text(pos, &text.txt, text.fontsize, text.ln_space);
             }
             Surface::None => {}
         }
@@ -131,9 +142,6 @@ pub enum Anim {
     RotTween,
     // ParamsTween,
 }
-
-/// Index of [`Anim`] in expected collection (i.e., generational arena)
-pub type AnimIndex = crate::utils::arena::Index<Anim>;
 
 /// Used for sorting nodes
 #[derive(Debug)]
@@ -298,14 +306,46 @@ impl NodePool {
             pool: Pool::with_capacity(16),
         }
     }
+}
 
-    pub fn add_as_child(&mut self, parent_handle: &Handle<Node>, mut child: Node) -> Handle<Node> {
-        child.parent = Some(parent_handle.clone());
-        let child_handle = self.pool.add(child);
+/// Parenting
+impl NodePool {
+    pub fn attach_child(&mut self, parent_handle: &Handle<Node>, child_handle: &Handle<Node>) {
         self.pool[parent_handle]
             .children
             .push(child_handle.to_downgraded());
+    }
+
+    /// Creates child node for a parent node
+    pub fn add_child(&mut self, parent_handle: &Handle<Node>, mut child: Node) -> Handle<Node> {
+        child.parent = Some(parent_handle.clone());
+        let child_handle = self.pool.add(child);
+        self.attach_child(parent_handle, &child_handle);
         child_handle
+    }
+
+    /// Creates parent node from child nodes. Node that child nodes are NOT owned by the parent; you
+    /// have to preserve them yourself!
+    pub fn add_parent(
+        &mut self,
+        parent: Node,
+        children: Vec<Node>,
+    ) -> (Handle<Node>, Vec<Handle<Node>>) {
+        let parent = self.add(parent);
+
+        let children = children
+            .into_iter()
+            .map(|c| self.add_child(&parent, c))
+            .collect::<Vec<_>>();
+
+        (parent, children)
+    }
+
+    /// Creates parent node from child nodes. Node that child nodes are NOT owned by the parent; you
+    /// have to preserve them yourself!
+    pub fn add_container(&mut self, children: Vec<Node>) -> (Handle<Node>, Vec<Handle<Node>>) {
+        let container = Node::from(Surface::None);
+        self.add_parent(container, children)
     }
 }
 

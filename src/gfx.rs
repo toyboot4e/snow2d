@@ -291,7 +291,7 @@ impl Snow2d {
             fontbook: {
                 let fontbook = FontBook {
                     tex: FontTexture::new(256, 256),
-                    storage: Default::default(),
+                    families: Default::default(),
                 };
                 fontbook.tex.set_align(fons::Align::TOP | fons::Align::LEFT);
                 fontbook

@@ -29,7 +29,7 @@ impl<'a> From<&'a [u8]> for LoadDesc<'a> {
 }
 
 #[derive(Debug)]
-pub struct FontSetDesc<'a> {
+pub struct FontFamilyDesc<'a> {
     pub name: String,
     pub regular: FontDesc<'a>,
     pub bold: Option<FontDesc<'a>>,
