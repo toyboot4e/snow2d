@@ -137,6 +137,7 @@ impl GameRunner {
 
 /// Lifecycle
 impl GameRunner {
+    #[inline(always)]
     pub fn event(&mut self, ev: &Event) {
         match ev {
             Event::Window {
@@ -160,7 +161,8 @@ impl GameRunner {
         }
     }
 
-    /// Returns if the game should be updated this frame
+    /// Returns true if the game should be updated this frame
+    #[inline(always)]
     pub fn update(&mut self) -> bool {
         let update = match (self.focus[0], self.focus[1]) {
             (false, true) => {

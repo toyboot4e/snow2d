@@ -14,10 +14,10 @@ UI nodes (renderables)
 pub use crate::gfx::tex::{NineSliceSprite, SpriteData};
 
 use imgui::{im_str, Ui};
-use rokol::fons::FontTexture;
+use rokol::fons::{fontstash::FontIx, FontTexture};
 
 use crate::{
-    gfx::{draw::*, geom2d::*, Color},
+    gfx::{draw::*, geom2d::*, text::FontHandle, Color},
     ui::Node,
     utils::Inspect,
 };
@@ -63,7 +63,7 @@ impl DrawParams {
 
 /// [`Node`] surface
 #[derive(Debug, Clone, PartialEq)]
-pub enum Draw {
+pub enum Surface {
     Sprite(SpriteData),
     NineSlice(NineSliceSprite),
     Text(Text),
@@ -71,7 +71,7 @@ pub enum Draw {
     None,
 }
 
-impl Inspect for Draw {
+impl Inspect for Surface {
     fn inspect(&mut self, ui: &Ui, label: &str) {
         match self {
             Self::Sprite(x) => x.inspect(ui, label),
@@ -82,30 +82,30 @@ impl Inspect for Draw {
     }
 }
 
-/// DrawVariant -> Draw -> Node
+/// SurfaceVariant -> Surface -> Node
 macro_rules! impl_into_draw {
     ($ty:ident, $var:ident) => {
-        impl From<$ty> for Draw {
-            fn from(x: $ty) -> Draw {
-                Draw::$var(x)
+        impl From<$ty> for Surface {
+            fn from(x: $ty) -> Surface {
+                Surface::$var(x)
             }
         }
 
         impl From<$ty> for Node {
             fn from(x: $ty) -> Node {
-                Node::from(Draw::from(x))
+                Node::from(Surface::from(x))
             }
         }
 
-        impl From<&$ty> for Draw {
-            fn from(x: &$ty) -> Draw {
-                Draw::$var(x.clone())
+        impl From<&$ty> for Surface {
+            fn from(x: &$ty) -> Surface {
+                Surface::$var(x.clone())
             }
         }
 
         impl From<&$ty> for Node {
             fn from(x: &$ty) -> Node {
-                Node::from(Draw::from(x.clone()))
+                Node::from(Surface::from(x.clone()))
             }
         }
     };
@@ -115,15 +115,16 @@ impl_into_draw!(SpriteData, Sprite);
 impl_into_draw!(NineSliceSprite, NineSlice);
 impl_into_draw!(Text, Text);
 
-/// [`Draw`] variant
+/// [`Surface`] variant
 #[derive(Debug, Clone, PartialEq, Inspect)]
 pub struct Text {
     pub txt: String,
     // TODO: batch these types?
+    #[inspect(skip)]
+    pub font: FontHandle,
     pub fontsize: f32,
     pub ln_space: f32,
-    // `size` and `origin` is set in `DrawParams`
-    // TODO: decoration information (spans for colors, etc)
+    // TODO: color
 }
 
 #[derive(Debug, Clone)]
@@ -142,6 +143,7 @@ impl<'a> TextBuilder<'a> {
                 txt,
                 fontsize: 20.0,
                 ln_space: 4.0,
+                font: FontHandle::from_ix(unsafe { FontIx::from_raw(0) }),
             },
             origin: Vec2f::ZERO,
         }
@@ -156,6 +158,11 @@ impl<'a> TextBuilder<'a> {
         node.params.size = Vec2f::from(size);
         node.params.origin = Some(self.origin);
         node
+    }
+
+    pub fn font(&mut self, font: FontHandle) -> &mut Self {
+        self.text.font = font;
+        self
     }
 
     pub fn fontsize(&mut self, fontsize: f32) -> &mut Self {

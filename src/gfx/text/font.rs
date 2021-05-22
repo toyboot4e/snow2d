@@ -1,5 +1,5 @@
 /*!
-Font resource handling
+Font data descripting types
 */
 
 use std::path::PathBuf;
@@ -7,7 +7,7 @@ use std::path::PathBuf;
 pub use rokol::fons::{fontstash::FontIx, FontTexture};
 
 // --------------------------------------------------------------------------------
-// Desc types for loading
+// Desc types for loading fonts
 
 /// Bytes loading description
 #[derive(Debug)]
@@ -29,7 +29,7 @@ impl<'a> From<&'a [u8]> for LoadDesc<'a> {
 }
 
 #[derive(Debug)]
-pub struct FontSetDesc<'a> {
+pub struct FontFamilyDesc<'a> {
     pub name: String,
     pub regular: FontDesc<'a>,
     pub bold: Option<FontDesc<'a>>,
@@ -40,27 +40,4 @@ pub struct FontSetDesc<'a> {
 pub struct FontDesc<'a> {
     pub name: String,
     pub load: LoadDesc<'a>,
-}
-
-// --------------------------------------------------------------------------------
-// Font handles
-
-#[derive(Debug, Clone, Copy)]
-pub struct FontHandle {
-    pub ix: FontIx,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum FontFace {
-    Regular,
-    Bold,
-    Italic,
-}
-
-#[derive(Debug, Clone)]
-pub struct FontSetHandle {
-    pub name: String,
-    pub regular: FontHandle,
-    pub bold: Option<FontHandle>,
-    pub italic: Option<FontHandle>,
 }
