@@ -1,30 +1,42 @@
 /*!
-(Not so) rich text rendering
+Simple text rendering
 
-This module is **not ready!** Use `crate::ui::node::Text`.
+See [`crate::ui::node::Text`] for rich text.
 */
 
 pub mod font;
-pub mod render;
-pub mod style;
-pub mod view;
 
-pub mod prelude {
-    //! Imports all the text view types
-    pub use super::{font, style::*, view::*, FontBook};
-}
+pub type Result<T> = std::io::Result<T>;
 
 use rokol::fons::FonsQuad;
 use std::{borrow::Cow, fs, io};
 
 use crate::{
-    gfx::{batch::QuadData, draw::*, geom2d::Vec2f, Snow2d},
+    gfx::{batch::QuadData, draw::*, geom2d::Vec2f},
     utils::arena::{Arena, Index},
 };
 
-use self::{font::*, view::*};
+use self::font::*;
 
-pub type Result<T> = std::io::Result<T>;
+#[derive(Debug, Clone, Copy)]
+pub struct FontHandle {
+    pub ix: FontIx,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FontFace {
+    Regular,
+    Bold,
+    Italic,
+}
+
+#[derive(Debug, Clone)]
+pub struct FontSetHandle {
+    pub name: String,
+    pub regular: FontHandle,
+    pub bold: Option<FontHandle>,
+    pub italic: Option<FontHandle>,
+}
 
 /// Bundle of font texture and font storage
 #[derive(Debug)]
@@ -77,49 +89,6 @@ impl FontBook {
 
 // --------------------------------------------------------------------------------
 // Immediate-mode rendering procedures
-
-/// Renders [`view::LineView`]
-pub fn render_line<'a>(
-    line: &LineView<'a>,
-    text: &str,
-    base_pos: Vec2f,
-    snow: &mut Snow2d,
-    font_set: Index<FontSetHandle>,
-) {
-    let fb = &mut snow.fontbook;
-    let batch = &mut snow.batch;
-
-    // TODO: use quad buffer in text renderer?
-    // TODO: use non-immediate batcher?
-    // TODO: text size
-    // TODO: use font set, also in talk.rs
-    // TODO: efficient rich text layout
-
-    let font_set = &fb.storage[font_set];
-    fb.tex.set_font(font_set.regular.ix);
-    let regular_quads = fb.tex.text_iter(text).unwrap().collect::<Vec<_>>();
-    fb.tex.set_font(font_set.bold.as_ref().unwrap().ix);
-    let bold_quads = fb.tex.text_iter(text).unwrap().collect::<Vec<_>>();
-
-    for sp in &line.line_spans {
-        if sp.style.is_bold {
-            for i in sp.quad_indices() {
-                let fons_quad = &bold_quads[i as usize];
-                let q = batch.next_quad_mut(fb.tex.img());
-                self::set_text_quad(q, fons_quad, base_pos, sp.style.color);
-            }
-        } else {
-            for i in sp.quad_indices() {
-                let fons_quad = &regular_quads[i as usize];
-                let q = batch.next_quad_mut(fb.tex.img());
-                self::set_text_quad(q, fons_quad, base_pos, sp.style.color);
-            }
-        }
-    }
-
-    // reset to default font
-    fb.tex.set_font(unsafe { FontIx::from_raw(0) });
-}
 
 /// Sets a text quad
 #[inline]

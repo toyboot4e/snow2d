@@ -66,6 +66,11 @@ pub use once_cell;
 ///
 pub use arraytools::ArrayTools;
 
+/// Re-exported from [`bitflags`]
+///
+///
+pub use bitflags::bitflags;
+
 /// Re-exported from [`derivative`]
 ///
 /// ---
