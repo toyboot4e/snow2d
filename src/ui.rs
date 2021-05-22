@@ -24,7 +24,7 @@ use crate::{
 use self::{
     anim::*,
     anim_builder::AnimSeq,
-    node::{Draw, DrawParams, Order},
+    node::{DrawParams, Order, Surface},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Hash, Inspect)]
@@ -47,7 +47,7 @@ pub struct Layer {
 /// Visible object in a UI layer
 #[derive(Debug, Clone, PartialEq, Inspect)]
 pub struct Node {
-    pub draw: Draw,
+    pub draw: Surface,
     /// Common geometry data
     pub params: DrawParams,
     /// Draw parameter calculated befre rendering
@@ -62,16 +62,16 @@ pub struct Node {
     // TODO: dirty flag,
 }
 
-impl From<Draw> for Node {
-    fn from(draw: Draw) -> Self {
+impl From<Surface> for Node {
+    fn from(draw: Surface) -> Self {
         let params = DrawParams {
             size: match draw {
                 // FIXME: parent box size. Node builder?
-                Draw::None => [1.0, 1.0].into(),
-                Draw::Sprite(ref x) => x.sub_tex_size_scaled().into(),
-                Draw::NineSlice(ref x) => x.sub_tex_size_scaled().into(),
+                Surface::None => [1.0, 1.0].into(),
+                Surface::Sprite(ref x) => x.sub_tex_size_scaled().into(),
+                Surface::NineSlice(ref x) => x.sub_tex_size_scaled().into(),
                 // FIXME: measure text size?
-                Draw::Text(ref _x) => [1.0, 1.0].into(),
+                Surface::Text(ref _x) => [1.0, 1.0].into(),
             },
             ..Default::default()
         };
@@ -100,18 +100,18 @@ impl Node {
     pub fn render(&mut self, pass: &mut RenderPass<'_>) {
         let params = &self.cache;
         match self.draw {
-            Draw::Sprite(ref x) => {
+            Surface::Sprite(ref x) => {
                 params.setup_quad(&mut pass.sprite(x));
             }
-            Draw::NineSlice(ref x) => {
+            Surface::NineSlice(ref x) => {
                 params.setup_quad(&mut pass.sprite(x));
             }
-            Draw::Text(ref x) => {
+            Surface::Text(ref x) => {
                 let origin = params.origin.unwrap_or(Vec2f::ZERO);
                 let pos = params.pos + params.size * origin;
                 pass.text(pos, &x.txt, x.fontsize, x.ln_space);
             }
-            Draw::None => {}
+            Surface::None => {}
         }
     }
 }

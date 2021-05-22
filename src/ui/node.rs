@@ -63,7 +63,7 @@ impl DrawParams {
 
 /// [`Node`] surface
 #[derive(Debug, Clone, PartialEq)]
-pub enum Draw {
+pub enum Surface {
     Sprite(SpriteData),
     NineSlice(NineSliceSprite),
     Text(Text),
@@ -71,7 +71,7 @@ pub enum Draw {
     None,
 }
 
-impl Inspect for Draw {
+impl Inspect for Surface {
     fn inspect(&mut self, ui: &Ui, label: &str) {
         match self {
             Self::Sprite(x) => x.inspect(ui, label),
@@ -82,30 +82,30 @@ impl Inspect for Draw {
     }
 }
 
-/// DrawVariant -> Draw -> Node
+/// SurfaceVariant -> Surface -> Node
 macro_rules! impl_into_draw {
     ($ty:ident, $var:ident) => {
-        impl From<$ty> for Draw {
-            fn from(x: $ty) -> Draw {
-                Draw::$var(x)
+        impl From<$ty> for Surface {
+            fn from(x: $ty) -> Surface {
+                Surface::$var(x)
             }
         }
 
         impl From<$ty> for Node {
             fn from(x: $ty) -> Node {
-                Node::from(Draw::from(x))
+                Node::from(Surface::from(x))
             }
         }
 
-        impl From<&$ty> for Draw {
-            fn from(x: &$ty) -> Draw {
-                Draw::$var(x.clone())
+        impl From<&$ty> for Surface {
+            fn from(x: &$ty) -> Surface {
+                Surface::$var(x.clone())
             }
         }
 
         impl From<&$ty> for Node {
             fn from(x: &$ty) -> Node {
-                Node::from(Draw::from(x.clone()))
+                Node::from(Surface::from(x.clone()))
             }
         }
     };
@@ -115,7 +115,7 @@ impl_into_draw!(SpriteData, Sprite);
 impl_into_draw!(NineSliceSprite, NineSlice);
 impl_into_draw!(Text, Text);
 
-/// [`Draw`] variant
+/// [`Surface`] variant
 #[derive(Debug, Clone, PartialEq, Inspect)]
 pub struct Text {
     pub txt: String,
