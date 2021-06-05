@@ -186,6 +186,12 @@ impl<T: AssetItem> Asset<T> {
 #[serde(into = "PathBuf")]
 pub struct AssetKey<'a>(Cow<'a, Path>);
 
+impl<'a> From<&'a Path> for AssetKey<'a> {
+    fn from(p: &'a Path) -> Self {
+        Self(Cow::from(p.to_path_buf()))
+    }
+}
+
 impl<'a> From<PathBuf> for AssetKey<'a> {
     fn from(p: PathBuf) -> Self {
         Self(Cow::from(p))
@@ -277,7 +283,7 @@ struct AssetCacheEntry<T: AssetItem> {
     asset: Asset<T>,
 }
 
-/// Cache of items of a specific [`AssetItem`] type
+/// Cache of specific [`AssetItem`] type items
 #[derive(Debug)]
 struct AssetCacheT<T: AssetItem> {
     any_cache: Cheat<AssetCache>,
@@ -286,7 +292,7 @@ struct AssetCacheT<T: AssetItem> {
     gen: Gen,
 }
 
-/// Collection of [`AssetCacheT`]s, all of the assets
+/// All of the assets
 #[derive(Debug)]
 pub struct AssetCache {
     caches: HashMap<TypeId, Box<dyn FreeUnused>>,
