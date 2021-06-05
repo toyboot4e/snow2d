@@ -6,7 +6,7 @@ They implement traits in the [`draw`] module.
 [`draw`]: super::draw
 */
 
-// TODO: texture builder
+pub mod pack;
 
 use {
     image::GenericImageView,
@@ -522,32 +522,4 @@ impl RenderTexture {
     pub fn img(&self) -> rg::Image {
         self.tex.img
     }
-}
-
-// --------------------------------------------------------------------------------
-// Texture packer integration
-
-/// Simple serde data for texture packer
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TexPackRect {
-    pub x: u32,
-    pub y: u32,
-    pub w: u32,
-    pub h: u32,
-}
-
-/// Simple serde data for texture packer
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TexPackFrame {
-    pub filename: String,
-    pub frame: TexPackRect,
-}
-
-/// Serde representation of texture packer JSON
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TexPack {
-    pub frames: Vec<TexPackFrame>,
 }
