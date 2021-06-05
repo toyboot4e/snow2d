@@ -16,7 +16,7 @@ use {
 };
 
 use crate::{
-    asset::{self, Asset, AssetItem, AssetLoader},
+    asset::{self, Asset, AssetCacheAny, AssetItem, AssetLoader},
     gfx::{
         draw::{DrawApiData, OnSpritePush, QuadIter, QuadParamsBuilder, Texture2d},
         geom2d::{Flips, Scaled, Vec2f},
@@ -28,6 +28,7 @@ use crate::{
 /// Image loading result
 pub type Result<T> = image::ImageResult<T>;
 
+/// Create texture with fluent API
 #[derive(Debug)]
 pub struct TextureBuilder {
     // TODO: Cow
@@ -137,11 +138,15 @@ pub struct TextureLoader;
 
 impl AssetLoader for TextureLoader {
     type Item = Texture2dDrop;
-    fn load(&mut self, path: &Path) -> asset::Result<Self::Item> {
+
+    fn load(&mut self, path: &Path, _cache: &mut AssetCacheAny) -> asset::Result<Self::Item> {
         use std::io::{Error, ErrorKind};
-        Ok(TextureBuilder::from_path(path)
+
+        let tex = TextureBuilder::from_path(path)
             .map_err(|e| Error::new(ErrorKind::Other, e))?
-            .build_texture())
+            .build_texture();
+
+        Ok(tex)
     }
 }
 
@@ -517,4 +522,32 @@ impl RenderTexture {
     pub fn img(&self) -> rg::Image {
         self.tex.img
     }
+}
+
+// --------------------------------------------------------------------------------
+// Texture packer integration
+
+/// Simple serde data for texture packer
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TexPackRect {
+    pub x: u32,
+    pub y: u32,
+    pub w: u32,
+    pub h: u32,
+}
+
+/// Simple serde data for texture packer
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TexPackFrame {
+    pub filename: String,
+    pub frame: TexPackRect,
+}
+
+/// Serde representation of texture packer JSON
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TexPack {
+    pub frames: Vec<TexPackFrame>,
 }

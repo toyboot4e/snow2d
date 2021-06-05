@@ -396,8 +396,6 @@ impl<'a> RenderPass<'a> {
         &mut self.snow.fontbook
     }
 
-    // pub fn txt(&mut self, pos: impl Into<Vec2f>, text: &str) {
-
     /// Immediate-mode rendering of multiple lines of text
     pub fn text(&mut self, pos: impl Into<Vec2f>, text: &str, fontsize: f32, ln_space: f32) {
         self.snow.fontbook.tex.set_size(fontsize);

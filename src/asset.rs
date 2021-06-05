@@ -120,7 +120,7 @@ pub trait AssetItem: fmt::Debug + Sized + 'static {
 /// How to load an [`AssetItem`]
 pub trait AssetLoader: fmt::Debug + Sized + 'static {
     type Item: AssetItem;
-    fn load(&mut self, path: &Path) -> Result<Self::Item>;
+    fn load(&mut self, path: &Path, cache: &mut AssetCacheAny) -> Result<Self::Item>;
 }
 
 /// Shared ownership of an asset item
@@ -280,6 +280,7 @@ struct AssetCacheEntry<T: AssetItem> {
 /// Cache of items of a specific [`AssetItem`] type
 #[derive(Debug)]
 pub struct AssetCacheT<T: AssetItem> {
+    any_cache: Cheat<AssetCacheAny>,
     entries: Vec<AssetCacheEntry<T>>,
     loader: T::Loader,
     gen: Gen,
@@ -294,6 +295,7 @@ pub struct AssetCacheAny {
 impl<T: AssetItem> AssetCacheT<T> {
     pub fn new(loader: T::Loader) -> Self {
         Self {
+            any_cache: unsafe { Cheat::null() },
             entries: Vec::with_capacity(16),
             loader,
             gen: 0,
@@ -333,7 +335,7 @@ impl<T: AssetItem> AssetCacheT<T> {
 
         let asset = Asset {
             item: {
-                let item = self.loader.load(&path)?;
+                let item = self.loader.load(&path, &mut self.any_cache)?;
                 Some(Arc::new(Mutex::new(item)))
             },
             preserved: Arc::new(Mutex::new(false)),
@@ -366,7 +368,8 @@ impl AssetCacheAny {
         }
     }
 
-    pub fn add_cache<T: AssetItem>(&mut self, cache: AssetCacheT<T>) {
+    pub fn add_cache<T: AssetItem>(&mut self, mut cache: AssetCacheT<T>) {
+        cache.any_cache = unsafe { Cheat::new(self) };
         self.caches.insert(TypeId::of::<T>(), Box::new(cache));
     }
 

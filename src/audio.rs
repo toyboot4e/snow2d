@@ -100,7 +100,7 @@ pub mod asset {
         T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
     {
         type Item = T;
-        fn load(&mut self, path: &Path) -> io::Result<Self::Item> {
+        fn load(&mut self, path: &Path, _cache: &mut AssetCacheAny) -> io::Result<Self::Item> {
             Self::Item::from_path(path).map_err(self::upcast_err)
         }
     }
