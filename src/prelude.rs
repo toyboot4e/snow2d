@@ -5,7 +5,7 @@ Primary types in `snow2d`
 pub use anyhow::{Result, *};
 
 pub use crate::{
-    asset::{self, Asset, AssetCache, AssetCacheT},
+    asset::{self, Asset, AssetCache},
     audio::{self, prelude::*, Audio},
     gfx::{draw::*, tex::*, Color, Snow2d, WindowState},
     input::{vi, Dir4, Dir8, Input, Key, Keyboard, Sign},

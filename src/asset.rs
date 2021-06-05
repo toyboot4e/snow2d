@@ -279,7 +279,7 @@ struct AssetCacheEntry<T: AssetItem> {
 
 /// Cache of items of a specific [`AssetItem`] type
 #[derive(Debug)]
-pub struct AssetCacheT<T: AssetItem> {
+struct AssetCacheT<T: AssetItem> {
     any_cache: Cheat<AssetCache>,
     entries: Vec<AssetCacheEntry<T>>,
     loader: T::Loader,
@@ -368,7 +368,8 @@ impl AssetCache {
         }
     }
 
-    pub fn add_cache<T: AssetItem>(&mut self, mut cache: AssetCacheT<T>) {
+    pub fn add_cache<T: AssetItem>(&mut self, loader: T::Loader) {
+        let mut cache = AssetCacheT::<T>::new(loader);
         cache.any_cache = unsafe { Cheat::new(self) };
         self.caches.insert(TypeId::of::<T>(), Box::new(cache));
     }

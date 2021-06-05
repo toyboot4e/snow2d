@@ -58,7 +58,7 @@ pub mod asset {
     use anyhow::*;
 
     use crate::{
-        asset::{Asset, AssetCache, AssetCacheT, AssetItem, AssetKey, AssetLoader},
+        asset::{Asset, AssetCache, AssetItem, AssetKey, AssetLoader},
         audio::{src, Audio, Handle},
     };
 
@@ -71,10 +71,10 @@ pub mod asset {
         where
             T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
         {
-            assets.add_cache::<T>(AssetCacheT::new(AudioLoader {
+            assets.add_cache::<T>(AudioLoader {
                 audio,
                 _phantom: std::marker::PhantomData,
-            }));
+            });
         }
     }
 
