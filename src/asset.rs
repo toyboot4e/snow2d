@@ -3,8 +3,8 @@ Asset management
 
 # Asset types
 
-[`Asset<T>`] is a shared reference of an asset item. Each type of `Asset` is stored in
-[`AssetCacheT`]. [`AssetCacheAny`] stores all [`AssetCacheT`].
+[`Asset<T>`] is a shared reference of an asset item. Any type of `Asset` is stored in
+[`AssetCache`].
 
 # Asset directory
 
@@ -13,7 +13,7 @@ the asset directory. TODO: Add asset key with scheme: `img:gorira`
 
 # Serde support
 
-Bind your [`AssetCacheAny`] to [`AssetDeState`] while deserializing.
+Bind your [`AssetCache`] to [`AssetDeState`] while deserializing.
 
 Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`]. Since [`Asset`] is a
 shared pointer, we need to take care to not create duplicates. But `serde` doesn't let us to use
@@ -120,7 +120,7 @@ pub trait AssetItem: fmt::Debug + Sized + 'static {
 /// How to load an [`AssetItem`]
 pub trait AssetLoader: fmt::Debug + Sized + 'static {
     type Item: AssetItem;
-    fn load(&mut self, path: &Path, cache: &mut AssetCacheAny) -> Result<Self::Item>;
+    fn load(&mut self, path: &Path, cache: &mut AssetCache) -> Result<Self::Item>;
 }
 
 /// Shared ownership of an asset item
@@ -280,7 +280,7 @@ struct AssetCacheEntry<T: AssetItem> {
 /// Cache of items of a specific [`AssetItem`] type
 #[derive(Debug)]
 pub struct AssetCacheT<T: AssetItem> {
-    any_cache: Cheat<AssetCacheAny>,
+    any_cache: Cheat<AssetCache>,
     entries: Vec<AssetCacheEntry<T>>,
     loader: T::Loader,
     gen: Gen,
@@ -288,7 +288,7 @@ pub struct AssetCacheT<T: AssetItem> {
 
 /// Collection of [`AssetCacheT`]s, all of the assets
 #[derive(Debug)]
-pub struct AssetCacheAny {
+pub struct AssetCache {
     caches: HashMap<TypeId, Box<dyn FreeUnused>>,
 }
 
@@ -355,7 +355,7 @@ impl<T: AssetItem> AssetCacheT<T> {
     }
 }
 
-impl AssetCacheAny {
+impl AssetCache {
     pub fn new() -> Self {
         Self {
             caches: HashMap::with_capacity(16),
@@ -373,7 +373,7 @@ impl AssetCacheAny {
         self.caches.insert(TypeId::of::<T>(), Box::new(cache));
     }
 
-    pub fn cache_mut<T: AssetItem>(&mut self) -> Option<&mut AssetCacheT<T>> {
+    fn cache_mut<T: AssetItem>(&mut self) -> Option<&mut AssetCacheT<T>> {
         let boxed = self.caches.get_mut(&TypeId::of::<T>()).unwrap();
         boxed.downcast_mut::<AssetCacheT<T>>()
     }
@@ -443,14 +443,14 @@ impl<T: AssetItem> FreeUnused for AssetCacheT<T> {
 /// Deserialize assets without making duplicates using thread-local variable
 #[derive(Debug)]
 pub struct AssetDeState {
-    cache: Cheat<AssetCacheAny>,
+    cache: Cheat<AssetCache>,
 }
 
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 impl AssetDeState {
     /// Make sure the memory location of `cache` doesn't change until we call `end`
-    pub unsafe fn start(cache: &mut AssetCacheAny) -> std::result::Result<(), Self> {
+    pub unsafe fn start(cache: &mut AssetCache) -> std::result::Result<(), Self> {
         DE_STATE.set(Self {
             cache: Cheat::new(cache),
         })
@@ -463,7 +463,7 @@ impl AssetDeState {
         }
     }
 
-    pub unsafe fn cache_mut() -> Option<Cheat<AssetCacheAny>> {
+    pub unsafe fn cache_mut() -> Option<Cheat<AssetCache>> {
         DE_STATE.get_mut().map(|me| Cheat::clone(&me.cache))
     }
 }

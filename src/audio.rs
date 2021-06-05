@@ -58,16 +58,16 @@ pub mod asset {
     use anyhow::*;
 
     use crate::{
-        asset::{Asset, AssetCacheAny, AssetCacheT, AssetItem, AssetKey, AssetLoader},
+        asset::{Asset, AssetCache, AssetCacheT, AssetItem, AssetKey, AssetLoader},
         audio::{src, Audio, Handle},
     };
 
-    /// Adds audio asset loaders to [`AssetCacheAny`]
-    pub fn register_asset_loaders(assets: &mut AssetCacheAny, audio: &Audio) {
+    /// Adds audio asset loaders to [`AssetCache`]
+    pub fn register_asset_loaders(assets: &mut AssetCache, audio: &Audio) {
         reg::<src::Wav>(assets, audio.clone());
         reg::<src::WavStream>(assets, audio.clone());
 
-        fn reg<T>(assets: &mut AssetCacheAny, audio: Audio)
+        fn reg<T>(assets: &mut AssetCache, audio: Audio)
         where
             T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
         {
@@ -100,7 +100,7 @@ pub mod asset {
         T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
     {
         type Item = T;
-        fn load(&mut self, path: &Path, _cache: &mut AssetCacheAny) -> io::Result<Self::Item> {
+        fn load(&mut self, path: &Path, _cache: &mut AssetCache) -> io::Result<Self::Item> {
             Self::Item::from_path(path).map_err(self::upcast_err)
         }
     }
@@ -152,7 +152,7 @@ pub mod asset {
         }
     }
 
-    impl AssetCacheT<src::Wav> {
+    impl AssetCache {
         /// Play sound
         pub fn play<'a>(&mut self, sound: impl Into<AssetKey<'a>>, audio: &Audio) -> Result<()> {
             let mut se: Asset<src::Wav> = self.load_sync(sound)?;
@@ -170,30 +170,6 @@ pub mod asset {
             let mut se: Asset<src::Wav> = self.load_sync_preserve(sound)?;
             let se = se.get_mut().unwrap();
             audio.play(&*se);
-            Ok(())
-        }
-    }
-
-    impl AssetCacheAny {
-        /// Play sound
-        pub fn play<'a>(&mut self, sound: impl Into<AssetKey<'a>>, audio: &Audio) -> Result<()> {
-            let cache: &mut AssetCacheT<src::Wav> = self
-                .cache_mut()
-                .ok_or_else(|| anyhow!("Unable to find cache of type WavStream"))?;
-            cache.play(sound, audio)?;
-            Ok(())
-        }
-
-        /// Play sound and set the preserve flag on the asset
-        pub fn play_preserve<'a>(
-            &mut self,
-            sound: impl Into<AssetKey<'a>>,
-            audio: &Audio,
-        ) -> Result<()> {
-            let cache: &mut AssetCacheT<src::Wav> = self
-                .cache_mut()
-                .ok_or_else(|| anyhow!("Unable to find cache of type WavStream"))?;
-            cache.play_preserve(sound, audio)?;
             Ok(())
         }
     }

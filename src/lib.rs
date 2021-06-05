@@ -23,7 +23,7 @@ use rokol::gfx as rg;
 use sdl2::event::{Event, WindowEvent};
 
 use crate::{
-    asset::AssetCacheAny,
+    asset::AssetCache,
     audio::asset::MusicPlayer,
     audio::Audio,
     gfx::{Color, Snow2d, WindowState},
@@ -42,7 +42,7 @@ pub struct Ice {
     /// Background music player
     pub music_player: MusicPlayer,
     /// Asset cache for any type
-    pub assets: AssetCacheAny,
+    pub assets: AssetCache,
     pub input: Input,
     /// Delta time from last frame
     dt: Duration,
@@ -59,7 +59,7 @@ impl Ice {
             snow,
             audio: audio.clone(),
             music_player: MusicPlayer::new(audio.clone()),
-            assets: AssetCacheAny::new(),
+            assets: AssetCache::new(),
             input: Input::new(),
             dt: Duration::new(0, 0),
             frame_count: 0,

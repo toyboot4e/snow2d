@@ -16,7 +16,7 @@ use {
 };
 
 use crate::{
-    asset::{self, Asset, AssetCacheAny, AssetItem, AssetLoader},
+    asset::{self, Asset, AssetCache, AssetItem, AssetLoader},
     gfx::{
         draw::{DrawApiData, OnSpritePush, QuadIter, QuadParamsBuilder, Texture2d},
         geom2d::{Flips, Scaled, Vec2f},
@@ -139,7 +139,7 @@ pub struct TextureLoader;
 impl AssetLoader for TextureLoader {
     type Item = Texture2dDrop;
 
-    fn load(&mut self, path: &Path, _cache: &mut AssetCacheAny) -> asset::Result<Self::Item> {
+    fn load(&mut self, path: &Path, _cache: &mut AssetCache) -> asset::Result<Self::Item> {
         use std::io::{Error, ErrorKind};
 
         let tex = TextureBuilder::from_path(path)
