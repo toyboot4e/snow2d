@@ -36,6 +36,6 @@ impl<T> Inspect for arena::Index<T> {
 
 impl Inspect for Asset<Texture2dDrop> {
     fn inspect(&mut self, ui: &Ui, _label: &str) {
-        ui.text("TODO: Asset<T>");
+        ui.text(format!("Asset at {}", self.path().display()));
     }
 }
