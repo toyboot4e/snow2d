@@ -151,6 +151,10 @@ impl<T: AssetItem> std::cmp::PartialEq for Asset<T> {
 }
 
 impl<T: AssetItem> Asset<T> {
+    pub fn path(&self) -> &Path {
+        self.path.as_ref()
+    }
+
     pub fn is_loaded(&self) -> bool {
         self.item.is_some()
     }
@@ -456,22 +460,21 @@ pub struct AssetDeState {
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 impl AssetDeState {
-    /// Make sure the memory location of `cache` doesn't change until we call `end`
-    pub unsafe fn start(cache: &mut AssetCache) -> std::result::Result<(), Self> {
-        DE_STATE.set(Self {
-            cache: Cheat::new(cache),
-        })
-    }
-
-    pub unsafe fn end() -> std::result::Result<(), ()> {
-        match DE_STATE.take() {
-            Some(_) => Ok(()),
-            None => Err(()),
+    /// Run deserializing procedure guarding the internal global access to the asset cache
+    pub fn run<T>(cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
+        unsafe {
+            DE_STATE.set(Self {
+                cache: Cheat::new(cache),
+            });
         }
-    }
 
-    pub unsafe fn cache_mut() -> Option<Cheat<AssetCache>> {
-        DE_STATE.get_mut().map(|me| Cheat::clone(&me.cache))
+        let res = proc(cache);
+
+        unsafe {
+            assert!(DE_STATE.take().is_some());
+        }
+
+        res
     }
 }
 
