@@ -20,7 +20,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 pub use snow2d_derive::TypeObject;
 
-use crate::{asset::AssetKey, utils::Inspect};
+use crate::{
+    asset::{AssetCache, AssetKey},
+    utils::Inspect,
+};
 
 /// Marker for data that define "type" of instances (type objects). Type objects are stored in
 /// static storage.
@@ -121,12 +124,13 @@ impl TypeObjectStorageBuilder {
     pub fn register<'a, T: TypeObject + 'static + DeserializeOwned, U: Into<AssetKey<'a>>>(
         &self,
         key: U,
+        cache: &mut AssetCache,
     ) -> anyhow::Result<&Self> {
         log::trace!(
             "registering type object storage for type `{}`",
             std::any::type_name::<T>()
         );
-        TypeObjectStorage::register_type_objects::<T, U>(key)?;
+        TypeObjectStorage::register_type_objects::<T, U>(key, cache)?;
         Ok(self)
     }
 }
@@ -160,13 +164,14 @@ impl TypeObjectStorage {
         U: Into<AssetKey<'a>>,
     >(
         key: U,
+        cache: &mut AssetCache,
     ) -> anyhow::Result<()> {
         unsafe {
             let s = STORAGE
                 .get_mut()
                 .expect("TypeObjectStorage is not initialized");
 
-            let map: HashMap<TypeObjectId<T>, T> = crate::asset::deserialize_ron(key)?;
+            let map: HashMap<TypeObjectId<T>, T> = cache.deserialize_ron(key)?;
             let map: HashMap<TypeObjectId<T>, Rc<T>> = map
                 .into_iter()
                 .map(|(key, value)| (key, Rc::new(value)))

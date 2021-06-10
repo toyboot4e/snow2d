@@ -55,37 +55,6 @@ use crate::utils::Cheat;
 /// Generational index or identity of assets
 type Gen = u32;
 
-/// Get asset path relative to asset root directory
-pub fn path(path: impl AsRef<Path>) -> PathBuf {
-    // TODO: runtime asset root detection
-    let proj_root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-    let asset_root = PathBuf::from(proj_root).join("assets");
-    asset_root.join(path)
-}
-
-/// Deserialize asset path as a RON file
-pub fn deserialize_ron<'a, T: serde::de::DeserializeOwned>(
-    key: impl Into<AssetKey<'a>>,
-) -> anyhow::Result<T> {
-    use std::fs;
-
-    let path = path(key.into().deref());
-    log::trace!("deserializing `{}`", path.display());
-
-    let s = fs::read_to_string(&path)
-        .map_err(anyhow::Error::msg)
-        .with_context(|| format!("Unable to read asset file at `{}`", path.display()))?;
-    ron::de::from_str::<T>(&s)
-        .map_err(anyhow::Error::msg)
-        .with_context(|| {
-            format!(
-                "Unable deserialize `{}` for type {}",
-                path.display(),
-                std::any::type_name::<T>()
-            )
-        })
-}
-
 // TODO: scheme support
 // /// `"scheme:path"` or `"relative_path"`
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Inspect)]
@@ -211,6 +180,14 @@ impl<'a> Into<PathBuf> for AssetKey<'a> {
 impl<'a> AssetKey<'a> {
     pub fn new(p: impl Into<Cow<'a, Path>>) -> Self {
         AssetKey(p.into())
+    }
+
+    pub fn from_str(s: &'a str) -> Self {
+        AssetKey(Cow::from(Path::new(s)))
+    }
+
+    pub fn from_string(s: String) -> Self {
+        AssetKey(Cow::from(PathBuf::from(s)))
     }
 }
 
@@ -341,7 +318,8 @@ impl<T: AssetItem> AssetCacheT<T> {
     }
 
     fn load_new_sync(&mut self, id: AssetId) -> Result<Asset<T>> {
-        let path = Rc::new(self::path(&id.identity));
+        let key = AssetKey::from(id.identity.as_ref());
+        let path = Rc::new(self.any_cache.resolve(key));
 
         let asset = Asset {
             item: {
@@ -419,6 +397,41 @@ impl AssetCache {
     }
 }
 
+/// Aseet path handling
+impl AssetCache {
+    /// Resolves asset path into an absolute path
+    pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
+        // TODO: runtime asset root detection
+        let proj_root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let asset_root = PathBuf::from(proj_root).join("assets");
+        asset_root.join(key.into().0)
+    }
+
+    /// Deserialize asset path as a RON file
+    pub fn deserialize_ron<'a, T: serde::de::DeserializeOwned>(
+        &self,
+        key: impl Into<AssetKey<'a>>,
+    ) -> anyhow::Result<T> {
+        use std::fs;
+
+        let path = self.resolve(key);
+        log::trace!("deserializing `{}`", path.display());
+
+        let s = fs::read_to_string(&path)
+            .map_err(anyhow::Error::msg)
+            .with_context(|| format!("Unable to read asset file at `{}`", path.display()))?;
+        ron::de::from_str::<T>(&s)
+            .map_err(anyhow::Error::msg)
+            .with_context(|| {
+                format!(
+                    "Unable deserialize `{}` for type {}",
+                    path.display(),
+                    std::any::type_name::<T>()
+                )
+            })
+    }
+}
+
 /// Upcast of [`AssetCacheT`]
 trait FreeUnused: fmt::Debug + Downcast {
     fn free_unused(&mut self);
@@ -460,7 +473,7 @@ pub struct AssetDeState {
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 impl AssetDeState {
-    /// Run deserializing procedure guarding the internal global access to the asset cache
+    /// Run a procedure with internal global access to asset cache
     pub fn run<T>(cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
         unsafe {
             DE_STATE.set(Self {
