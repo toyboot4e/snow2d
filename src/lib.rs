@@ -40,7 +40,7 @@ pub struct Ice {
     /// Audio context
     pub audio: Audio,
     /// Background music player
-    pub music_player: MusicPlayer,
+    pub music: MusicPlayer,
     /// Asset cache for any type
     pub assets: AssetCache,
     pub input: Input,
@@ -58,7 +58,7 @@ impl Ice {
             pa_blue: rg::PassAction::clear(Color::CORNFLOWER_BLUE.to_normalized_array()),
             snow,
             audio: audio.clone(),
-            music_player: MusicPlayer::new(audio.clone()),
+            music: MusicPlayer::new(audio.clone()),
             assets: AssetCache::new(),
             input: Input::new(),
             dt: Duration::new(0, 0),
