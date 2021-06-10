@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/asset.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>asset.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
@@ -506,14 +506,40 @@
 <span id="503">503</span>
 <span id="504">504</span>
 <span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 Asset management
 
 # Asset types
 
-[`Asset&lt;T&gt;`] is a shared reference of an asset item. Each type of `Asset` is stored in
-[`AssetCacheT`]. [`AssetCacheAny`] stores all [`AssetCacheT`].
+[`Asset&lt;T&gt;`] is a shared reference of an asset item. Any type of `Asset` is stored in
+[`AssetCache`].
 
 # Asset directory
 
@@ -522,7 +548,7 @@ the asset directory. TODO: Add asset key with scheme: `img:gorira`
 
 # Serde support
 
-Bind your [`AssetCacheAny`] to [`AssetDeState`] while deserializing.
+Bind your [`AssetCache`] to [`AssetDeState`] while deserializing.
 
 Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`]. Since [`Asset`] is a
 shared pointer, we need to take care to not create duplicates. But `serde` doesn&#39;t let us to use
@@ -564,37 +590,6 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="doccomment">/// Generational index or identity of assets</span>
 <span class="kw">type</span> <span class="ident">Gen</span> <span class="op">=</span> <span class="ident">u32</span>;
 
-<span class="doccomment">/// Get asset path relative to asset root directory</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">path</span>(<span class="ident">path</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
-    <span class="comment">// TODO: runtime asset root detection</span>
-    <span class="kw">let</span> <span class="ident">proj_root</span> <span class="op">=</span> <span class="ident">std::env::var</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">asset_root</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">proj_root</span>).<span class="ident">join</span>(<span class="string">&quot;assets&quot;</span>);
-    <span class="ident">asset_root</span>.<span class="ident">join</span>(<span class="ident">path</span>)
-}
-
-<span class="doccomment">/// Deserialize asset path as a RON file</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize_ron</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">serde::de::DeserializeOwned</span><span class="op">&gt;</span>(
-    <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">std::fs</span>;
-
-    <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">path</span>(<span class="ident">key</span>.<span class="ident">into</span>().<span class="ident">deref</span>());
-    <span class="macro">log::trace!</span>(<span class="string">&quot;deserializing `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>());
-
-    <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
-        .<span class="ident">map_err</span>(<span class="ident">anyhow::Error::msg</span>)
-        .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Unable to read asset file at `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
-    <span class="ident">ron::de::from_str</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
-        .<span class="ident">map_err</span>(<span class="ident">anyhow::Error::msg</span>)
-        .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="macro">format!</span>(
-                <span class="string">&quot;Unable deserialize `{}` for type {}&quot;</span>,
-                <span class="ident">path</span>.<span class="ident">display</span>(),
-                <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
-            )
-        })
-}
-
 <span class="comment">// TODO: scheme support</span>
 <span class="comment">// /// `&quot;scheme:path&quot;` or `&quot;relative_path&quot;`</span>
 <span class="comment">// #[derive(Debug, Clone, PartialEq, Eq, Hash, Inspect)]</span>
@@ -629,7 +624,7 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="doccomment">/// How to load an [`AssetItem`]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AssetLoader</span>: <span class="ident">fmt::Debug</span> <span class="op">+</span> <span class="ident">Sized</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> {
     <span class="kw">type</span> <span class="ident">Item</span>: <span class="ident">AssetItem</span>;
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Item</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCache</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Item</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Shared ownership of an asset item</span>
@@ -660,6 +655,10 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Path</span> {
+        <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">as_ref</span>()
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_loaded</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">item</span>.<span class="ident">is_some</span>()
     }
@@ -695,6 +694,12 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">into</span> <span class="op">=</span> <span class="string">&quot;PathBuf&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span>);
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">Cow::from</span>(<span class="ident">p</span>.<span class="ident">to_path_buf</span>()))
+    }
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">p</span>: <span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">Cow::from</span>(<span class="ident">p</span>))
@@ -710,6 +715,14 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">p</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">AssetKey</span>(<span class="ident">p</span>.<span class="ident">into</span>())
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">AssetKey</span>(<span class="ident">Cow::from</span>(<span class="ident">Path::new</span>(<span class="ident">s</span>)))
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_string</span>(<span class="ident">s</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">AssetKey</span>(<span class="ident">Cow::from</span>(<span class="ident">PathBuf::from</span>(<span class="ident">s</span>)))
     }
 }
 
@@ -786,23 +799,25 @@ states while serializing/deserializing. So we need a thread-local pointer for de
     <span class="ident">asset</span>: <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Cache of items of a specific [`AssetItem`] type</span>
+<span class="doccomment">/// Cache of specific [`AssetItem`] type items</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
+<span class="kw">struct</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
+    <span class="ident">any_cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCache</span><span class="op">&gt;</span>,
     <span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AssetCacheEntry</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">loader</span>: <span class="ident">T::Loader</span>,
     <span class="ident">gen</span>: <span class="ident">Gen</span>,
 }
 
-<span class="doccomment">/// Collection of [`AssetCacheT`]s, all of the assets</span>
+<span class="doccomment">/// All of the assets</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetCacheAny</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetCache</span> {
     <span class="ident">caches</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">TypeId</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FreeUnused</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">loader</span>: <span class="ident">T::Loader</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
+            <span class="ident">any_cache</span>: <span class="kw">unsafe</span> { <span class="ident">Cheat::null</span>() },
             <span class="ident">entries</span>: <span class="ident">Vec::with_capacity</span>(<span class="number">16</span>),
             <span class="ident">loader</span>,
             <span class="ident">gen</span>: <span class="number">0</span>,
@@ -838,11 +853,12 @@ states while serializing/deserializing. So we need a thread-local pointer for de
     }
 
     <span class="kw">fn</span> <span class="ident">load_new_sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">AssetId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="self">self</span><span class="ident">::path</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>.<span class="ident">identity</span>));
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">AssetKey::from</span>(<span class="ident">id</span>.<span class="ident">identity</span>.<span class="ident">as_ref</span>());
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="self">self</span>.<span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>));
 
         <span class="kw">let</span> <span class="ident">asset</span> <span class="op">=</span> <span class="ident">Asset</span> {
             <span class="ident">item</span>: {
-                <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">loader</span>.<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
+                <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">loader</span>.<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">any_cache</span>)<span class="question-mark">?</span>;
                 <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">item</span>)))
             },
             <span class="ident">preserved</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="bool-val">false</span>)),
@@ -862,7 +878,7 @@ states while serializing/deserializing. So we need a thread-local pointer for de
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AssetCacheAny</span> {
+<span class="kw">impl</span> <span class="ident">AssetCache</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">caches</span>: <span class="ident">HashMap::with_capacity</span>(<span class="number">16</span>),
@@ -875,11 +891,13 @@ states while serializing/deserializing. So we need a thread-local pointer for de
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_cache</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cache</span>: <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_cache</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">loader</span>: <span class="ident">T::Loader</span>) {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cache</span> <span class="op">=</span> <span class="ident">AssetCacheT</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">loader</span>);
+        <span class="ident">cache</span>.<span class="ident">any_cache</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">Cheat::new</span>(<span class="self">self</span>) };
         <span class="self">self</span>.<span class="ident">caches</span>.<span class="ident">insert</span>(<span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">Box::new</span>(<span class="ident">cache</span>));
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cache_mut</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cache_mut</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">boxed</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">caches</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()).<span class="ident">unwrap</span>();
         <span class="ident">boxed</span>.<span class="ident">downcast_mut</span>::<span class="op">&lt;</span><span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>()
     }
@@ -911,6 +929,41 @@ states while serializing/deserializing. So we need a thread-local pointer for de
             <span class="ident">asset</span>.<span class="ident">set_preserved</span>(<span class="bool-val">true</span>);
         }
         <span class="ident">res</span>
+    }
+}
+
+<span class="doccomment">/// Aseet path handling</span>
+<span class="kw">impl</span> <span class="ident">AssetCache</span> {
+    <span class="doccomment">/// Resolves asset path into an absolute path</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
+        <span class="comment">// TODO: runtime asset root detection</span>
+        <span class="kw">let</span> <span class="ident">proj_root</span> <span class="op">=</span> <span class="ident">std::env::var</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">asset_root</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">proj_root</span>).<span class="ident">join</span>(<span class="string">&quot;assets&quot;</span>);
+        <span class="ident">asset_root</span>.<span class="ident">join</span>(<span class="ident">key</span>.<span class="ident">into</span>().<span class="number">0</span>)
+    }
+
+    <span class="doccomment">/// Deserialize asset path as a RON file</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize_ron</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">serde::de::DeserializeOwned</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">std::fs</span>;
+
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">resolve</span>(<span class="ident">key</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;deserializing `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>());
+
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
+            .<span class="ident">map_err</span>(<span class="ident">anyhow::Error::msg</span>)
+            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Unable to read asset file at `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
+        <span class="ident">ron::de::from_str</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
+            .<span class="ident">map_err</span>(<span class="ident">anyhow::Error::msg</span>)
+            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="macro">format!</span>(
+                    <span class="string">&quot;Unable deserialize `{}` for type {}&quot;</span>,
+                    <span class="ident">path</span>.<span class="ident">display</span>(),
+                    <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+                )
+            })
     }
 }
 
@@ -949,28 +1002,27 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="doccomment">/// Deserialize assets without making duplicates using thread-local variable</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetDeState</span> {
-    <span class="ident">cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCacheAny</span><span class="op">&gt;</span>,
+    <span class="ident">cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCache</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">DE_STATE</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">AssetDeState</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
 
 <span class="kw">impl</span> <span class="ident">AssetDeState</span> {
-    <span class="doccomment">/// Make sure the memory location of `cache` doesn&#39;t change until we call `end`</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCacheAny</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">DE_STATE</span>.<span class="ident">set</span>(<span class="self">Self</span> {
-            <span class="ident">cache</span>: <span class="ident">Cheat::new</span>(<span class="ident">cache</span>),
-        })
-    }
-
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">end</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">DE_STATE</span>.<span class="ident">take</span>() {
-            <span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
+    <span class="doccomment">/// Run a procedure with internal global access to asset cache</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCache</span>, <span class="ident">proc</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCache</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+        <span class="kw">unsafe</span> {
+            <span class="ident">DE_STATE</span>.<span class="ident">set</span>(<span class="self">Self</span> {
+                <span class="ident">cache</span>: <span class="ident">Cheat::new</span>(<span class="ident">cache</span>),
+            });
         }
-    }
 
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">cache_mut</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCacheAny</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="ident">DE_STATE</span>.<span class="ident">get_mut</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">me</span><span class="op">|</span> <span class="ident">Cheat::clone</span>(<span class="kw-2">&amp;</span><span class="ident">me</span>.<span class="ident">cache</span>))
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">proc</span>(<span class="ident">cache</span>);
+
+        <span class="kw">unsafe</span> {
+            <span class="macro">assert!</span>(<span class="ident">DE_STATE</span>.<span class="ident">take</span>().<span class="ident">is_some</span>());
+        }
+
+        <span class="ident">res</span>
     }
 }
 

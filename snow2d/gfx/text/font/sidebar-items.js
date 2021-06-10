@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["FontFace",""],["LoadDesc","Bytes loading description"]],"struct":[["FontDesc",""],["FontHandle",""],["FontIx","Font index"],["FontSetDesc",""],["FontSetHandle",""],["FontTexture","Be sure to set alignment of the [`FontStash`] to draw text as you want."]]});
+initSidebarItems({"enum":[["LoadDesc","Bytes loading description"]],"struct":[["FontDesc",""],["FontFamilyDesc",""],["FontIx","Font index"],["FontTexture","Be sure to set alignment of the [`FontStash`] to draw text as you want."]]});
