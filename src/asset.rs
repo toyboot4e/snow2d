@@ -242,11 +242,25 @@ impl<'a> AssetKey<'a> {
         }
     }
 
-    pub fn parse(s: impl Into<String>) -> Self {
-        AssetKey {
-            path: Cow::Owned(PathBuf::from(s.into())),
-            // TODO: support scheme
-            scheme: None,
+    /// Parses a schemed string in syntax `scheme:relative/path`
+    pub fn parse<'b>(s: impl Into<Cow<'b, str>>) -> Self {
+        let s = s.into();
+
+        let s_ref = s.as_ref();
+        if let Some(colon) = s_ref.bytes().position(|b| b == b':') {
+            Self {
+                path: if s.len() == colon + 1 {
+                    Path::new("./").into()
+                } else {
+                    Cow::Owned(PathBuf::from(s_ref[colon + 1..].to_string()))
+                },
+                scheme: Some(Cow::Owned(PathBuf::from(s_ref[0..colon].to_string()))),
+            }
+        } else {
+            Self {
+                path: Cow::Owned(PathBuf::from(s.into_owned())),
+                scheme: None,
+            }
         }
     }
 
@@ -275,12 +289,6 @@ impl AssetKey<'static> {
     }
 }
 
-// impl<'a> AsRef<Path> for AssetKey<'a> {
-//     fn as_ref(&self) -> &Path {
-//         self.path.as_ref()
-//     }
-// }
-
 /// Key to load asset (allocated statically)
 ///
 /// See also: [`AssetKey::new_const`]
@@ -298,12 +306,6 @@ impl<'a> Into<AssetKey<'a>> for StaticAssetKey {
         }
     }
 }
-
-// impl AsRef<Path> for StaticAssetKey {
-//     fn as_ref(&self) -> &Path {
-//         self.path.as_ref()
-//     }
-// }
 
 /// [`AssetKey`] resolved to be a [`PathBuf`]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
