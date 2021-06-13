@@ -158,15 +158,35 @@ impl<T: AssetItem> Asset<T> {
 }
 
 /// Special URI for an asset (c.f. [`AssetCache::resolve`])
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(from = "PathBuf")]
-#[serde(into = "PathBuf")]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AssetKey<'a> {
     path: Cow<'a, Path>,
     scheme: Option<Cow<'a, Path>>,
 }
 
-// FIXME:
+impl<'a, 'de> Deserialize<'de> for AssetKey<'a> {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let x = String::deserialize(deserializer)?;
+        let key = Self::parse(x);
+        // TODO: validate the key?
+        Ok(key)
+    }
+}
+
+impl<'a> Serialize for AssetKey<'a> {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let s = self.to_string_repr();
+        s.serialize(serializer)
+    }
+}
+
+// implicit type conversions for convenient API
 impl<'a> From<&'a Path> for AssetKey<'a> {
     fn from(p: &'a Path) -> Self {
         Self {
@@ -176,18 +196,27 @@ impl<'a> From<&'a Path> for AssetKey<'a> {
     }
 }
 
+impl<'a> From<&'a str> for AssetKey<'static> {
+    fn from(s: &'a str) -> Self {
+        Self::parse(s)
+    }
+}
+
 impl<'a> From<PathBuf> for AssetKey<'a> {
     fn from(p: PathBuf) -> Self {
-        Self {
-            path: Cow::from(p),
-            scheme: None,
-        }
+        Self::from_path(p)
     }
 }
 
 impl<'a> Into<PathBuf> for AssetKey<'a> {
     fn into(self) -> PathBuf {
         self.path.into_owned()
+    }
+}
+
+impl Into<AssetKey<'static>> for &'static AssetKey<'static> {
+    fn into(self) -> AssetKey<'static> {
+        self.clone()
     }
 }
 
@@ -202,7 +231,10 @@ impl<'a> AssetKey<'a> {
             scheme: s.map(|x| x.into()),
         }
     }
+}
 
+/// Explicit type conversions
+impl<'a> AssetKey<'a> {
     pub fn from_path(p: impl Into<Cow<'a, Path>>) -> Self {
         AssetKey {
             path: p.into(),
@@ -210,17 +242,19 @@ impl<'a> AssetKey<'a> {
         }
     }
 
-    pub fn relative_ref(s: &'a str) -> Self {
+    pub fn parse(s: impl Into<String>) -> Self {
         AssetKey {
-            path: Cow::from(Path::new(s)),
+            path: Cow::Owned(PathBuf::from(s.into())),
+            // TODO: support scheme
             scheme: None,
         }
     }
 
-    pub fn relative_owned(s: String) -> Self {
-        AssetKey {
-            path: Cow::from(PathBuf::from(s)),
-            scheme: None,
+    pub fn to_string_repr(&self) -> String {
+        if let Some(scheme) = &self.scheme {
+            format!("{}:{}", scheme.display(), self.path.display())
+        } else {
+            format!("{}", self.path.display())
         }
     }
 }
@@ -241,24 +275,11 @@ impl AssetKey<'static> {
     }
 }
 
-impl Into<AssetKey<'static>> for &'static AssetKey<'static> {
-    fn into(self) -> AssetKey<'static> {
-        self.clone()
-    }
-}
-
-impl<'a> AsRef<Path> for AssetKey<'a> {
-    fn as_ref(&self) -> &Path {
-        self.path.as_ref()
-    }
-}
-
-impl<'a> std::ops::Deref for AssetKey<'a> {
-    type Target = Path;
-    fn deref(&self) -> &Self::Target {
-        self.path.as_ref()
-    }
-}
+// impl<'a> AsRef<Path> for AssetKey<'a> {
+//     fn as_ref(&self) -> &Path {
+//         self.path.as_ref()
+//     }
+// }
 
 /// Key to load asset (allocated statically)
 ///
@@ -278,30 +299,22 @@ impl<'a> Into<AssetKey<'a>> for StaticAssetKey {
     }
 }
 
-impl AsRef<Path> for StaticAssetKey {
-    fn as_ref(&self) -> &Path {
-        self.path.as_ref()
-    }
-}
+// impl AsRef<Path> for StaticAssetKey {
+//     fn as_ref(&self) -> &Path {
+//         self.path.as_ref()
+//     }
+// }
 
-/// Newtype of [`PathBuf`], which is relative path from "root" asset directory
+/// [`AssetKey`] resolved to be a [`PathBuf`]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct AssetId {
-    identity: PathBuf,
-}
-
-impl AssetId {
-    pub fn from_key(key: &AssetKey) -> Self {
-        Self {
-            identity: key.to_path_buf(),
-        }
-    }
+struct ResolvedPath {
+    path: PathBuf,
 }
 
 /// Access to an [`AssetItem`] with metadata
 #[derive(Debug)]
 struct AssetCacheEntry<T: AssetItem> {
-    id: AssetId,
+    id: ResolvedPath,
     path: Rc<PathBuf>,
     asset: Asset<T>,
 }
@@ -333,20 +346,29 @@ impl<T: AssetItem> AssetCacheT<T> {
 
     pub fn load_sync<'a>(&mut self, key: impl Into<AssetKey<'a>>) -> Result<Asset<T>> {
         let key = key.into();
-        let id = AssetId::from_key(&key);
+
+        // TODO: remove this code on release build
+        let repr = key.to_string_repr();
+
+        let id = ResolvedPath {
+            path: self.any_cache.resolve(key),
+        };
+
         if let Some(entry) = self.entries.iter().find(|a| a.id == id) {
             log::trace!(
                 "(cache found for `{}` of type `{}`)",
-                key.display(),
+                repr,
                 std::any::type_name::<T>()
             );
+
             Ok(entry.asset.clone())
         } else {
             log::debug!(
                 "loading asset `{}` of type `{}`",
-                key.display(),
+                repr,
                 std::any::type_name::<T>()
             );
+
             self.load_new_sync(id)
         }
     }
@@ -359,8 +381,8 @@ impl<T: AssetItem> AssetCacheT<T> {
         res
     }
 
-    fn load_new_sync(&mut self, id: AssetId) -> Result<Asset<T>> {
-        let key = AssetKey::from(id.identity.as_ref());
+    fn load_new_sync(&mut self, id: ResolvedPath) -> Result<Asset<T>> {
+        let key = AssetKey::from_path(id.path.clone());
         let path = Rc::new(self.any_cache.resolve(key));
 
         let asset = Asset {
@@ -515,12 +537,16 @@ pub struct AssetDeState {
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 impl AssetDeState {
-    /// Run a procedure with internal global access to asset cache
+    /// Run a procedure with global access to asset cache
     pub fn run<T>(cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
         unsafe {
-            DE_STATE.set(Self {
-                cache: Cheat::new(cache),
-            });
+            DE_STATE
+                .set(Self {
+                    cache: Cheat::new(cache),
+                })
+                .unwrap_or_else(|_old_value| {
+                    unreachable!("DE_STATE is guarded by AssetDeState::run")
+                });
         }
 
         let res = proc(cache);
