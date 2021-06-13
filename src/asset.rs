@@ -605,14 +605,22 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
 #[cfg(test)]
 mod test {
     use super::*;
+
     #[test]
-    fn schemed_path() {
-        assert_eq!(
-            AssetKey::parse("schemed:path/to/asset"),
-            AssetKey {
-                path: Cow::Owned(PathBuf::from("path/to/asset")),
-                scheme: Some(Cow::Owned(PathBuf::from("schemed"))),
-            }
-        );
+    fn key() {
+        let key = AssetKey::parse("schemed:path/to/asset");
+
+        let correct = AssetKey {
+            path: Cow::Owned(PathBuf::from("path/to/asset")),
+            scheme: Some(Cow::Owned(PathBuf::from("schemed"))),
+        };
+
+        assert_eq!(key, correct);
+
+        let s = ron::ser::to_string(&key).unwrap();
+        assert_eq!(s, "\"schemed:path/to/asset\"");
+
+        let d: AssetKey = ron::de::from_str(&s).unwrap();
+        assert_eq!(d, correct);
     }
 }
