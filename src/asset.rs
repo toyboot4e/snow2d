@@ -9,7 +9,7 @@ Asset management
 # Asset directory
 
 Asset directory is assumed to be at `manifest_dir/assets`. [`AssetKey`] is a relative path from
-the asset directory. TODO: Add asset key with scheme: `img:gorira`
+the asset directory.
 
 # Serde support
 
@@ -23,7 +23,6 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 
 * async loading
 * hot reloading (tiled map, actor image, etc.)
-* fix static asset path
 * `Asset` implements `Deref`, but they don't implement traits that the underlying data implements
 */
 
@@ -286,8 +285,15 @@ impl AssetKey<'static> {
     }
     ```
     */
-    pub const fn new_const(path: Cow<'static, Path>, scheme: Option<Cow<'static, Path>>) -> Self {
-        AssetKey { path, scheme }
+    pub const fn new_const(path: &'static Path, scheme: Option<&'static Path>) -> Self {
+        AssetKey {
+            path: Cow::Borrowed(path),
+            scheme: if let Some(s) = scheme {
+                Some(Cow::Borrowed(s))
+            } else {
+                None
+            },
+        }
     }
 }
 
