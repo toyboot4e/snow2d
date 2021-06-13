@@ -47,17 +47,19 @@ impl From<&[DefaultVertex; 4]> for QuadData {
     }
 }
 
-/// Creates index buffer for quadliterals
-///
-/// ```no_run
-/// 0-1
-/// |/|
-/// 2-3
-/// ```
-///
-/// TODO: cull mode (indices should be in reverse?)
-///
-/// Each index element has 16 bits length.
+/**
+Creates index buffer for quadliterals
+
+```no_run
+0-1
+|/|
+2-3
+```
+
+TODO: cull mode (indices should be in reverse?)
+
+Each index element has 16 bits length.
+*/
 macro_rules! gen_quad_indices {
     ( $ix_type:ident, $n_quads:expr ) => {{
         let mut indices = [0; 6 * $n_quads as usize];

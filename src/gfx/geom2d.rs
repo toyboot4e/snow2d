@@ -229,12 +229,14 @@ impl Into<(f32, f32)> for &Vec2f {
     }
 }
 
-/// 2D rectangle
-///
-/// It doesn't consider offset, rotation and scales.
-///
-/// Note that the `x`, `y` fields correspond top-left point. If you consider an origin at somewhere
-/// else, then those methods don't make sense.
+/**
+2D rectangle
+
+It doesn't consider offset, rotation and scales.
+
+Note that the `x`, `y` fields correspond top-left point. If you consider an origin at somewhere
+else, then those methods don't make sense.
+*/
 #[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Inspect)]
 pub struct Rect2f {
     /// Left
@@ -521,15 +523,17 @@ impl Into<[f32; 4]> for &Rect2f {
     }
 }
 
-/// Column-major 2x3 matrix, which represents 3x3 matrix
-///
-/// ```txt
-///  m[0] m[1]  ...  |  scale_x  sin       0
-///  m[2] m[3]  ...  |  cos      scale_y   0
-///  m[4] m[5]  ...  |  trans_x  trans_y   1
-/// ```
-///
-/// TODO: assert on zero division (NAN)?
+/**
+Column-major 2x3 matrix, which represents 3x3 matrix
+
+```txt
+ m[0] m[1]  ...  |  scale_x  sin       0
+ m[2] m[3]  ...  |  cos      scale_y   0
+ m[4] m[5]  ...  |  trans_x  trans_y   1
+```
+
+TODO: assert on zero division (NAN)?
+*/
 #[derive(Debug, Clone, Default, PartialEq, Deserialize, Serialize, Inspect)]
 pub struct Mat2f {
     /// Scale x

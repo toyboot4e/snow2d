@@ -157,13 +157,15 @@ impl<V: Pod> DynamicMesh<V> {
         offset
     }
 
-    /// Draw call
-    ///
-    /// Be sure to bind image before calling this.
-    ///
-    /// `base_elem`: relative to `self.bind.vertex_buffer_offsets[0]`.
-    ///
-    /// `base_elem` should be zero after calling `append_vert_slice`.
+    /**
+    Draw call
+
+    Be sure to bind image before calling this.
+
+    `base_elem`: relative to `self.bind.vertex_buffer_offsets[0]`.
+
+    `base_elem` should be zero after calling `append_vert_slice`.
+    */
     pub fn draw(&self, base_elem: u32, n_indices: u32) {
         rg::apply_bindings(&self.bind);
         rg::draw(base_elem, n_indices, 1);

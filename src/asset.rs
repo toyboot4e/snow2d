@@ -132,76 +132,112 @@ impl<T: AssetItem> Asset<T> {
         *self.preserved.lock().unwrap() = b;
     }
 
-    /// Tries to get `&T`, fails if the asset is not loaded or failed to load
-    ///
-    /// This step is for asynchrounous loading and hot reloaidng.
-    ///
-    /// Unfortunatelly, the return type is not `Option<&T>` and doesn't implement trait for type `T`.
-    /// Still, you can use `&*asset.get()` to cast it to `&T`.
+    /**
+    Tries to get `&T`, fails if the asset is not loaded or failed to load
+
+    This step is for asynchrounous loading and hot reloaidng.
+
+    Unfortunatelly, the return type is not `Option<&T>` and doesn't implement trait for type `T`.
+    Still, you can use `&*asset.get()` to cast it to `&T`.
+    */
     pub fn get<'a>(&'a self) -> Option<impl Deref<Target = T> + 'a> {
         self.item.as_ref()?.lock().ok()
     }
 
-    /// Tries to get `&mut T`, fails if the asset is not loaded or panics ([`Mutex`] under the hood)
-    ///
-    /// This step is for asynchrounous loading and hot reloaidng.
-    ///
-    /// Unfortunatelly, the return type is not `Option<&mut T>` and doesn't implement trait for type
-    /// `T`. Still, you can use `&mut *asset.get()` to cast it to `&mut T`.
+    /**
+    Tries to get `&mut T`, fails if the asset is not loaded or panics ([`Mutex`] under the hood)
+
+    This step is for asynchrounous loading and hot reloaidng.
+
+    Unfortunatelly, the return type is not `Option<&mut T>` and doesn't implement trait for type
+    `T`. Still, you can use `&mut *asset.get_mut()` to cast it to `&mut T`.
+    */
     pub fn get_mut<'a>(&'a mut self) -> Option<impl DerefMut<Target = T> + 'a> {
         self.item.as_mut()?.lock().ok()
     }
 }
 
-/// Key to load asset
+/// Special URI for an asset (c.f. [`AssetCache::resolve`])
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(from = "PathBuf")]
 #[serde(into = "PathBuf")]
-pub struct AssetKey<'a>(Cow<'a, Path>);
+pub struct AssetKey<'a> {
+    path: Cow<'a, Path>,
+    scheme: Option<Cow<'a, Path>>,
+}
 
+// FIXME:
 impl<'a> From<&'a Path> for AssetKey<'a> {
     fn from(p: &'a Path) -> Self {
-        Self(Cow::from(p.to_path_buf()))
+        Self {
+            path: Cow::from(p.to_path_buf()),
+            scheme: None,
+        }
     }
 }
 
 impl<'a> From<PathBuf> for AssetKey<'a> {
     fn from(p: PathBuf) -> Self {
-        Self(Cow::from(p))
+        Self {
+            path: Cow::from(p),
+            scheme: None,
+        }
     }
 }
 
 impl<'a> Into<PathBuf> for AssetKey<'a> {
     fn into(self) -> PathBuf {
-        self.0.into_owned()
+        self.path.into_owned()
     }
 }
 
 impl<'a> AssetKey<'a> {
-    pub fn new(p: impl Into<Cow<'a, Path>>) -> Self {
-        AssetKey(p.into())
+    pub fn new<P1, P2>(p: P1, s: Option<P2>) -> Self
+    where
+        P1: Into<Cow<'a, Path>> + Clone,
+        P2: Into<Cow<'a, Path>> + Clone,
+    {
+        AssetKey {
+            path: p.into(),
+            scheme: s.map(|x| x.into()),
+        }
     }
 
-    pub fn from_str(s: &'a str) -> Self {
-        AssetKey(Cow::from(Path::new(s)))
+    pub fn from_path(p: impl Into<Cow<'a, Path>>) -> Self {
+        AssetKey {
+            path: p.into(),
+            scheme: None,
+        }
     }
 
-    pub fn from_string(s: String) -> Self {
-        AssetKey(Cow::from(PathBuf::from(s)))
+    pub fn relative_ref(s: &'a str) -> Self {
+        AssetKey {
+            path: Cow::from(Path::new(s)),
+            scheme: None,
+        }
+    }
+
+    pub fn relative_owned(s: String) -> Self {
+        AssetKey {
+            path: Cow::from(PathBuf::from(s)),
+            scheme: None,
+        }
     }
 }
 
 impl AssetKey<'static> {
-    /// Create static asset key with static path
-    ///
-    /// ```
-    /// /// Requires `#![const_raw_ptr_deref]`
-    /// const fn as_path(s:&'static str) -> &'static Path {
-    ///     unsafe { &*(s as *const str as *const OsStr as *const Path) }
-    /// }
-    /// ```
-    pub const fn new_const(p: Cow<'static, Path>) -> Self {
-        AssetKey(p)
+    /**
+    Create static asset key with static path
+
+    ```
+    /// Requires `#![const_raw_ptr_deref]`
+    const fn as_path(s:&'static str) -> &'static Path {
+        unsafe { &*(s as *const str as *const OsStr as *const Path) }
+    }
+    ```
+    */
+    pub const fn new_const(path: Cow<'static, Path>, scheme: Option<Cow<'static, Path>>) -> Self {
+        AssetKey { path, scheme }
     }
 }
 
@@ -213,14 +249,14 @@ impl Into<AssetKey<'static>> for &'static AssetKey<'static> {
 
 impl<'a> AsRef<Path> for AssetKey<'a> {
     fn as_ref(&self) -> &Path {
-        self.0.as_ref()
+        self.path.as_ref()
     }
 }
 
 impl<'a> std::ops::Deref for AssetKey<'a> {
     type Target = Path;
     fn deref(&self) -> &Self::Target {
-        self.0.as_ref()
+        self.path.as_ref()
     }
 }
 
@@ -228,17 +264,23 @@ impl<'a> std::ops::Deref for AssetKey<'a> {
 ///
 /// See also: [`AssetKey::new_const`]
 #[derive(Clone, Copy)]
-pub struct StaticAssetKey(pub &'static str);
+pub struct StaticAssetKey {
+    pub path: &'static str,
+    pub scheme: Option<&'static str>,
+}
 
 impl<'a> Into<AssetKey<'a>> for StaticAssetKey {
     fn into(self) -> AssetKey<'a> {
-        AssetKey(Cow::Borrowed(self.0.as_ref()))
+        AssetKey {
+            path: Cow::Borrowed(self.path.as_ref()),
+            scheme: self.scheme.map(|s| Cow::Borrowed(s.as_ref())),
+        }
     }
 }
 
 impl AsRef<Path> for StaticAssetKey {
     fn as_ref(&self) -> &Path {
-        self.0.as_ref()
+        self.path.as_ref()
     }
 }
 
@@ -404,7 +446,7 @@ impl AssetCache {
         // TODO: runtime asset root detection
         let proj_root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
         let asset_root = PathBuf::from(proj_root).join("assets");
-        asset_root.join(key.into().0)
+        asset_root.join(key.into().path)
     }
 
     /// Deserialize asset path as a RON file
@@ -522,7 +564,7 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
 
         let item = state
             .cache
-            .load_sync(AssetKey::new(&path))
+            .load_sync(AssetKey::from_path(&path))
             .map_err(|e| format!("Error while loading asset at `{}`: {}", path.display(), e))
             .unwrap();
 
