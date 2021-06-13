@@ -277,8 +277,10 @@ impl AssetKey<'static> {
     /**
     Create static asset key with static path
 
-    ```
-    /// Requires `#![const_raw_ptr_deref]`
+    ```no_run
+    #![feature(const_raw_ptr_deref)]
+    use std::{ffi::OsStr, path::Path};
+
     const fn as_path(s:&'static str) -> &'static Path {
         unsafe { &*(s as *const str as *const OsStr as *const Path) }
     }
@@ -597,5 +599,20 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
             .unwrap();
 
         Ok(item)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn schemed_path() {
+        assert_eq!(
+            AssetKey::parse("schemed:path/to/asset"),
+            AssetKey {
+                path: Cow::Owned(PathBuf::from("path/to/asset")),
+                scheme: Some(Cow::Owned(PathBuf::from("schemed"))),
+            }
+        );
     }
 }
