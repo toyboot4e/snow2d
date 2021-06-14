@@ -59,32 +59,6 @@ use crate::utils::Cheat;
 /// Generational index or identity of assets
 type Gen = u32;
 
-// TODO: scheme support
-// /// `"scheme:path"` or `"relative_path"`
-// #[derive(Debug, Clone, PartialEq, Eq, Hash, Inspect)]
-// pub struct StringWithScheme {
-//     raw: String,
-//     /// Byte offset of `:` character
-//     scheme_offset: Option<usize>,
-// }
-//
-// /// Maps scheme to relative path from asset root directory
-// #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-// pub struct SchemeHolder {
-//     schemes: Vec<(String, String)>,
-// }
-//
-// impl StringWithScheme {
-//     pub fn as_scheme(&self) -> Option<&str> {
-//         self.scheme_offset.map(|offset| &self.raw[offset..])
-//     }
-//
-//     pub fn as_body(&self) -> &str {
-//         let offset = self.scheme_offset.map(|offset| offset + 1).unwrap_or(0);
-//         &self.raw[offset..]
-//     }
-// }
-
 /// Data that can be used as an asset
 pub trait AssetItem: fmt::Debug + Sized + 'static {
     type Loader: AssetLoader<Item = Self>;
@@ -485,7 +459,7 @@ impl AssetCache {
 impl AssetCache {
     /// Resolves asset path into an absolute path
     pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
-        // TODO: runtime asset root detection
+        // FIXME: runtime asset root detection
         let proj_root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
         let asset_root = PathBuf::from(proj_root).join("assets");
         asset_root.join(key.into().path)
@@ -597,8 +571,7 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
     {
         // deserialize as PathBuf
         let path = <PathBuf as Deserialize>::deserialize(deserializer)
-            .map_err(|e| format!("Unable to load asset as `PathBuf`: {}", e))
-            .unwrap();
+            .map_err(|e| de::Error::custom(format!("Unable to load asset as `PathBuf`: {}", e)))?;
 
         // then load asset
         let state = unsafe {
@@ -611,8 +584,13 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
         let item = state
             .cache
             .load_sync(AssetKey::from_path(&path))
-            .map_err(|e| format!("Error while loading asset at `{}`: {}", path.display(), e))
-            .unwrap();
+            .map_err(|e| {
+                de::Error::custom(format!(
+                    "Error while loading asset at `{}`: {}",
+                    path.display(),
+                    e
+                ))
+            })?;
 
         Ok(item)
     }
