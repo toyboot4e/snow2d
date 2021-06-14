@@ -10,8 +10,8 @@ proc-macro = true
 dummy = []
 
 [dependencies]
-darling = "0.12.4"
-proc-macro2 = "1.0.26"
+darling = "0.13.0"
+proc-macro2 = "1.0.27"
 quote = "1.0.9"
-syn = "1.0.70"
+syn = "1.0.73"
 synstructure = "0.12.4"

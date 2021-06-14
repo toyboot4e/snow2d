@@ -41,13 +41,18 @@ use std::{
     ops::{Deref, DerefMut},
     path::{Path, PathBuf},
     rc::Rc,
+    str,
     sync::{Arc, Mutex},
 };
 
 use anyhow::Context;
 use downcast_rs::{impl_downcast, Downcast};
 use once_cell::sync::OnceCell;
-use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
+use serde::{
+    de::{self, Deserializer},
+    ser::Serializer,
+    Deserialize, Serialize,
+};
 
 use crate::utils::Cheat;
 
@@ -169,7 +174,7 @@ impl<'a, 'de> Deserialize<'de> for AssetKey<'a> {
         D: Deserializer<'de>,
     {
         let x = String::deserialize(deserializer)?;
-        let key = Self::parse(x);
+        let key: Self = x.parse().map_err(de::Error::custom)?;
         // TODO: validate the key?
         Ok(key)
     }
@@ -180,8 +185,7 @@ impl<'a> Serialize for AssetKey<'a> {
     where
         S: Serializer,
     {
-        let s = self.to_string_repr();
-        s.serialize(serializer)
+        self.to_string().serialize(serializer)
     }
 }
 
@@ -197,7 +201,7 @@ impl<'a> From<&'a Path> for AssetKey<'a> {
 
 impl<'a> From<&'a str> for AssetKey<'static> {
     fn from(s: &'a str) -> Self {
-        Self::parse(s)
+        s.parse().unwrap()
     }
 }
 
@@ -232,42 +236,48 @@ impl<'a> AssetKey<'a> {
     }
 }
 
+/// `AssetKey::to_string` never fails
+impl<'a> fmt::Display for AssetKey<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(scheme) = &self.scheme {
+            write!(f, "{}:{}", scheme.display(), self.path.display())?;
+        } else {
+            write!(f, "{}", self.path.display())?;
+        }
+        Ok(())
+    }
+}
+
+impl<'a> str::FromStr for AssetKey<'a> {
+    type Err = String;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        let key = if let Some(colon) = s.bytes().position(|b| b == b':') {
+            Self {
+                path: if s.len() == colon + 1 {
+                    Path::new("./").into()
+                } else {
+                    Cow::Owned(PathBuf::from(s[colon + 1..].to_string()))
+                },
+                scheme: Some(Cow::Owned(PathBuf::from(s[0..colon].to_string()))),
+            }
+        } else {
+            Self {
+                path: Cow::Owned(PathBuf::from(s)),
+                scheme: None,
+            }
+        };
+
+        Ok(key)
+    }
+}
+
 /// Explicit type conversions
 impl<'a> AssetKey<'a> {
     pub fn from_path(p: impl Into<Cow<'a, Path>>) -> Self {
         AssetKey {
             path: p.into(),
             scheme: None,
-        }
-    }
-
-    /// Parses a schemed string in syntax `scheme:relative/path`
-    pub fn parse<'b>(s: impl Into<Cow<'b, str>>) -> Self {
-        let s = s.into();
-
-        let s_ref = s.as_ref();
-        if let Some(colon) = s_ref.bytes().position(|b| b == b':') {
-            Self {
-                path: if s.len() == colon + 1 {
-                    Path::new("./").into()
-                } else {
-                    Cow::Owned(PathBuf::from(s_ref[colon + 1..].to_string()))
-                },
-                scheme: Some(Cow::Owned(PathBuf::from(s_ref[0..colon].to_string()))),
-            }
-        } else {
-            Self {
-                path: Cow::Owned(PathBuf::from(s.into_owned())),
-                scheme: None,
-            }
-        }
-    }
-
-    pub fn to_string_repr(&self) -> String {
-        if let Some(scheme) = &self.scheme {
-            format!("{}:{}", scheme.display(), self.path.display())
-        } else {
-            format!("{}", self.path.display())
         }
     }
 }
@@ -358,7 +368,7 @@ impl<T: AssetItem> AssetCacheT<T> {
         let key = key.into();
 
         // TODO: remove this code on release build
-        let repr = key.to_string_repr();
+        let repr = key.to_string();
 
         let id = ResolvedPath {
             path: self.any_cache.resolve(key),
