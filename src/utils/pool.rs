@@ -67,7 +67,7 @@ pub struct Handle<T> {
     gen: Gen,
     #[inspect(skip)]
     sender: Sender<Message>,
-    _phantom: PhantomData<fn() -> T>,
+    _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> cmp::PartialEq for Handle<T> {
@@ -87,7 +87,7 @@ impl<T> Handle<T> {
         WeakHandle {
             slot: self.slot,
             gen: self.gen,
-            _phantom: PhantomData,
+            _ty: PhantomData,
         }
     }
 
@@ -104,7 +104,7 @@ impl<T> Clone for Handle<T> {
             slot: self.slot,
             gen: self.gen,
             sender: self.sender.clone(),
-            _phantom: Default::default(),
+            _ty: Default::default(),
         }
     }
 }
@@ -124,7 +124,7 @@ impl<T> Drop for Handle<T> {
 pub struct WeakHandle<T> {
     slot: Slot,
     gen: Gen,
-    _phantom: PhantomData<fn() -> T>,
+    _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> WeakHandle<T> {
@@ -139,7 +139,7 @@ impl<T> From<Handle<T>> for WeakHandle<T> {
         Self {
             slot: h.slot,
             gen: h.gen,
-            _phantom: PhantomData,
+            _ty: PhantomData,
         }
     }
 }
@@ -282,7 +282,7 @@ impl<T> Pool<T> {
             slot: Slot(slot as u32),
             gen: gen.unwrap(),
             sender: self.sender.clone(),
-            _phantom: Default::default(),
+            _ty: Default::default(),
         }
     }
 

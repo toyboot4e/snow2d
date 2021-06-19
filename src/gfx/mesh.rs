@@ -14,7 +14,7 @@ use crate::utils::bytemuck::{self, Pod};
 pub struct StaticMesh<V: Pod> {
     bind: rg::Bindings,
     n_indices: usize,
-    _phantom: PhantomData<fn() -> V>,
+    _ty: PhantomData<fn() -> V>,
 }
 
 impl<V: Pod> Drop for StaticMesh<V> {
@@ -43,7 +43,7 @@ impl<V: Pod> StaticMesh<V> {
                 ..Default::default()
             },
             n_indices: indices.len(),
-            _phantom: PhantomData,
+            _ty: PhantomData,
         }
     }
 
@@ -74,7 +74,7 @@ pub struct DynamicMesh<V: Pod> {
     pub bind: rg::Bindings,
     pub n_indices: usize,
     pub verts: Vec<V>,
-    _phantom: PhantomData<fn() -> V>,
+    _ty: PhantomData<fn() -> V>,
 }
 
 impl<V: Pod> Drop for DynamicMesh<V> {
@@ -103,7 +103,7 @@ impl<V: Pod> DynamicMesh<V> {
             bind: b,
             n_indices: indices.len(),
             verts,
-            _phantom: Default::default(),
+            _ty: Default::default(),
         }
     }
 

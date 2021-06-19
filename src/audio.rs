@@ -73,7 +73,7 @@ pub mod asset {
         {
             assets.add_cache::<T>(AudioLoader {
                 audio,
-                _phantom: std::marker::PhantomData,
+                _ty: std::marker::PhantomData,
             });
         }
     }
@@ -85,7 +85,7 @@ pub mod asset {
         Src: crate::audio::prelude::FromExt + fmt::Debug + 'static,
     {
         audio: Audio,
-        _phantom: std::marker::PhantomData<Src>,
+        _ty: std::marker::PhantomData<Src>,
     }
 
     impl<T> AssetItem for T
