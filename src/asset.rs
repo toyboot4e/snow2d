@@ -28,10 +28,7 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 
 #![allow(dead_code)]
 
-/// `std::io::Result` re-exported
-///
-/// ---
-pub use std::io::Result;
+pub type Result<T, E = std::io::Error> = std::result::Result<T, E>;
 
 use std::{
     any::TypeId,
@@ -143,7 +140,7 @@ pub struct AssetKey<'a> {
 }
 
 impl<'a, 'de> Deserialize<'de> for AssetKey<'a> {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -155,7 +152,7 @@ impl<'a, 'de> Deserialize<'de> for AssetKey<'a> {
 }
 
 impl<'a> Serialize for AssetKey<'a> {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -225,7 +222,7 @@ impl<'a> fmt::Display for AssetKey<'a> {
 impl<'a> str::FromStr for AssetKey<'a> {
     type Err = String;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let key = if let Some(colon) = s.bytes().position(|b| b == b':') {
             Self {
                 path: if s.len() == colon + 1 {
@@ -554,7 +551,7 @@ impl AssetDeState {
 }
 
 impl<T: AssetItem> Serialize for Asset<T> {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -565,7 +562,7 @@ impl<T: AssetItem> Serialize for Asset<T> {
 
 // TODO: Ensure to not panic while deserializing
 impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {

@@ -43,7 +43,7 @@ pub trait TypeObject: std::fmt::Debug + Sized {
 pub struct TypeObjectId<T: TypeObject> {
     /// TODO: use `Cow` and add lifetime?
     key: String,
-    _marker: PhantomData<fn() -> T>,
+    _ty: PhantomData<fn() -> T>,
 }
 
 impl<T: TypeObject> fmt::Display for TypeObjectId<T> {
@@ -56,7 +56,7 @@ impl<'a, T: TypeObject> From<&'a str> for TypeObjectId<T> {
     fn from(s: &'a str) -> Self {
         TypeObjectId {
             key: s.to_string(),
-            _marker: PhantomData,
+            _ty: PhantomData,
         }
     }
 }
@@ -69,7 +69,7 @@ impl<'de, T: TypeObject> serde::de::Deserialize<'de> for TypeObjectId<T> {
         let key = <String as serde::de::Deserialize>::deserialize(deserializer)?;
         Ok(Self {
             key,
-            _marker: PhantomData,
+            _ty: PhantomData,
         })
     }
 }
@@ -88,7 +88,7 @@ impl<T: TypeObject> TypeObjectId<T> {
     pub fn from_raw(s: String) -> Self {
         Self {
             key: s,
-            _marker: PhantomData,
+            _ty: PhantomData,
         }
     }
 
@@ -109,16 +109,14 @@ impl<T: TypeObject> TypeObjectId<T> {
 /// Utility for initializing static [`TypeObjectStorage`]
 #[derive(Debug)]
 pub struct TypeObjectStorageBuilder {
-    _marker: PhantomData<()>,
+    _ty: PhantomData<()>,
 }
 
 impl TypeObjectStorageBuilder {
     /// Unwrap the return value since [`TypeObjectStorage`] doesn't implement `Display`
     pub unsafe fn begin() -> Result<Self, TypeObjectStorage> {
         TypeObjectStorage::init()?;
-        Ok(Self {
-            _marker: PhantomData,
-        })
+        Ok(Self { _ty: PhantomData })
     }
 
     pub fn register<'a, T: TypeObject + 'static + DeserializeOwned, U: Into<AssetKey<'a>>>(
