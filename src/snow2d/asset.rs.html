@@ -1,7 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/asset.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>asset.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -532,6 +531,92 @@
 <span id="529">529</span>
 <span id="530">530</span>
 <span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 Asset management
@@ -544,7 +629,7 @@ Asset management
 # Asset directory
 
 Asset directory is assumed to be at `manifest_dir/assets`. [`AssetKey`] is a relative path from
-the asset directory. TODO: Add asset key with scheme: `img:gorira`
+the asset directory.
 
 # Serde support
 
@@ -558,16 +643,12 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 
 * async loading
 * hot reloading (tiled map, actor image, etc.)
-* fix static asset path
 * `Asset` implements `Deref`, but they don&#39;t implement traits that the underlying data implements
 */</span>
 
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 
-<span class="doccomment">/// `std::io::Result` re-exported</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ---</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">std::io::Result</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span> <span class="op">=</span> <span class="ident">std::io::Error</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">any::TypeId</span>,
@@ -577,44 +658,23 @@ states while serializing/deserializing. So we need a thread-local pointer for de
     <span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>},
     <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
     <span class="ident">rc::Rc</span>,
+    <span class="ident">str</span>,
     <span class="ident">sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>},
 };
 
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
 <span class="kw">use</span> <span class="ident">downcast_rs</span>::{<span class="ident">impl_downcast</span>, <span class="ident">Downcast</span>};
 <span class="kw">use</span> <span class="ident">once_cell::sync::OnceCell</span>;
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">de::Deserializer</span>, <span class="ident">ser::Serializer</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+<span class="kw">use</span> <span class="ident">serde</span>::{
+    <span class="ident">de</span>::{<span class="self">self</span>, <span class="ident">Deserializer</span>},
+    <span class="ident">ser::Serializer</span>,
+    <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>,
+};
 
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils::Cheat</span>;
 
 <span class="doccomment">/// Generational index or identity of assets</span>
 <span class="kw">type</span> <span class="ident">Gen</span> <span class="op">=</span> <span class="ident">u32</span>;
-
-<span class="comment">// TODO: scheme support</span>
-<span class="comment">// /// `&quot;scheme:path&quot;` or `&quot;relative_path&quot;`</span>
-<span class="comment">// #[derive(Debug, Clone, PartialEq, Eq, Hash, Inspect)]</span>
-<span class="comment">// pub struct StringWithScheme {</span>
-<span class="comment">//     raw: String,</span>
-<span class="comment">//     /// Byte offset of `:` character</span>
-<span class="comment">//     scheme_offset: Option&lt;usize&gt;,</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// /// Maps scheme to relative path from asset root directory</span>
-<span class="comment">// #[derive(Debug, Clone, PartialEq, Eq, Hash)]</span>
-<span class="comment">// pub struct SchemeHolder {</span>
-<span class="comment">//     schemes: Vec&lt;(String, String)&gt;,</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// impl StringWithScheme {</span>
-<span class="comment">//     pub fn as_scheme(&amp;self) -&gt; Option&lt;&amp;str&gt; {</span>
-<span class="comment">//         self.scheme_offset.map(|offset| &amp;self.raw[offset..])</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn as_body(&amp;self) -&gt; &amp;str {</span>
-<span class="comment">//         let offset = self.scheme_offset.map(|offset| offset + 1).unwrap_or(0);</span>
-<span class="comment">//         &amp;self.raw[offset..]</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
 
 <span class="doccomment">/// Data that can be used as an asset</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AssetItem</span>: <span class="ident">fmt::Debug</span> <span class="op">+</span> <span class="ident">Sized</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> {
@@ -667,76 +727,84 @@ states while serializing/deserializing. So we need a thread-local pointer for de
         <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">preserved</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="ident">b</span>;
     }
 
-    <span class="doccomment">/// Tries to get `&amp;T`, fails if the asset is not loaded or failed to load</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This step is for asynchrounous loading and hot reloaidng.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Unfortunatelly, the return type is not `Option&lt;&amp;T&gt;` and doesn&#39;t implement trait for type `T`.</span>
-    <span class="doccomment">/// Still, you can use `&amp;*asset.get()` to cast it to `&amp;T`.</span>
+    <span class="doccomment">/**
+    Tries to get `&amp;T`, fails if the asset is not loaded or failed to load
+
+    This step is for asynchrounous loading and hot reloaidng.
+
+    Unfortunatelly, the return type is not `Option&lt;&amp;T&gt;` and doesn&#39;t implement trait for type `T`.
+    Still, you can use `&amp;*asset.get()` to cast it to `&amp;T`.
+    */</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Deref</span><span class="op">&lt;</span><span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">item</span>.<span class="ident">as_ref</span>()<span class="question-mark">?</span>.<span class="ident">lock</span>().<span class="ident">ok</span>()
     }
 
-    <span class="doccomment">/// Tries to get `&amp;mut T`, fails if the asset is not loaded or panics ([`Mutex`] under the hood)</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This step is for asynchrounous loading and hot reloaidng.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Unfortunatelly, the return type is not `Option&lt;&amp;mut T&gt;` and doesn&#39;t implement trait for type</span>
-    <span class="doccomment">/// `T`. Still, you can use `&amp;mut *asset.get()` to cast it to `&amp;mut T`.</span>
+    <span class="doccomment">/**
+    Tries to get `&amp;mut T`, fails if the asset is not loaded or panics ([`Mutex`] under the hood)
+
+    This step is for asynchrounous loading and hot reloaidng.
+
+    Unfortunatelly, the return type is not `Option&lt;&amp;mut T&gt;` and doesn&#39;t implement trait for type
+    `T`. Still, you can use `&amp;mut *asset.get_mut()` to cast it to `&amp;mut T`.
+    */</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_mut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">DerefMut</span><span class="op">&lt;</span><span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">item</span>.<span class="ident">as_mut</span>()<span class="question-mark">?</span>.<span class="ident">lock</span>().<span class="ident">ok</span>()
     }
 }
 
-<span class="doccomment">/// Key to load asset</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">from</span> <span class="op">=</span> <span class="string">&quot;PathBuf&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">into</span> <span class="op">=</span> <span class="string">&quot;PathBuf&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span>);
+<span class="doccomment">/// Special URI for an asset (c.f. [`AssetCache::resolve`])</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">path</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span>,
+    <span class="ident">scheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">D::Error</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">String::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">key</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">parse</span>().<span class="ident">map_err</span>(<span class="ident">de::Error::custom</span>)<span class="question-mark">?</span>;
+        <span class="comment">// TODO: validate the key?</span>
+        <span class="prelude-val">Ok</span>(<span class="ident">key</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S::Ok</span>, <span class="ident">S::Error</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">S</span>: <span class="ident">Serializer</span>,
+    {
+        <span class="self">self</span>.<span class="ident">to_string</span>().<span class="ident">serialize</span>(<span class="ident">serializer</span>)
+    }
+}
+
+<span class="comment">// implicit type conversions for convenient API</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">Cow::from</span>(<span class="ident">p</span>.<span class="ident">to_path_buf</span>()))
+        <span class="self">Self</span> {
+            <span class="ident">path</span>: <span class="ident">Cow::from</span>(<span class="ident">p</span>.<span class="ident">to_path_buf</span>()),
+            <span class="ident">scheme</span>: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">s</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">p</span>: <span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">Cow::from</span>(<span class="ident">p</span>))
+        <span class="self">Self</span><span class="ident">::from_path</span>(<span class="ident">p</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">into_owned</span>()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">p</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">AssetKey</span>(<span class="ident">p</span>.<span class="ident">into</span>())
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">AssetKey</span>(<span class="ident">Cow::from</span>(<span class="ident">Path::new</span>(<span class="ident">s</span>)))
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_string</span>(<span class="ident">s</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">AssetKey</span>(<span class="ident">Cow::from</span>(<span class="ident">PathBuf::from</span>(<span class="ident">s</span>)))
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create static asset key with static path</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// /// Requires `#![const_raw_ptr_deref]`</span>
-    <span class="doccomment">/// const fn as_path(s:&amp;&#39;static str) -&gt; &amp;&#39;static Path {</span>
-    <span class="doccomment">///     unsafe { &amp;*(s as *const str as *const OsStr as *const Path) }</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">p</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">Path</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">AssetKey</span>(<span class="ident">p</span>)
+        <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">into_owned</span>()
     }
 }
 
@@ -746,16 +814,87 @@ states while serializing/deserializing. So we need a thread-local pointer for de
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Path</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P1</span>, <span class="ident">P2</span><span class="op">&gt;</span>(<span class="ident">p</span>: <span class="ident">P1</span>, <span class="ident">s</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">P2</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">P1</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+        <span class="ident">P2</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    {
+        <span class="ident">AssetKey</span> {
+            <span class="ident">path</span>: <span class="ident">p</span>.<span class="ident">into</span>(),
+            <span class="ident">scheme</span>: <span class="ident">s</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">into</span>()),
+        }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">std::ops::Deref</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">Path</span>;
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Target</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()
+<span class="doccomment">/// `AssetKey::to_string` never fails</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">scheme</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">scheme</span> {
+            <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}:{}&quot;</span>, <span class="ident">scheme</span>.<span class="ident">display</span>(), <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">display</span>())<span class="question-mark">?</span>;
+        } <span class="kw">else</span> {
+            <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">display</span>())<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">str::FromStr</span> <span class="kw">for</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">String</span>;
+
+    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="self">Self</span><span class="ident">::Err</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">colon</span>) <span class="op">=</span> <span class="ident">s</span>.<span class="ident">bytes</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="string">b&#39;:&#39;</span>) {
+            <span class="self">Self</span> {
+                <span class="ident">path</span>: <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">colon</span> <span class="op">+</span> <span class="number">1</span> {
+                    <span class="ident">Path::new</span>(<span class="string">&quot;./&quot;</span>).<span class="ident">into</span>()
+                } <span class="kw">else</span> {
+                    <span class="ident">Cow::Owned</span>(<span class="ident">PathBuf::from</span>(<span class="ident">s</span>[<span class="ident">colon</span> <span class="op">+</span> <span class="number">1</span>..].<span class="ident">to_string</span>()))
+                },
+                <span class="ident">scheme</span>: <span class="prelude-val">Some</span>(<span class="ident">Cow::Owned</span>(<span class="ident">PathBuf::from</span>(<span class="ident">s</span>[<span class="number">0</span>..<span class="ident">colon</span>].<span class="ident">to_string</span>()))),
+            }
+        } <span class="kw">else</span> {
+            <span class="self">Self</span> {
+                <span class="ident">path</span>: <span class="ident">Cow::Owned</span>(<span class="ident">PathBuf::from</span>(<span class="ident">s</span>)),
+                <span class="ident">scheme</span>: <span class="prelude-val">None</span>,
+            }
+        };
+
+        <span class="prelude-val">Ok</span>(<span class="ident">key</span>)
+    }
+}
+
+<span class="doccomment">/// Explicit type conversions</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_path</span>(<span class="ident">p</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">AssetKey</span> {
+            <span class="ident">path</span>: <span class="ident">p</span>.<span class="ident">into</span>(),
+            <span class="ident">scheme</span>: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="doccomment">/**
+    Create static asset key with static path
+
+    ```no_run
+    #![feature(const_raw_ptr_deref)]
+    use std::{ffi::OsStr, path::Path};
+
+    const fn as_path(s:&amp;&#39;static str) -&gt; &amp;&#39;static Path {
+        unsafe { &amp;*(s as *const str as *const OsStr as *const Path) }
+    }
+    ```
+    */</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Path</span>, <span class="ident">scheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Path</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">AssetKey</span> {
+            <span class="ident">path</span>: <span class="ident">Cow::Borrowed</span>(<span class="ident">path</span>),
+            <span class="ident">scheme</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">scheme</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">Cow::Borrowed</span>(<span class="ident">s</span>))
+            } <span class="kw">else</span> {
+                <span class="prelude-val">None</span>
+            },
+        }
     }
 }
 
@@ -763,38 +902,30 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="doccomment">///</span>
 <span class="doccomment">/// See also: [`AssetKey::new_const`]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StaticAssetKey</span>(<span class="kw">pub</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StaticAssetKey</span> {
+    <span class="kw">pub</span> <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    <span class="kw">pub</span> <span class="ident">scheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>,
+}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">StaticAssetKey</span> {
     <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">AssetKey</span>(<span class="ident">Cow::Borrowed</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()))
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">StaticAssetKey</span> {
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Path</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()
-    }
-}
-
-<span class="doccomment">/// Newtype of [`PathBuf`], which is relative path from &quot;root&quot; asset directory</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
-<span class="kw">struct</span> <span class="ident">AssetId</span> {
-    <span class="ident">identity</span>: <span class="ident">PathBuf</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">AssetId</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_key</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">AssetKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">identity</span>: <span class="ident">key</span>.<span class="ident">to_path_buf</span>(),
+        <span class="ident">AssetKey</span> {
+            <span class="ident">path</span>: <span class="ident">Cow::Borrowed</span>(<span class="self">self</span>.<span class="ident">path</span>.<span class="ident">as_ref</span>()),
+            <span class="ident">scheme</span>: <span class="self">self</span>.<span class="ident">scheme</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Cow::Borrowed</span>(<span class="ident">s</span>.<span class="ident">as_ref</span>())),
         }
     }
+}
+
+<span class="doccomment">/// [`AssetKey`] resolved to be a [`PathBuf`]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ResolvedPath</span> {
+    <span class="ident">path</span>: <span class="ident">PathBuf</span>,
 }
 
 <span class="doccomment">/// Access to an [`AssetItem`] with metadata</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">AssetCacheEntry</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
-    <span class="ident">id</span>: <span class="ident">AssetId</span>,
+    <span class="ident">id</span>: <span class="ident">ResolvedPath</span>,
     <span class="ident">path</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="ident">asset</span>: <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 }
@@ -826,20 +957,29 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_sync</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">into</span>();
-        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">AssetId::from_key</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>);
+
+        <span class="comment">// TODO: remove this code on release build</span>
+        <span class="kw">let</span> <span class="ident">repr</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_string</span>();
+
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ResolvedPath</span> {
+            <span class="ident">path</span>: <span class="self">self</span>.<span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>),
+        };
+
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">entry</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">id</span>) {
             <span class="macro">log::trace!</span>(
                 <span class="string">&quot;(cache found for `{}` of type `{}`)&quot;</span>,
-                <span class="ident">key</span>.<span class="ident">display</span>(),
+                <span class="ident">repr</span>,
                 <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
             );
+
             <span class="prelude-val">Ok</span>(<span class="ident">entry</span>.<span class="ident">asset</span>.<span class="ident">clone</span>())
         } <span class="kw">else</span> {
             <span class="macro">log::debug!</span>(
                 <span class="string">&quot;loading asset `{}` of type `{}`&quot;</span>,
-                <span class="ident">key</span>.<span class="ident">display</span>(),
+                <span class="ident">repr</span>,
                 <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
             );
+
             <span class="self">self</span>.<span class="ident">load_new_sync</span>(<span class="ident">id</span>)
         }
     }
@@ -852,8 +992,8 @@ states while serializing/deserializing. So we need a thread-local pointer for de
         <span class="ident">res</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">load_new_sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">AssetId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">AssetKey::from</span>(<span class="ident">id</span>.<span class="ident">identity</span>.<span class="ident">as_ref</span>());
+    <span class="kw">fn</span> <span class="ident">load_new_sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">ResolvedPath</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">AssetKey::from_path</span>(<span class="ident">id</span>.<span class="ident">path</span>.<span class="ident">clone</span>());
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="self">self</span>.<span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>));
 
         <span class="kw">let</span> <span class="ident">asset</span> <span class="op">=</span> <span class="ident">Asset</span> {
@@ -936,10 +1076,10 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="kw">impl</span> <span class="ident">AssetCache</span> {
     <span class="doccomment">/// Resolves asset path into an absolute path</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
-        <span class="comment">// TODO: runtime asset root detection</span>
+        <span class="comment">// FIXME: runtime asset root detection</span>
         <span class="kw">let</span> <span class="ident">proj_root</span> <span class="op">=</span> <span class="ident">std::env::var</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">asset_root</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">proj_root</span>).<span class="ident">join</span>(<span class="string">&quot;assets&quot;</span>);
-        <span class="ident">asset_root</span>.<span class="ident">join</span>(<span class="ident">key</span>.<span class="ident">into</span>().<span class="number">0</span>)
+        <span class="ident">asset_root</span>.<span class="ident">join</span>(<span class="ident">key</span>.<span class="ident">into</span>().<span class="ident">path</span>)
     }
 
     <span class="doccomment">/// Deserialize asset path as a RON file</span>
@@ -1008,12 +1148,16 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">DE_STATE</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">AssetDeState</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
 
 <span class="kw">impl</span> <span class="ident">AssetDeState</span> {
-    <span class="doccomment">/// Run a procedure with internal global access to asset cache</span>
+    <span class="doccomment">/// Run a procedure with global access to asset cache</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCache</span>, <span class="ident">proc</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCache</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
         <span class="kw">unsafe</span> {
-            <span class="ident">DE_STATE</span>.<span class="ident">set</span>(<span class="self">Self</span> {
-                <span class="ident">cache</span>: <span class="ident">Cheat::new</span>(<span class="ident">cache</span>),
-            });
+            <span class="ident">DE_STATE</span>
+                .<span class="ident">set</span>(<span class="self">Self</span> {
+                    <span class="ident">cache</span>: <span class="ident">Cheat::new</span>(<span class="ident">cache</span>),
+                })
+                .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">_old_value</span><span class="op">|</span> {
+                    <span class="macro">unreachable!</span>(<span class="string">&quot;DE_STATE is guarded by AssetDeState::run&quot;</span>)
+                });
         }
 
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">proc</span>(<span class="ident">cache</span>);
@@ -1027,7 +1171,7 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">S::Ok</span>, <span class="ident">S::Error</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S::Ok</span>, <span class="ident">S::Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">Serializer</span>,
     {
@@ -1038,14 +1182,13 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 
 <span class="comment">// TODO: Ensure to not panic while deserializing</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">D::Error</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">D::Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
         <span class="comment">// deserialize as PathBuf</span>
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">PathBuf</span> <span class="kw">as</span> <span class="ident">Deserialize</span><span class="op">&gt;</span><span class="ident">::deserialize</span>(<span class="ident">deserializer</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Unable to load asset as `PathBuf`: {}&quot;</span>, <span class="ident">e</span>))
-            .<span class="ident">unwrap</span>();
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">de::Error::custom</span>(<span class="macro">format!</span>(<span class="string">&quot;Unable to load asset as `PathBuf`: {}&quot;</span>, <span class="ident">e</span>)))<span class="question-mark">?</span>;
 
         <span class="comment">// then load asset</span>
         <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw">unsafe</span> {
@@ -1057,13 +1200,40 @@ states while serializing/deserializing. So we need a thread-local pointer for de
 
         <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="ident">state</span>
             .<span class="ident">cache</span>
-            .<span class="ident">load_sync</span>(<span class="ident">AssetKey::new</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Error while loading asset at `{}`: {}&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>(), <span class="ident">e</span>))
-            .<span class="ident">unwrap</span>();
+            .<span class="ident">load_sync</span>(<span class="ident">AssetKey::from_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+                <span class="ident">de::Error::custom</span>(<span class="macro">format!</span>(
+                    <span class="string">&quot;Error while loading asset at `{}`: {}&quot;</span>,
+                    <span class="ident">path</span>.<span class="ident">display</span>(),
+                    <span class="ident">e</span>
+                ))
+            })<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">item</span>)
     }
 }
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">test</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">key</span>() {
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">AssetKey::parse</span>(<span class="string">&quot;schemed:path/to/asset&quot;</span>);
+
+        <span class="kw">let</span> <span class="ident">correct</span> <span class="op">=</span> <span class="ident">AssetKey</span> {
+            <span class="ident">path</span>: <span class="ident">Cow::Owned</span>(<span class="ident">PathBuf::from</span>(<span class="string">&quot;path/to/asset&quot;</span>)),
+            <span class="ident">scheme</span>: <span class="prelude-val">Some</span>(<span class="ident">Cow::Owned</span>(<span class="ident">PathBuf::from</span>(<span class="string">&quot;schemed&quot;</span>))),
+        };
+
+        <span class="macro">assert_eq!</span>(<span class="ident">key</span>, <span class="ident">correct</span>);
+
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">ron::ser::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">s</span>, <span class="string">&quot;\&quot;schemed:path/to/asset\&quot;&quot;</span>);
+
+        <span class="kw">let</span> <span class="ident">d</span>: <span class="ident">AssetKey</span> <span class="op">=</span> <span class="ident">ron::de::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">d</span>, <span class="ident">correct</span>);
+    }
+}
 </pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="snow2d" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="snow2d" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
