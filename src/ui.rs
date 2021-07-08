@@ -1,5 +1,7 @@
 /*!
-UI or scene graph: container of sprites and animations
+Retained-mode rendering
+
+UI (scene graph) is a container of sprites and animations.
 */
 
 // TODO: Consider whether animation arena should be handled equally as user data

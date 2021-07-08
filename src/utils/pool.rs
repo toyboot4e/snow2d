@@ -26,12 +26,7 @@ Another approach would be using non-reference-counted [`Index`] in [`arena`].
 [`Index`]: crate::utils::arena::Index
 */
 
-use std::{
-    cmp,
-    marker::PhantomData,
-    ops, slice,
-    sync::mpsc::{channel, Receiver, Sender},
-};
+use std::{cell::RefCell, cmp, collections::VecDeque, marker::PhantomData, ops, rc::Rc, slice};
 
 use derivative::Derivative;
 
@@ -66,7 +61,7 @@ pub struct Handle<T> {
     slot: Slot,
     gen: Gen,
     #[inspect(skip)]
-    sender: Sender<Message>,
+    sender: Rc<RefCell<VecDeque<Message>>>,
     _ty: PhantomData<fn() -> T>,
 }
 
@@ -98,8 +93,8 @@ impl<T> Handle<T> {
 
 impl<T> Clone for Handle<T> {
     fn clone(&self) -> Self {
-        // TODO: it dies if the pool is already dead?
-        self.sender.send(Message::New(self.slot)).unwrap();
+        self.sender.borrow_mut().push_back(Message::New(self.slot));
+
         Self {
             slot: self.slot,
             gen: self.gen,
@@ -111,8 +106,7 @@ impl<T> Clone for Handle<T> {
 
 impl<T> Drop for Handle<T> {
     fn drop(&mut self) {
-        // fails if the pool is already dead
-        self.sender.send(Message::Drop(self.slot)).ok();
+        self.sender.borrow_mut().push_back(Message::Drop(self.slot));
     }
 }
 
@@ -160,10 +154,8 @@ pub struct Pool<T> {
     entries: Vec<PoolEntry<T>>,
     /// Generation counter per [`Pool`]. Another option is per slot.
     gen_count: GenCounter,
-    /// Receives [`Message`]s from [`Handle`]s for handling reference countings
-    receiver: Receiver<Message>,
     /// Cloned and passed to [`Handle`]s
-    sender: Sender<Message>,
+    mes: Rc<RefCell<VecDeque<Message>>>,
 }
 
 use imgui::Ui;
@@ -182,13 +174,10 @@ impl<T: Inspect> Inspect for Pool<T> {
 
 impl<T> Pool<T> {
     pub fn with_capacity(cap: usize) -> Self {
-        let (sender, receiver) = channel::<Message>();
-
         Self {
             entries: Vec::with_capacity(cap),
             gen_count: 1,
-            sender,
-            receiver,
+            mes: Rc::new(RefCell::new(VecDeque::with_capacity(4))),
         }
     }
 
@@ -215,7 +204,7 @@ impl<T> Pool<T> {
     /// Update reference counting of internal items and remove unreferenced nodes
     pub fn sync_refcounts(&mut self) {
         // TODO: can we assume messages are correctly ordered?
-        while let Ok(mes) = self.receiver.try_recv() {
+        for mes in self.mes.borrow_mut().drain(0..) {
             match mes {
                 Message::New(slot) => {
                     let e = &mut self.entries[slot.as_usize()];
@@ -281,7 +270,7 @@ impl<T> Pool<T> {
         Handle {
             slot: Slot(slot as u32),
             gen: gen.unwrap(),
-            sender: self.sender.clone(),
+            sender: self.mes.clone(),
             _ty: Default::default(),
         }
     }

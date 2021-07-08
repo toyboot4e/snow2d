@@ -1,4 +1,27 @@
-//! Just for placing macros in somewhere other than crate root
+/*!
+Crate just for placing macros in somewhere other than crate root
+
+# Other option
+
+We could do this:
+
+```no_run
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _keys {
+    [ $( $d:expr ),* ] => {
+        vec![
+            $($d.into(),)*
+        ]
+    }
+}
+
+pub use _keys as keys;
+```
+
+..but then the document results in an unknown re-export, not a macro. `#[doc(inline)]` doesn't work,
+either.
+*/
 
 /// Create `InputBundle` from literals
 ///
