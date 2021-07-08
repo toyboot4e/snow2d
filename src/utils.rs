@@ -16,6 +16,7 @@ pub use snow2d_derive::Inspect;
 
 pub mod ez;
 pub mod pool;
+pub mod smpsc;
 
 pub mod tyobj;
 

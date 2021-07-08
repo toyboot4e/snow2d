@@ -26,11 +26,14 @@ Another approach would be using non-reference-counted [`Index`] in [`arena`].
 [`Index`]: crate::utils::arena::Index
 */
 
-use std::{cell::RefCell, cmp, collections::VecDeque, marker::PhantomData, ops, rc::Rc, slice};
+use std::{cmp, marker::PhantomData, ops, slice};
 
 use derivative::Derivative;
 
-use crate::utils::Inspect;
+use crate::utils::{
+    smpsc::{self, Receiver, Sender},
+    Inspect,
+};
 
 type Gen = std::num::NonZeroU32;
 type GenCounter = u32;
@@ -61,7 +64,7 @@ pub struct Handle<T> {
     slot: Slot,
     gen: Gen,
     #[inspect(skip)]
-    sender: Rc<RefCell<VecDeque<Message>>>,
+    sender: Sender<Message>,
     _ty: PhantomData<fn() -> T>,
 }
 
@@ -93,7 +96,7 @@ impl<T> Handle<T> {
 
 impl<T> Clone for Handle<T> {
     fn clone(&self) -> Self {
-        self.sender.borrow_mut().push_back(Message::New(self.slot));
+        self.sender.send(Message::New(self.slot));
 
         Self {
             slot: self.slot,
@@ -106,7 +109,7 @@ impl<T> Clone for Handle<T> {
 
 impl<T> Drop for Handle<T> {
     fn drop(&mut self) {
-        self.sender.borrow_mut().push_back(Message::Drop(self.slot));
+        self.sender.send(Message::Drop(self.slot));
     }
 }
 
@@ -154,8 +157,10 @@ pub struct Pool<T> {
     entries: Vec<PoolEntry<T>>,
     /// Generation counter per [`Pool`]. Another option is per slot.
     gen_count: GenCounter,
-    /// Cloned and passed to [`Handle`]s
-    mes: Rc<RefCell<VecDeque<Message>>>,
+    /// Receiver
+    rx: Receiver<Message>,
+    /// Sender. Cloned and passed to [`Handle`]s
+    tx: Sender<Message>,
 }
 
 use imgui::Ui;
@@ -174,10 +179,12 @@ impl<T: Inspect> Inspect for Pool<T> {
 
 impl<T> Pool<T> {
     pub fn with_capacity(cap: usize) -> Self {
+        let (tx, rx) = smpsc::unbounded();
         Self {
             entries: Vec::with_capacity(cap),
             gen_count: 1,
-            mes: Rc::new(RefCell::new(VecDeque::with_capacity(4))),
+            rx,
+            tx,
         }
     }
 
@@ -203,8 +210,7 @@ impl<T> Pool<T> {
 
     /// Update reference counting of internal items and remove unreferenced nodes
     pub fn sync_refcounts(&mut self) {
-        // TODO: can we assume messages are correctly ordered?
-        for mes in self.mes.borrow_mut().drain(0..) {
+        while let Some(mes) = self.rx.recv() {
             match mes {
                 Message::New(slot) => {
                     let e = &mut self.entries[slot.as_usize()];
@@ -270,7 +276,7 @@ impl<T> Pool<T> {
         Handle {
             slot: Slot(slot as u32),
             gen: gen.unwrap(),
-            sender: self.mes.clone(),
+            sender: self.tx.clone(),
             _ty: Default::default(),
         }
     }
