@@ -1,11 +1,12 @@
 /*!
-Single-threaded `mpsc` backed by `Rc<RefCell<VecDequeue<T>>`
+Single-threaded `mpsc` backed by `Rc<RefCell<VecDeque<T>>`
 */
 
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 
 type Queue<T> = Rc<RefCell<VecDeque<T>>>;
 
+/// Sender. Often referred to as `tx` (transmission)
 #[derive(Debug)]
 pub struct Sender<T>(Queue<T>);
 
@@ -21,6 +22,7 @@ impl<T> Clone for Sender<T> {
     }
 }
 
+/// Receiver. Often referred to as `rx` (receiver)
 #[derive(Debug)]
 pub struct Receiver<T>(Queue<T>);
 

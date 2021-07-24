@@ -32,6 +32,7 @@ impl<'a, 'b, T: RenderPassBuilderState> RenderPassBuilder<'a, 'b, T> {
     }
 }
 
+/// TODO: Separate default screen pass
 #[derive(Debug, Default)]
 pub struct ScreenPass<'a> {
     /// Projection = orthographic_projection * transform (tfm)
@@ -107,6 +108,7 @@ impl<'a, 'b, 'c> RenderPassBuilder<'a, 'b, ScreenPass<'c>> {
     }
 }
 
+/// TODO: Separate default off-screen pass
 #[derive(Debug)]
 pub struct OffscreenPass<'a, 'b> {
     /// Projection = orthographic_projection * transform (tfm)

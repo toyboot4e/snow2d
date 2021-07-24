@@ -1,5 +1,5 @@
 /*!
-Audio module
+Audio suport
 
 That is, [`soloud-rs`] re-exported with additional types and [`asset`](../asset) integration.
 
@@ -26,7 +26,7 @@ pub struct Audio {
 }
 
 impl Audio {
-    /// Two instances of [`AudioDrop`] can't exist
+    /// Make sure to not create [`Audio`] twice
     pub unsafe fn create() -> Result<Self, prelude::SoloudError> {
         let inner = AudioDrop::default()?;
         Ok(Self {

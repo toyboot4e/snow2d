@@ -1,7 +1,7 @@
 /*!
 Simple text rendering
 
-See [`crate::ui::node::Text`] for rich text.
+See [`crate::ui::node::Text`] for rich and retained-mode text rendering.
 */
 
 pub mod font;

@@ -1,7 +1,7 @@
 /*!
 2D texture types
 
-They implement traits in the [`draw`] module.
+These types implement traits in the [`draw`] module.
 
 [`draw`]: super::draw
 */

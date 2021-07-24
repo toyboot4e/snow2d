@@ -7,7 +7,7 @@ UI nodes (renderables)
 
 # `Into` impls
 
-`Draw` variants -> `Draw` -> `Node`
+`Surface` variants -> `Surface` -> `Node`
 */
 
 // Re-exported as [`Node`] variants

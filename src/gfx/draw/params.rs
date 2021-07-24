@@ -7,9 +7,9 @@ use crate::gfx::{batch::QuadData, geom2d::*, Color};
 /// Texture with size data. Used by [`QuadParams`]
 pub trait Texture2d {
     fn img(&self) -> rg::Image;
-    /// Texture [width, height] in pixels, scale not considered
+    /// Texture [width, height] in pixels. Framebuffer scale is not considered
     fn sub_tex_size_unscaled(&self) -> [f32; 2];
-    /// Just for users
+    /// Texture [width, height] in pixels. Framebuffer scale is considered
     fn sub_tex_size_scaled(&self) -> [f32; 2];
 }
 

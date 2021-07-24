@@ -29,10 +29,10 @@ use self::{
     node::{DrawParams, Order, Surface},
 };
 
-/// Index of [`Node`] in expected collection (i.e., pool)
+/// Handle of [`Node`] in [`NodePool`]
 pub type NodeHandle = crate::utils::pool::Handle<Node>;
 
-/// Index of [`Anim`] in expected collection (i.e., generational arena)
+/// Index of [`Anim`] in [`AnimStorage`]
 pub type AnimIndex = crate::utils::arena::Index<Anim>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Hash, Inspect)]
@@ -375,7 +375,7 @@ impl DelayedAnim {
 #[derive(Debug)]
 pub struct AnimStorage {
     running: Arena<Anim>,
-    delayed: Arena<DelayedAnim>,
+    delayed: Vec<DelayedAnim>,
 }
 
 impl Inspect for AnimStorage {
@@ -387,7 +387,7 @@ impl Inspect for AnimStorage {
                 }
             });
 
-            inspect::inspect_seq(self.delayed.iter_mut().map(|(_i, x)| x), ui, "delayed");
+            inspect::inspect_seq(self.delayed.iter_mut().map(|x| x), ui, "delayed");
         });
     }
 }
@@ -396,18 +396,18 @@ impl AnimStorage {
     pub fn new() -> Self {
         Self {
             running: Arena::with_capacity(16),
-            delayed: Arena::with_capacity(16),
+            delayed: Vec::with_capacity(16),
         }
     }
 
     pub fn insert_seq(&mut self, seq: AnimSeq) {
         for anim in seq.anims {
-            self.delayed.insert(anim);
+            self.delayed.push(anim);
         }
     }
 
     pub fn insert_delayed(&mut self, delay: Duration, anim: Anim) {
-        self.delayed.insert(DelayedAnim::new(delay, anim));
+        self.delayed.push(DelayedAnim::new(delay, anim));
     }
 }
 
@@ -447,7 +447,7 @@ impl AnimStorage {
             }
         });
 
-        for mut anim in new_start_anims.map(|(_ix, delayed)| delayed.anim) {
+        for mut anim in new_start_anims.map(|delayed| delayed.anim) {
             anim.set_active(true);
             self.running.insert(anim);
         }

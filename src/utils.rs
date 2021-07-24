@@ -1,5 +1,7 @@
 /*!
-Core utilities
+Core utilities and handy tools
+
+[`arena`], [`ez`], [`Inspect`], [`pool`] and [`tyobj`] are core utilities. Other are handy tools.
 */
 
 mod cheat;

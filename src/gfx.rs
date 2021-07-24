@@ -1,7 +1,8 @@
 /*!
-Graphics
+Immediate-mode rendering (sprite, shader and text)
 
-[`Snow2d`] is the graphics context and the primary rendering API.
+It's built on top of [`rokol`]. The primary API is [`Snow2d`]. See [`crate::ui`] for retained-mode
+rendering.
 
 # Coordinate system
 
@@ -235,7 +236,7 @@ impl WindowState {
     }
 }
 
-/// Game time progress (stops while pausing)
+/// Game time progress (ticked only when [`crate::Ice`] is updated)
 #[derive(Debug, Clone)]
 pub struct GameClock {
     past: Duration,
@@ -269,13 +270,15 @@ pub struct Snow2d {
     pub window: WindowState,
     /// Game time progress
     pub clock: GameClock,
-    /// Vertex/index buffer and images slots
-    pub batch: Batch,
+    /// Bundle of font texture and font storage
     pub fontbook: FontBook,
-    /// Shader program for on-screen rendering
+    /// Quad batcher under the hood
+    pub batch: Batch,
+    /// Default shader program for on-screen rendering
     ons_shd: Shader,
-    /// Shader program for off-screen rendering
+    /// Default shader program for off-screen rendering
     ofs_shd: Shader,
+    // graphics context is a global variable in rokol (sokol)
 }
 
 /// Lifeycle
@@ -355,7 +358,7 @@ impl Snow2d {
     }
 }
 
-/// Extended [`DrawApi`] for a rendering pass (on-screen or off-screen)
+/// Rendering pass, extension of [`DrawApi`]
 pub struct RenderPass<'a> {
     snow: &'a mut Snow2d,
 }

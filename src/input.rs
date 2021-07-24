@@ -1,7 +1,9 @@
 /*!
-Input module
+Input support
 
-That is, [`xdl`] re-exported. TODO: gamepad and mouse
+That is, [`xdl`] re-exported. Currently, virtual key is oriented for orthogonal grid maps.
+
+TODO: gamepad and mouse
 */
 
 pub use xdl::{utils, Dir4, Dir8, Input, Key, Keyboard, Sign};

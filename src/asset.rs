@@ -1,34 +1,42 @@
 /*!
 Asset management
 
-# Asset types
-
 [`Asset<T>`] is a shared reference of an asset item. Any type of `Asset` is stored in
 [`AssetCache`].
 
-# Asset directory
+# Asset path
 
-Asset directory is assumed to be at `manifest_dir/assets`. [`AssetKey`] is a relative path from
-the asset directory.
+Asset directory is assumed to be at `manifest_dir/assets`. [`AssetKey`] is either of the two:
+
+* "relative/path/to/the/asset/directory"
+* "scheme:relative/path/to/the/scheme/directory"
+
+TODO: `<asset_dir>/schemes.txt`
 
 # Serde support
 
-Bind your [`AssetCache`] to [`AssetDeState`] while deserializing.
+Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`].
 
-Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`]. Since [`Asset`] is a
-shared pointer, we need to take care to not create duplicates. But `serde` doesn't let us to use
-states while serializing/deserializing. So we need a thread-local pointer for deserialization.
+WARNING: Deserialization has to be done in [`with_cache`].
+
+Reason: [`Asset`] is a shared pointer and we need to take care to not create duplicates. But `serde`
+doesn't let us share states while deserialization. So we need a thread-local pointer for
+deserialization.
 
 # TODOs
 
 * async loading
 * hot reloading (tiled map, actor image, etc.)
+
+# Problems
+
 * `Asset` implements `Deref`, but they don't implement traits that the underlying data implements
 */
 
 #![allow(dead_code)]
 
-pub type Result<T, E = std::io::Error> = std::result::Result<T, E>;
+pub type Error = std::io::Error;
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 use std::{
     any::TypeId,
@@ -67,7 +75,7 @@ pub trait AssetLoader: fmt::Debug + Sized + 'static {
     fn load(&mut self, path: &Path, cache: &mut AssetCache) -> Result<Self::Item>;
 }
 
-/// Shared ownership of an asset item
+/// Shared ownership of an asset item. Be sure to call [`with_cache`] on deserialization.
 #[derive(Debug)]
 pub struct Asset<T: AssetItem> {
     item: Option<Arc<Mutex<T>>>,
@@ -132,7 +140,8 @@ impl<T: AssetItem> Asset<T> {
     }
 }
 
-/// Special URI for an asset (c.f. [`AssetCache::resolve`])
+/// URI for an asset resolved with [`AssetCache::resolve`]. It's either a relative path from either
+/// asset directory or a directory specified with scheme.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AssetKey<'a> {
     path: Cow<'a, Path>,
@@ -255,7 +264,9 @@ impl<'a> AssetKey<'a> {
 
 impl AssetKey<'static> {
     /**
-    Create static asset key with static path
+    Create static asset key from static path
+
+    `&'static Path` can be created as this:
 
     ```no_run
     #![feature(const_raw_ptr_deref)]
@@ -278,9 +289,7 @@ impl AssetKey<'static> {
     }
 }
 
-/// Key to load asset (allocated statically)
-///
-/// See also: [`AssetKey::new_const`]
+/// Prefer [`AssetKey::new_const`]
 #[derive(Clone, Copy)]
 pub struct StaticAssetKey {
     pub path: &'static str,
@@ -319,7 +328,7 @@ struct AssetCacheT<T: AssetItem> {
     gen: Gen,
 }
 
-/// All of the assets
+/// All assets on memory
 #[derive(Debug)]
 pub struct AssetCache {
     caches: HashMap<TypeId, Box<dyn FreeUnused>>,
@@ -521,33 +530,32 @@ impl<T: AssetItem> FreeUnused for AssetCacheT<T> {
 
 /// Deserialize assets without making duplicates using thread-local variable
 #[derive(Debug)]
-pub struct AssetDeState {
+struct AssetDeState {
     cache: Cheat<AssetCache>,
 }
 
+/// TODO: Just use thread_local!
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
-impl AssetDeState {
-    /// Run a procedure with global access to asset cache
-    pub fn run<T>(cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
-        unsafe {
-            DE_STATE
-                .set(Self {
-                    cache: Cheat::new(cache),
-                })
-                .unwrap_or_else(|_old_value| {
-                    unreachable!("DE_STATE is guarded by AssetDeState::run")
-                });
-        }
-
-        let res = proc(cache);
-
-        unsafe {
-            assert!(DE_STATE.take().is_some());
-        }
-
-        res
+/// Run a procedure with deserialization support for [`Asset`]
+pub fn with_cache<T>(cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
+    unsafe {
+        DE_STATE
+            .set(AssetDeState {
+                cache: Cheat::new(cache),
+            })
+            .unwrap_or_else(|_old_value| {
+                unreachable!("DE_STATE is guarded by snow2d::asset::with_cache")
+            });
     }
+
+    let res = proc(cache);
+
+    unsafe {
+        assert!(DE_STATE.take().is_some());
+    }
+
+    res
 }
 
 impl<T: AssetItem> Serialize for Asset<T> {
