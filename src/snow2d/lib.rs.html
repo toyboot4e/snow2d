@@ -310,6 +310,49 @@
 <span id="308">308</span>
 <span id="309">309</span>
 <span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 `snow2d` ❄️ framework
@@ -427,11 +470,105 @@ It&#39;s a 2D framework specific for my roguelike game. **It doesn&#39;t meet ot
     }
 }
 
-<span class="doccomment">/// Utility for updating the game at 60 FPS while the window has focus</span>
+<span class="doccomment">/// Simple FPS wathcer</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Fps</span> {
+    <span class="ident">now</span>: <span class="ident">Instant</span>,
+    <span class="doccomment">/// Average FPS per frame in seconds</span>
+    <span class="ident">avg</span>: <span class="ident">f64</span>,
+    <span class="doccomment">/// Square of spike FPS in seconds</span>
+    <span class="ident">spike</span>: <span class="ident">f64</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Fps</span> {
+    <span class="kw">const</span> <span class="ident">K</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="number">0.05</span>;
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">now</span>: <span class="ident">Instant::now</span>(),
+            <span class="ident">avg</span>: <span class="ident">Default::default</span>(),
+            <span class="ident">spike</span>: <span class="ident">Default::default</span>(),
+        }
+    }
+
+    <span class="doccomment">/// Update FPS counts with real time</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
+        <span class="kw">let</span> <span class="ident">dt</span> <span class="op">=</span> <span class="ident">now</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">now</span>;
+        <span class="self">self</span>.<span class="ident">now</span> <span class="op">=</span> <span class="ident">now</span>;
+
+        <span class="self">self</span>.<span class="ident">update_avg</span>(<span class="ident">dt</span>.<span class="ident">as_secs_f64</span>());
+        <span class="self">self</span>.<span class="ident">update_spike</span>(<span class="ident">dt</span>.<span class="ident">as_secs_f64</span>());
+    }
+
+    <span class="doccomment">/// Average FPS</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">avg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+        <span class="number">1.0</span> <span class="op">/</span> <span class="self">self</span>.<span class="ident">avg</span>
+    }
+
+    <span class="doccomment">/// Spike FPS</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spike</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+        <span class="self">self</span>.<span class="ident">spike</span>.<span class="ident">sqrt</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">update_avg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dt</span>: <span class="ident">f64</span>) {
+        <span class="self">self</span>.<span class="ident">avg</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">1.0</span> <span class="op">-</span> <span class="self">Self</span><span class="ident">::K</span>;
+        <span class="self">self</span>.<span class="ident">avg</span> <span class="op">+</span><span class="op">=</span> <span class="ident">dt</span> <span class="op">*</span> <span class="self">Self</span><span class="ident">::K</span>;
+    }
+
+    <span class="kw">fn</span> <span class="ident">update_spike</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dt</span>: <span class="ident">f64</span>) {
+        <span class="self">self</span>.<span class="ident">spike</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">1.0</span> <span class="op">-</span> <span class="self">Self</span><span class="ident">::K</span>;
+        <span class="self">self</span>.<span class="ident">spike</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">dt</span> <span class="op">*</span> <span class="ident">dt</span>) <span class="op">*</span> <span class="self">Self</span><span class="ident">::K</span>;
+    }
+}
+
+<span class="doccomment">/// Run your game at 60 FPS (without a trait)</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// For details, look into the source code (by clikcing the `src` button on the right)</span>
+<span class="doccomment">/// TODO: Error handling</span>
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(
+    <span class="kw-2">mut</span> <span class="ident">pump</span>: <span class="ident">sdl2::EventPump</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>,
+    <span class="kw-2">mut</span> <span class="ident">event</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>, <span class="kw-2">&amp;</span><span class="ident">Event</span>),
+    <span class="kw-2">mut</span> <span class="ident">frame</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>, <span class="ident">Duration</span>),
+) {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">runner</span> <span class="op">=</span> <span class="self">self</span><span class="ident">::GameRunner::new</span>();
+
+    <span class="lifetime">&#39;game_loop</span>: <span class="kw">loop</span> {
+        <span class="kw">for</span> <span class="ident">ev</span> <span class="kw">in</span> <span class="ident">pump</span>.<span class="ident">poll_iter</span>() {
+            <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">ev</span>, <span class="ident">sdl2::event::Event::Quit</span> { .. }) {
+                <span class="kw">break</span> <span class="lifetime">&#39;game_loop</span>;
+            }
+
+            <span class="ident">runner</span>.<span class="ident">event</span>(<span class="kw-2">&amp;</span><span class="ident">ev</span>);
+            (<span class="ident">event</span>)(<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="ident">ev</span>);
+        }
+
+        <span class="kw">let</span> <span class="ident">tick</span> <span class="op">=</span> <span class="ident">runner</span>.<span class="ident">update</span>();
+
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">tick</span> {
+            <span class="comment">// not focused</span>
+            <span class="ident">std::thread::sleep</span>(<span class="ident">std::time::Duration::from_secs_f32</span>(<span class="number">0.2</span>));
+            <span class="kw">continue</span>;
+        }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dt</span>) <span class="op">=</span> <span class="ident">runner</span>.<span class="ident">timestep</span>() {
+            <span class="comment">// focused &amp; update</span>
+            (<span class="ident">frame</span>)(<span class="ident">state</span>, <span class="ident">dt</span>);
+        } <span class="kw">else</span> {
+            <span class="comment">// focusd &amp; iding</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dt</span>) <span class="op">=</span> <span class="ident">runner</span>.<span class="ident">sleep_duration</span>() {
+                <span class="ident">std::thread::sleep</span>(<span class="ident">dt</span>);
+            } <span class="kw">else</span> {
+                <span class="macro">eprintln!</span>(<span class="string">&quot;ASSSSSSSSSSSSSSSSSSSSSSSS??&quot;</span>);
+            }
+        }
+    }
+}
+
+<span class="doccomment">/// Utility for updating the game at 60 FPS while the window has focus</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GameRunner</span> {
+<span class="kw">struct</span> <span class="ident">GameRunner</span> {
     <span class="ident">target_dt</span>: <span class="ident">Duration</span>,
     <span class="ident">now</span>: <span class="ident">Instant</span>,
     <span class="ident">accum</span>: <span class="ident">Duration</span>,
@@ -477,14 +614,6 @@ It&#39;s a 2D framework specific for my roguelike game. **It doesn&#39;t meet ot
 }
 
 <span class="kw">impl</span> <span class="ident">GameRunner</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sleep_duration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">accum</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">Duration::from_secs_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">61.0</span>) {
-            <span class="prelude-val">None</span>
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">target_dt</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">accum</span>)
-        }
-    }
-
     <span class="doccomment">/// Updates the accumulated duration</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
@@ -517,6 +646,15 @@ It&#39;s a 2D framework specific for my roguelike game. **It doesn&#39;t meet ot
             <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">target_dt</span> <span class="op">*</span> <span class="ident">n_steps</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
+        }
+    }
+
+    <span class="doccomment">/// Sleep duration for idling</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sleep_duration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">accum</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">Duration::from_secs_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">61.0</span>) {
+            <span class="prelude-val">None</span>
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">target_dt</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">accum</span>)
         }
     }
 
@@ -567,58 +705,6 @@ It&#39;s a 2D framework specific for my roguelike game. **It doesn&#39;t meet ot
         } <span class="kw">else</span> {
             <span class="bool-val">false</span>
         }
-    }
-}
-
-<span class="doccomment">/// Simple FPS wathcer</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Fps</span> {
-    <span class="ident">now</span>: <span class="ident">Instant</span>,
-    <span class="doccomment">/// Average FPS per frame in seconds</span>
-    <span class="ident">avg</span>: <span class="ident">f64</span>,
-    <span class="doccomment">/// Square of spike FPS in seconds</span>
-    <span class="ident">spike</span>: <span class="ident">f64</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Fps</span> {
-    <span class="kw">const</span> <span class="ident">K</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="number">0.05</span>;
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">now</span>: <span class="ident">Instant::now</span>(),
-            <span class="ident">avg</span>: <span class="ident">Default::default</span>(),
-            <span class="ident">spike</span>: <span class="ident">Default::default</span>(),
-        }
-    }
-
-    <span class="doccomment">/// Update FPS counts with real time</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
-        <span class="kw">let</span> <span class="ident">dt</span> <span class="op">=</span> <span class="ident">now</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">now</span>;
-        <span class="self">self</span>.<span class="ident">now</span> <span class="op">=</span> <span class="ident">now</span>;
-
-        <span class="self">self</span>.<span class="ident">update_avg</span>(<span class="ident">dt</span>.<span class="ident">as_secs_f64</span>());
-        <span class="self">self</span>.<span class="ident">update_spike</span>(<span class="ident">dt</span>.<span class="ident">as_secs_f64</span>());
-    }
-
-    <span class="doccomment">/// Average FPS</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">avg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
-        <span class="number">1.0</span> <span class="op">/</span> <span class="self">self</span>.<span class="ident">avg</span>
-    }
-
-    <span class="doccomment">/// Spike FPS</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spike</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
-        <span class="self">self</span>.<span class="ident">spike</span>.<span class="ident">sqrt</span>()
-    }
-
-    <span class="kw">fn</span> <span class="ident">update_avg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dt</span>: <span class="ident">f64</span>) {
-        <span class="self">self</span>.<span class="ident">avg</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">1.0</span> <span class="op">-</span> <span class="self">Self</span><span class="ident">::K</span>;
-        <span class="self">self</span>.<span class="ident">avg</span> <span class="op">+</span><span class="op">=</span> <span class="ident">dt</span> <span class="op">*</span> <span class="self">Self</span><span class="ident">::K</span>;
-    }
-
-    <span class="kw">fn</span> <span class="ident">update_spike</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dt</span>: <span class="ident">f64</span>) {
-        <span class="self">self</span>.<span class="ident">spike</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">1.0</span> <span class="op">-</span> <span class="self">Self</span><span class="ident">::K</span>;
-        <span class="self">self</span>.<span class="ident">spike</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">dt</span> <span class="op">*</span> <span class="ident">dt</span>) <span class="op">*</span> <span class="self">Self</span><span class="ident">::K</span>;
     }
 }
 </pre></div>

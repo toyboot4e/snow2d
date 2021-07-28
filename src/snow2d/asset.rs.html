@@ -768,8 +768,8 @@ deserialization.
     }
 }
 
-<span class="doccomment">/// URI for an asset resolved with [`AssetCache::resolve`]. It&#39;s either a relative path from either</span>
-<span class="doccomment">/// asset directory or a directory specified with scheme.</span>
+<span class="doccomment">/// URI for an asset resolved with [`AssetCache::resolve`]. It&#39;s a relative path from either asset</span>
+<span class="doccomment">/// directory or a directory specified by scheme.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">path</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Path</span><span class="op">&gt;</span>,
