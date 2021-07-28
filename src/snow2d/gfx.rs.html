@@ -449,11 +449,17 @@
 <span id="447">447</span>
 <span id="448">448</span>
 <span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
-Graphics
+Immediate-mode rendering (sprite, shader and text)
 
-[`Snow2d`] is the graphics context and the primary rendering API.
+It&#39;s built on top of [`rokol`]. The primary API is [`Snow2d`]. See [`crate::ui`] for retained-mode
+rendering.
 
 # Coordinate system
 
@@ -687,7 +693,7 @@ Same as OpenGL or school math (right-handed and column-major).
     }
 }
 
-<span class="doccomment">/// Game time progress (stops while pausing)</span>
+<span class="doccomment">/// Game time progress (ticked only when [`crate::Ice`] is updated)</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GameClock</span> {
     <span class="ident">past</span>: <span class="ident">Duration</span>,
@@ -715,19 +721,23 @@ Same as OpenGL or school math (right-handed and column-major).
 }
 
 <span class="doccomment">/// The 2D renderer</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It&#39;s self-contained and provides object-oriented API.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Snow2d</span> {
     <span class="doccomment">/// Window state used by the renderer</span>
     <span class="kw">pub</span> <span class="ident">window</span>: <span class="ident">WindowState</span>,
     <span class="doccomment">/// Game time progress</span>
     <span class="kw">pub</span> <span class="ident">clock</span>: <span class="ident">GameClock</span>,
-    <span class="doccomment">/// Vertex/index buffer and images slots</span>
-    <span class="kw">pub</span> <span class="ident">batch</span>: <span class="ident">Batch</span>,
+    <span class="doccomment">/// Bundle of font texture and font storage</span>
     <span class="kw">pub</span> <span class="ident">fontbook</span>: <span class="ident">FontBook</span>,
-    <span class="doccomment">/// Shader program for on-screen rendering</span>
+    <span class="doccomment">/// Quad batcher under the hood</span>
+    <span class="kw">pub</span> <span class="ident">batch</span>: <span class="ident">Batch</span>,
+    <span class="doccomment">/// Default shader program for on-screen rendering</span>
     <span class="ident">ons_shd</span>: <span class="ident">Shader</span>,
-    <span class="doccomment">/// Shader program for off-screen rendering</span>
+    <span class="doccomment">/// Default shader program for off-screen rendering</span>
     <span class="ident">ofs_shd</span>: <span class="ident">Shader</span>,
+    <span class="comment">// graphics context is a global variable in rokol (sokol)</span>
 }
 
 <span class="doccomment">/// Lifeycle</span>
@@ -807,7 +817,7 @@ Same as OpenGL or school math (right-handed and column-major).
     }
 }
 
-<span class="doccomment">/// Extended [`DrawApi`] for a rendering pass (on-screen or off-screen)</span>
+<span class="doccomment">/// Rendering pass, extension of [`DrawApi`]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RenderPass</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">snow</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Snow2d</span>,
 }

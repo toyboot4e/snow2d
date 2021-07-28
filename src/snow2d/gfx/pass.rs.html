@@ -189,6 +189,8 @@
 <span id="187">187</span>
 <span id="188">188</span>
 <span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Builder for [`RenderPass`]</span>
 
@@ -224,6 +226,7 @@
     }
 }
 
+<span class="doccomment">/// TODO: Separate default screen pass</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ScreenPass</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Projection = orthographic_projection * transform (tfm)</span>
@@ -299,6 +302,7 @@
     }
 }
 
+<span class="doccomment">/// TODO: Separate default off-screen pass</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">OffscreenPass</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Projection = orthographic_projection * transform (tfm)</span>

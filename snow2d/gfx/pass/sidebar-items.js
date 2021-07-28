@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["OffscreenPass",""],["RenderPassBuilder","Builder for [`RenderPass`]"],["ScreenPass",""]],"trait":[["RenderPassBuilderState","Marker for “typestate” pattern"]]});
+initSidebarItems({"struct":[["OffscreenPass","TODO: Separate default off-screen pass"],["RenderPassBuilder","Builder for [`RenderPass`]"],["ScreenPass","TODO: Separate default screen pass"]],"trait":[["RenderPassBuilderState","Marker for “typestate” pattern"]]});

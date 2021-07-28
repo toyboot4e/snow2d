@@ -178,7 +178,7 @@
 <span id="176">176</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
-Audio module
+Audio suport
 
 That is, [`soloud-rs`] re-exported with additional types and [`asset`](../asset) integration.
 
@@ -205,7 +205,7 @@ That is, [`soloud-rs`] re-exported with additional types and [`asset`](../asset)
 }
 
 <span class="kw">impl</span> <span class="ident">Audio</span> {
-    <span class="doccomment">/// Two instances of [`AudioDrop`] can&#39;t exist</span>
+    <span class="doccomment">/// Make sure to not create [`Audio`] twice</span>
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">create</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prelude::SoloudError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">AudioDrop::default</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {

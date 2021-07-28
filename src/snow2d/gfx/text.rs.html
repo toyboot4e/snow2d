@@ -176,11 +176,18 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 Simple text rendering
 
-See [`crate::ui::node::Text`] for rich text.
+See [`crate::ui::node::Text`] for rich and retained-mode text rendering.
 */</span>
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">font</span>;
@@ -251,9 +258,16 @@ See [`crate::ui::node::Text`] for rich text.
 }
 
 <span class="doccomment">/// Bundle of font texture and font storage</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Currently only TTF is supported.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * TODO: Bitmap support</span>
+<span class="doccomment">/// * TODO: SDF support</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FontBook</span> {
+    <span class="doccomment">/// Texture where font data is rasterized</span>
     <span class="kw">pub</span> <span class="ident">tex</span>: <span class="ident">FontTexture</span>,
+    <span class="doccomment">/// Loaded font handles</span>
     <span class="kw">pub</span> <span class="ident">families</span>: <span class="ident">Arena</span><span class="op">&lt;</span><span class="ident">FontFamilyHandle</span><span class="op">&gt;</span>,
 }
 

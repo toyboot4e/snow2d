@@ -169,9 +169,9 @@
 <span class="doccomment">/// Texture with size data. Used by [`QuadParams`]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Texture2d</span> {
     <span class="kw">fn</span> <span class="ident">img</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">rg::Image</span>;
-    <span class="doccomment">/// Texture [width, height] in pixels, scale not considered</span>
+    <span class="doccomment">/// Texture [width, height] in pixels. Framebuffer scale is not considered</span>
     <span class="kw">fn</span> <span class="ident">sub_tex_size_unscaled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">f32</span>; <span class="number">2</span>];
-    <span class="doccomment">/// Just for users</span>
+    <span class="doccomment">/// Texture [width, height] in pixels. Framebuffer scale is considered</span>
     <span class="kw">fn</span> <span class="ident">sub_tex_size_scaled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">f32</span>; <span class="number">2</span>];
 }
 
