@@ -1,7 +1,7 @@
 /*!
 Input support
 
-That is, [`xdl`] re-exported. Currently, virtual key is oriented for orthogonal grid maps.
+That is, [`xdl`] re-exported. Currently, the virtual key is oriented for orthogonal grid maps.
 
 TODO: gamepad and mouse
 */

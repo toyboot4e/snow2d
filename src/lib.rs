@@ -114,11 +114,105 @@ impl Ice {
     }
 }
 
-/// Utility for updating the game at 60 FPS while the window has focus
+/// Simple FPS wathcer
+#[derive(Debug, Clone)]
+pub struct Fps {
+    now: Instant,
+    /// Average FPS per frame in seconds
+    avg: f64,
+    /// Square of spike FPS in seconds
+    spike: f64,
+}
+
+impl Fps {
+    const K: f64 = 0.05;
+
+    pub fn new() -> Self {
+        Self {
+            now: Instant::now(),
+            avg: Default::default(),
+            spike: Default::default(),
+        }
+    }
+
+    /// Update FPS counts with real time
+    pub fn update(&mut self) {
+        let now = Instant::now();
+        let dt = now - self.now;
+        self.now = now;
+
+        self.update_avg(dt.as_secs_f64());
+        self.update_spike(dt.as_secs_f64());
+    }
+
+    /// Average FPS
+    pub fn avg(&self) -> f64 {
+        1.0 / self.avg
+    }
+
+    /// Spike FPS
+    pub fn spike(&self) -> f64 {
+        self.spike.sqrt()
+    }
+
+    fn update_avg(&mut self, dt: f64) {
+        self.avg *= 1.0 - Self::K;
+        self.avg += dt * Self::K;
+    }
+
+    fn update_spike(&mut self, dt: f64) {
+        self.spike *= 1.0 - Self::K;
+        self.spike += (dt * dt) * Self::K;
+    }
+}
+
+/// Run your game at 60 FPS (without a trait)
 ///
-/// For details, look into the source code (by clikcing the `src` button on the right)
+/// TODO: Error handling
+#[inline(always)]
+pub fn run<S>(
+    mut pump: sdl2::EventPump,
+    state: &mut S,
+    mut event: impl FnMut(&mut S, &Event),
+    mut frame: impl FnMut(&mut S, Duration),
+) {
+    let mut runner = self::GameRunner::new();
+
+    'game_loop: loop {
+        for ev in pump.poll_iter() {
+            if matches!(ev, sdl2::event::Event::Quit { .. }) {
+                break 'game_loop;
+            }
+
+            runner.event(&ev);
+            (event)(state, &ev);
+        }
+
+        let tick = runner.update();
+
+        if !tick {
+            // not focused
+            std::thread::sleep(std::time::Duration::from_secs_f32(0.2));
+            continue;
+        }
+
+        if let Some(dt) = runner.timestep() {
+            // focused & update
+            (frame)(state, dt);
+        } else {
+            // focusd & iding
+            if let Some(dt) = runner.sleep_duration() {
+                std::thread::sleep(dt);
+            } else {
+                eprintln!("ASSSSSSSSSSSSSSSSSSSSSSSS??");
+            }
+        }
+    }
+}
+
+/// Utility for updating the game at 60 FPS while the window has focus
 #[derive(Debug)]
-pub struct GameRunner {
+struct GameRunner {
     target_dt: Duration,
     now: Instant,
     accum: Duration,
@@ -164,14 +258,6 @@ impl GameRunner {
 }
 
 impl GameRunner {
-    pub fn sleep_duration(&self) -> Option<Duration> {
-        if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
-            None
-        } else {
-            Some(self.target_dt - self.accum)
-        }
-    }
-
     /// Updates the accumulated duration
     #[inline(always)]
     pub fn update(&mut self) -> bool {
@@ -204,6 +290,15 @@ impl GameRunner {
             Some(self.target_dt * n_steps)
         } else {
             None
+        }
+    }
+
+    /// Sleep duration for idling
+    pub fn sleep_duration(&self) -> Option<Duration> {
+        if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
+            None
+        } else {
+            Some(self.target_dt - self.accum)
         }
     }
 
@@ -254,57 +349,5 @@ impl GameRunner {
         } else {
             false
         }
-    }
-}
-
-/// Simple FPS wathcer
-#[derive(Debug, Clone)]
-pub struct Fps {
-    now: Instant,
-    /// Average FPS per frame in seconds
-    avg: f64,
-    /// Square of spike FPS in seconds
-    spike: f64,
-}
-
-impl Fps {
-    const K: f64 = 0.05;
-
-    pub fn new() -> Self {
-        Self {
-            now: Instant::now(),
-            avg: Default::default(),
-            spike: Default::default(),
-        }
-    }
-
-    /// Update FPS counts with real time
-    pub fn update(&mut self) {
-        let now = Instant::now();
-        let dt = now - self.now;
-        self.now = now;
-
-        self.update_avg(dt.as_secs_f64());
-        self.update_spike(dt.as_secs_f64());
-    }
-
-    /// Average FPS
-    pub fn avg(&self) -> f64 {
-        1.0 / self.avg
-    }
-
-    /// Spike FPS
-    pub fn spike(&self) -> f64 {
-        self.spike.sqrt()
-    }
-
-    fn update_avg(&mut self, dt: f64) {
-        self.avg *= 1.0 - Self::K;
-        self.avg += dt * Self::K;
-    }
-
-    fn update_spike(&mut self, dt: f64) {
-        self.spike *= 1.0 - Self::K;
-        self.spike += (dt * dt) * Self::K;
     }
 }

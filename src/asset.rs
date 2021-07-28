@@ -140,8 +140,8 @@ impl<T: AssetItem> Asset<T> {
     }
 }
 
-/// URI for an asset resolved with [`AssetCache::resolve`]. It's either a relative path from either
-/// asset directory or a directory specified with scheme.
+/// URI for an asset resolved with [`AssetCache::resolve`]. It's a relative path from either asset
+/// directory or a directory specified by scheme.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AssetKey<'a> {
     path: Cow<'a, Path>,
