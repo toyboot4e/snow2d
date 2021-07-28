@@ -1,5 +1,5 @@
 /*!
-Primary types in `snow2d`
+Primary types and handy tools
 */
 
 pub use anyhow::{Result, *};

@@ -264,6 +264,8 @@ impl GameClock {
 }
 
 /// The 2D renderer
+///
+/// It's self-contained and provides object-oriented API.
 #[derive(Debug)]
 pub struct Snow2d {
     /// Window state used by the renderer

@@ -31,19 +31,22 @@ use crate::{
 };
 
 /// Generic game context
+///
+/// Bundle of graphics, input, audio, assets and utilities.
 #[derive(Debug)]
 pub struct Ice {
     /// Clears target (frame buffer by default) with cornflower blue color
     pa_blue: rg::PassAction,
     /// 2D renderer
     pub snow: Snow2d,
+    /// All the input states
+    pub input: Input,
     /// Audio context
     pub audio: Audio,
-    /// Background music player
-    pub music: MusicPlayer,
     /// Asset cache for any type
     pub assets: AssetCache,
-    pub input: Input,
+    /// Background music player
+    pub music: MusicPlayer,
     /// Delta time from last frame
     dt: Duration,
     frame_count: u64,
@@ -112,6 +115,8 @@ impl Ice {
 }
 
 /// Utility for updating the game at 60 FPS while the window has focus
+///
+/// For details, look into the source code (by clikcing the `src` button on the right)
 #[derive(Debug)]
 pub struct GameRunner {
     target_dt: Duration,
@@ -125,18 +130,14 @@ impl GameRunner {
         Self {
             target_dt: Duration::from_nanos(1_000_000_000 / 60),
             now: Instant::now(),
-            accum: Duration::default(),
+            accum: Duration::ZERO,
             focus: [false, false],
         }
     }
-
-    pub fn dt(&self) -> Duration {
-        self.target_dt
-    }
 }
 
-/// Lifecycle
 impl GameRunner {
+    /// Watch window focus state
     #[inline(always)]
     pub fn event(&mut self, ev: &Event) {
         match ev {
@@ -160,39 +161,150 @@ impl GameRunner {
             _ => {}
         }
     }
+}
 
-    /// Returns true if the game should be updated this frame
+impl GameRunner {
+    pub fn sleep_duration(&self) -> Option<Duration> {
+        if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
+            None
+        } else {
+            Some(self.target_dt - self.accum)
+        }
+    }
+
+    /// Updates the accumulated duration
     #[inline(always)]
     pub fn update(&mut self) -> bool {
-        let update = match (self.focus[0], self.focus[1]) {
-            (false, true) => {
-                // gain focus
-                self.accum = Duration::default();
-                self.now = Instant::now();
+        let tick = self.update_focus();
 
+        if tick {
+            let new_now = Instant::now();
+            self.accum += new_now - self.now;
+            self.now = new_now;
+        } else {
+            self.accum = Duration::ZERO;
+            self.now = Instant::now();
+        }
+
+        tick
+    }
+
+    /// Consumes the accumulated duration and maybe creates a timestep
+    #[inline(always)]
+    pub fn timestep(&mut self) -> Option<Duration> {
+        // Consume the accumulated duration.
+        // It may correspond to multiple timesteps.
+        let mut n_steps = 0;
+        while self.reduce() {
+            n_steps += 1;
+        }
+
+        if n_steps > 0 {
+            // Update only once, but with a `dt` propertional to the number of steps
+            Some(self.target_dt * n_steps)
+        } else {
+            None
+        }
+    }
+
+    #[inline(always)]
+    fn update_focus(&mut self) -> bool {
+        let tick = match (self.focus[0], self.focus[1]) {
+            (false, true) => {
+                // on gain focus
                 false
             }
             (true, false) => {
-                // lose focus
-                self.accum = Duration::default();
-                self.now = Instant::now();
-
+                // on lose focus
                 false
             }
             (true, true) => {
                 // been focused
-                let new_now = Instant::now();
-                self.accum += new_now - self.now;
-                self.now = new_now;
-
                 true
             }
             (false, false) => {
-                // been unfocused: stop the game
+                // been unfocused
                 false
             }
         };
+
         self.focus[0] = self.focus[1];
-        update
+        tick
+    }
+
+    /**
+    https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
+
+    ```c++
+    while(accumulator >= 1.0/61.0){
+        simulate_update();
+        accumulator -= 1.0/60.0;
+        if(accumulator < 1.0/59.0–1.0/60.0) accumulator = 0;
+    }
+    ```
+    */
+    fn reduce(&mut self) -> bool {
+        if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
+            if self.accum < Duration::from_secs_f64(1.0 / 59.0) {
+                self.accum = Duration::ZERO;
+            } else {
+                self.accum -= Duration::from_secs_f64(1.0 / 60.0);
+            }
+            true
+        } else {
+            false
+        }
+    }
+}
+
+/// Simple FPS wathcer
+#[derive(Debug, Clone)]
+pub struct Fps {
+    now: Instant,
+    /// Average FPS per frame in seconds
+    avg: f64,
+    /// Square of spike FPS in seconds
+    spike: f64,
+}
+
+impl Fps {
+    const K: f64 = 0.05;
+
+    pub fn new() -> Self {
+        Self {
+            now: Instant::now(),
+            avg: Default::default(),
+            spike: Default::default(),
+        }
+    }
+
+    /// Update FPS counts with real time
+    pub fn update(&mut self) {
+        let now = Instant::now();
+        let dt = now - self.now;
+        self.now = now;
+
+        self.update_avg(dt.as_secs_f64());
+        self.update_spike(dt.as_secs_f64());
+    }
+
+    /// Average FPS
+    pub fn avg(&self) -> f64 {
+        1.0 / self.avg
+    }
+
+    /// Spike FPS
+    pub fn spike(&self) -> f64 {
+        self.spike.sqrt()
+    }
+
+    fn update_avg(&mut self, dt: f64) {
+        self.avg *= 1.0 - Self::K;
+        self.avg += dt * Self::K;
+    }
+
+    fn update_spike(&mut self, dt: f64) {
+        self.spike *= 1.0 - Self::K;
+        self.spike += (dt * dt) * Self::K;
     }
 }

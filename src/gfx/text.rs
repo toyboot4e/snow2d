@@ -72,9 +72,16 @@ impl FontFamilyHandle {
 }
 
 /// Bundle of font texture and font storage
+///
+/// Currently only TTF is supported.
+///
+/// * TODO: Bitmap support
+/// * TODO: SDF support
 #[derive(Debug)]
 pub struct FontBook {
+    /// Texture where font data is rasterized
     pub tex: FontTexture,
+    /// Loaded font handles
     pub families: Arena<FontFamilyHandle>,
 }
 
