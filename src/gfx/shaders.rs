@@ -16,10 +16,7 @@ macro_rules! c_str {
     };
 }
 
-/// (Release build) embed shader files
-///
-/// [&str; 2]
-#[cfg(not(debug_assertions))]
+/// Embed shader files (`[&str; 2]`)
 macro_rules! def_shd {
     ($file:expr) => {
         [
@@ -27,37 +24,6 @@ macro_rules! def_shd {
             concat!(include_str!(concat!("shaders/glsl/", $file, ".fs")), "\0").to_string(),
         ]
     };
-}
-
-/// (Debug build) dynamically load shader files
-///
-/// [String; 2]
-#[cfg(debug_assertions)]
-macro_rules! def_shd {
-    ($file:expr) => {{
-        use std::{fs, path::PathBuf};
-
-        // NOTE: `file!` is relative path from CARGO_MANIFEST_DIR
-        let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
-        let dir = root.join(
-            PathBuf::from(file!())
-                .parent()
-                .unwrap()
-                .join("shaders/glsl"),
-        );
-
-        let vs_path = dir.join($file).with_extension("vs");
-        let mut vert = fs::read_to_string(&vs_path)
-            .unwrap_or_else(|_| panic!("can't file shader file: {}", vs_path.display()));
-        vert.push('\0');
-
-        let fs_path = dir.join($file).with_extension("fs");
-        let mut frag = fs::read_to_string(&fs_path)
-            .unwrap_or_else(|_| panic!("can't file shader file: {}", fs_path.display()));
-        frag.push('\0');
-
-        [vert, frag]
-    }};
 }
 
 macro_rules! img_type {
