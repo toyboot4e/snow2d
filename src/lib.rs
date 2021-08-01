@@ -114,10 +114,9 @@ impl Ice {
     }
 }
 
-/// Simple FPS wathcer
-#[derive(Debug, Clone)]
+/// Simple FPS watchcer
+#[derive(Debug, Clone, Default)]
 pub struct Fps {
-    now: Instant,
     /// Average FPS per frame in seconds
     avg: f64,
     /// Square of spike FPS in seconds
@@ -127,22 +126,10 @@ pub struct Fps {
 impl Fps {
     const K: f64 = 0.05;
 
-    pub fn new() -> Self {
-        Self {
-            now: Instant::now(),
-            avg: Default::default(),
-            spike: Default::default(),
-        }
-    }
-
     /// Update FPS counts with real time
-    pub fn update(&mut self) {
-        let now = Instant::now();
-        let dt = now - self.now;
-        self.now = now;
-
-        self.update_avg(dt.as_secs_f64());
-        self.update_spike(dt.as_secs_f64());
+    pub fn update(&mut self, frame_time: Duration) {
+        self.update_avg(frame_time.as_secs_f64());
+        self.update_spike(frame_time.as_secs_f64());
     }
 
     /// Average FPS
@@ -166,9 +153,11 @@ impl Fps {
     }
 }
 
-/// Run your game at 60 FPS (without a trait)
+/// Run your game at 60 FPS (trait-free)
 ///
 /// TODO: Error handling
+///
+/// Details are in the source code.
 #[inline(always)]
 pub fn run<S>(
     mut pump: sdl2::EventPump,
@@ -180,12 +169,17 @@ pub fn run<S>(
 
     'game_loop: loop {
         for ev in pump.poll_iter() {
+            let poll_start = Instant::now();
+
             if matches!(ev, sdl2::event::Event::Quit { .. }) {
                 break 'game_loop;
             }
 
             runner.event(&ev);
             (event)(state, &ev);
+
+            let dt = Instant::now() - poll_start;
+            log::trace!("poll: {:?} | {:?}", dt, ev);
         }
 
         let tick = runner.update();
@@ -204,7 +198,7 @@ pub fn run<S>(
             if let Some(dt) = runner.sleep_duration() {
                 std::thread::sleep(dt);
             } else {
-                eprintln!("ASSSSSSSSSSSSSSSSSSSSSSSS??");
+                eprintln!("AAAAAAAAAAAAAAAAAAAAAAAAA??");
             }
         }
     }
@@ -281,7 +275,7 @@ impl GameRunner {
         // Consume the accumulated duration.
         // It may correspond to multiple timesteps.
         let mut n_steps = 0;
-        while self.reduce() {
+        while self.consume() {
             n_steps += 1;
         }
 
@@ -338,7 +332,7 @@ impl GameRunner {
     }
     ```
     */
-    fn reduce(&mut self) -> bool {
+    fn consume(&mut self) -> bool {
         if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
             if self.accum < Duration::from_secs_f64(1.0 / 59.0) {
                 self.accum = Duration::ZERO;
