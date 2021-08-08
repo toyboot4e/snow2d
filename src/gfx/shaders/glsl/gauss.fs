@@ -3,7 +3,7 @@
 uniform sampler2D tex1;
 uniform float is_horizontal;
 
-in vec4 pip_color; // FIXME: UNUSED
+in vec4 pip_color;
 in vec2 pip_uv;
 
 out vec4 frag_color;
@@ -28,6 +28,5 @@ void main() {
         alpha += texture(tex1, pip_uv - ((i * uv_unit) * dir)).w * weight[i];
     }
 
-    // frag_color = result;
-    frag_color = vec4(0, 0, 0, alpha);
+    frag_color = pip_color * vec4(0, 0, 0, alpha);
 }

@@ -53,7 +53,7 @@ pub struct Ice {
 }
 
 impl Ice {
-    pub fn new(snow: Snow2d) -> Self {
+    pub fn new(snow: Snow2d, asset_root: PathBuf) -> Self {
         // TODO: don't unwrap
         let audio = unsafe { Audio::create().unwrap() };
 
@@ -62,7 +62,7 @@ impl Ice {
             snow,
             audio: audio.clone(),
             music: MusicPlayer::new(audio.clone()),
-            assets: AssetCache::new(),
+            assets: AssetCache::with_root(asset_root),
             input: Input::new(),
             dt: Duration::new(0, 0),
             frame_count: 0,
