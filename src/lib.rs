@@ -17,7 +17,11 @@ pub mod prelude;
 pub mod ui;
 pub mod utils;
 
-use std::time::{Duration, Instant};
+use std::{
+    path::PathBuf,
+    thread,
+    time::{Duration, Instant},
+};
 
 use rokol::gfx as rg;
 use sdl2::event::{Event, WindowEvent};
@@ -117,7 +121,7 @@ impl Ice {
 /// Simple FPS watchcer
 #[derive(Debug, Clone, Default)]
 pub struct Fps {
-    /// Average FPS per frame in seconds
+    /// Average duration per frame in seconds
     avg: f64,
     /// Square of spike FPS in seconds
     spike: f64,
@@ -168,39 +172,59 @@ pub fn run<S>(
     let mut runner = self::GameRunner::new();
 
     'game_loop: loop {
+        // 1. poll event
         for ev in pump.poll_iter() {
-            let poll_start = Instant::now();
-
             if matches!(ev, sdl2::event::Event::Quit { .. }) {
                 break 'game_loop;
             }
 
             runner.event(&ev);
-            (event)(state, &ev);
 
-            let dt = Instant::now() - poll_start;
-            log::trace!("poll: {:?} | {:?}", dt, ev);
+            // TODO: filter events while not focused?
+            (event)(state, &ev);
         }
 
+        // 2. tick
         let tick = runner.update();
 
         if !tick {
-            // not focused
-            std::thread::sleep(std::time::Duration::from_secs_f32(0.2));
+            // not focused: wait polling events
+            thread::sleep(std::time::Duration::from_secs_f32(0.2));
             continue;
         }
 
-        if let Some(dt) = runner.timestep() {
+        // 3. update
+        if let Some(dt) = runner.consume_timestep() {
             // focused & update
             (frame)(state, dt);
-        } else {
-            // focusd & iding
-            if let Some(dt) = runner.sleep_duration() {
-                std::thread::sleep(dt);
-            } else {
-                eprintln!("AAAAAAAAAAAAAAAAAAAAAAAAA??");
-            }
         }
+
+        // 4. wait until next frame (don't poll events while waiting!)
+        if let Some(dt) = runner.wait_duration() {
+            self::accurate_sleep(dt);
+        } else {
+            eprintln!("AAAAAAAAAAAAAAAAAAAAAAAAA??");
+        }
+    }
+}
+
+#[inline(always)]
+fn accurate_sleep(dt: Duration) {
+    let now = Instant::now();
+    let hi = Duration::from_millis(1);
+
+    // discrete sleep loop for most of the time
+    if dt > hi {
+        while Instant::now() - now < dt - hi {
+            std::thread::sleep(hi);
+        }
+    }
+
+    // accurate sleep loop for the last 1ms
+    while Instant::now() - now < dt {
+        // TODO: more accurately?
+        let small = Duration::from_micros(1);
+        std::thread::sleep(small);
     }
 }
 
@@ -258,10 +282,12 @@ impl GameRunner {
         let tick = self.update_focus();
 
         if tick {
-            let new_now = Instant::now();
-            self.accum += new_now - self.now;
-            self.now = new_now;
+            // tick
+            let next = Instant::now();
+            self.accum += next - self.now;
+            self.now = next;
         } else {
+            // reset accumulated duration
             self.accum = Duration::ZERO;
             self.now = Instant::now();
         }
@@ -271,15 +297,19 @@ impl GameRunner {
 
     /// Consumes the accumulated duration and maybe creates a timestep
     #[inline(always)]
-    pub fn timestep(&mut self) -> Option<Duration> {
+    pub fn consume_timestep(&mut self) -> Option<Duration> {
         // Consume the accumulated duration.
         // It may correspond to multiple timesteps.
         let mut n_steps = 0;
-        while self.consume() {
+        while self.consume_one_step() {
             n_steps += 1;
         }
 
-        if n_steps > 0 {
+        if n_steps > 3 {
+            // limit the length of update
+            log::trace!("very slow!");
+            Some(self.target_dt * 3)
+        } else if n_steps > 0 {
             // Update only once, but with a `dt` propertional to the number of steps
             Some(self.target_dt * n_steps)
         } else {
@@ -287,8 +317,9 @@ impl GameRunner {
         }
     }
 
-    /// Sleep duration for idling
-    pub fn sleep_duration(&self) -> Option<Duration> {
+    /// Duration for accurate sleep
+    #[inline(always)]
+    pub fn wait_duration(&self) -> Option<Duration> {
         if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
             None
         } else {
@@ -332,7 +363,8 @@ impl GameRunner {
     }
     ```
     */
-    fn consume(&mut self) -> bool {
+    #[inline(always)]
+    fn consume_one_step(&mut self) -> bool {
         if self.accum >= Duration::from_secs_f64(1.0 / 61.0) {
             if self.accum < Duration::from_secs_f64(1.0 / 59.0) {
                 self.accum = Duration::ZERO;
