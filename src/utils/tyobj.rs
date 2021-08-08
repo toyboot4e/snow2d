@@ -169,7 +169,7 @@ impl TypeObjectStorage {
                 .get_mut()
                 .expect("TypeObjectStorage is not initialized");
 
-            let map: HashMap<TypeObjectId<T>, T> = cache.deserialize_ron(key)?;
+            let map: HashMap<TypeObjectId<T>, T> = cache.load_ron(key)?;
             let map: HashMap<TypeObjectId<T>, Rc<T>> = map
                 .into_iter()
                 .map(|(key, value)| (key, Rc::new(value)))

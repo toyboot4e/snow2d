@@ -27,6 +27,7 @@ deserialization.
 
 * async loading
 * hot reloading (tiled map, actor image, etc.)
+* force `/` as path separateor
 
 # Problems
 
@@ -39,10 +40,10 @@ pub type Error = std::io::Error;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 use std::{
-    any::TypeId,
+    any::{self, TypeId},
     borrow::Cow,
     collections::HashMap,
-    fmt, io,
+    fmt, fs, io,
     ops::{Deref, DerefMut},
     path::{Path, PathBuf},
     rc::Rc,
@@ -332,6 +333,7 @@ struct AssetCacheT<T: AssetItem> {
 #[derive(Debug)]
 pub struct AssetCache {
     caches: HashMap<TypeId, Box<dyn FreeUnused>>,
+    root: PathBuf,
 }
 
 impl<T: AssetItem> AssetCacheT<T> {
@@ -358,7 +360,7 @@ impl<T: AssetItem> AssetCacheT<T> {
             log::trace!(
                 "(cache found for `{}` of type `{}`)",
                 repr,
-                std::any::type_name::<T>()
+                any::type_name::<T>()
             );
 
             Ok(entry.asset.clone())
@@ -366,7 +368,7 @@ impl<T: AssetItem> AssetCacheT<T> {
             log::debug!(
                 "loading asset `{}` of type `{}`",
                 repr,
-                std::any::type_name::<T>()
+                any::type_name::<T>()
             );
 
             self.load_new_sync(id)
@@ -408,9 +410,11 @@ impl<T: AssetItem> AssetCacheT<T> {
 }
 
 impl AssetCache {
-    pub fn new() -> Self {
+    pub fn with_root(root: PathBuf) -> Self {
+        assert!(root.is_absolute());
         Self {
             caches: HashMap::with_capacity(16),
+            root,
         }
     }
 
@@ -465,25 +469,26 @@ impl AssetCache {
 impl AssetCache {
     /// Resolves asset path into an absolute path
     pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
-        // FIXME: runtime asset root detection
-        let proj_root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        let asset_root = PathBuf::from(proj_root).join("assets");
-        asset_root.join(key.into().path)
+        self.root.join(key.into().path)
     }
 
-    /// Deserialize asset path as a RON file
-    pub fn deserialize_ron<'a, T: serde::de::DeserializeOwned>(
+    pub fn read_to_string<'a>(&self, key: impl Into<AssetKey<'a>>) -> io::Result<String> {
+        let path = self.resolve(key);
+        fs::read_to_string(&path)
+    }
+
+    /// Deserialize asset file as RON
+    pub fn load_ron<'a, T: serde::de::DeserializeOwned>(
         &self,
         key: impl Into<AssetKey<'a>>,
     ) -> anyhow::Result<T> {
-        use std::fs;
-
         let path = self.resolve(key);
-        log::trace!("deserializing `{}`", path.display());
-
         let s = fs::read_to_string(&path)
             .map_err(anyhow::Error::msg)
-            .with_context(|| format!("Unable to read asset file at `{}`", path.display()))?;
+            .with_context(|| {
+                anyhow::anyhow!("Unable to read asset file at `{}`", path.display())
+            })?;
+
         ron::de::from_str::<T>(&s)
             .map_err(anyhow::Error::msg)
             .with_context(|| {
