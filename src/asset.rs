@@ -225,6 +225,7 @@ impl<'a> fmt::Display for AssetKey<'a> {
         } else {
             write!(f, "{}", self.path.display())?;
         }
+
         Ok(())
     }
 }
@@ -306,115 +307,43 @@ impl<'a> Into<AssetKey<'a>> for StaticAssetKey {
     }
 }
 
-/// [`AssetKey`] resolved to be a [`PathBuf`]
+/// [`AssetKey`] resolved as an absolute path
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct ResolvedPath {
     path: PathBuf,
 }
 
-/// Access to an [`AssetItem`] with metadata
+/// Resolves asset path to absolute path
 #[derive(Debug)]
-struct AssetCacheEntry<T: AssetItem> {
-    id: ResolvedPath,
-    path: Rc<PathBuf>,
-    asset: Asset<T>,
+struct Resolver {
+    root: PathBuf,
+    // schemes: Vec<(String, PathBuf)>,
 }
 
-/// Cache of specific [`AssetItem`] type items
-#[derive(Debug)]
-struct AssetCacheT<T: AssetItem> {
-    any_cache: Cheat<AssetCache>,
-    entries: Vec<AssetCacheEntry<T>>,
-    loader: T::Loader,
-    gen: Gen,
+impl Resolver {
+    // TODO: return ResolvedPath?
+    pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
+        let key = key.into();
+        // TODO: handle scheme
+        self.root.join(key.path)
+    }
 }
 
 /// All assets on memory
 #[derive(Debug)]
 pub struct AssetCache {
+    resolver: Resolver,
     caches: HashMap<TypeId, Box<dyn FreeUnused>>,
-    root: PathBuf,
-}
-
-impl<T: AssetItem> AssetCacheT<T> {
-    pub fn new(loader: T::Loader) -> Self {
-        Self {
-            any_cache: unsafe { Cheat::null() },
-            entries: Vec::with_capacity(16),
-            loader,
-            gen: 0,
-        }
-    }
-
-    pub fn load_sync<'a>(&mut self, key: impl Into<AssetKey<'a>>) -> Result<Asset<T>> {
-        let key = key.into();
-
-        // TODO: remove this code on release build
-        let repr = key.to_string();
-
-        let id = ResolvedPath {
-            path: self.any_cache.resolve(key),
-        };
-
-        if let Some(entry) = self.entries.iter().find(|a| a.id == id) {
-            log::trace!(
-                "(cache found for `{}` of type `{}`)",
-                repr,
-                any::type_name::<T>()
-            );
-
-            Ok(entry.asset.clone())
-        } else {
-            log::debug!(
-                "loading asset `{}` of type `{}`",
-                repr,
-                any::type_name::<T>()
-            );
-
-            self.load_new_sync(id)
-        }
-    }
-
-    pub fn load_sync_preserve<'a>(&mut self, key: impl Into<AssetKey<'a>>) -> Result<Asset<T>> {
-        let mut res = self.load_sync(key);
-        if let Ok(asset) = res.as_mut() {
-            asset.set_preserved(true);
-        }
-        res
-    }
-
-    fn load_new_sync(&mut self, id: ResolvedPath) -> Result<Asset<T>> {
-        let key = AssetKey::from_path(id.path.clone());
-        let path = Rc::new(self.any_cache.resolve(key));
-
-        let asset = Asset {
-            item: {
-                let item = self.loader.load(&path, &mut self.any_cache)?;
-                Some(Arc::new(Mutex::new(item)))
-            },
-            preserved: Arc::new(Mutex::new(false)),
-            path: Rc::clone(&path),
-            identity: self.gen,
-        };
-        self.gen += 1;
-
-        let entry = AssetCacheEntry {
-            id,
-            path: Rc::clone(&path),
-            asset: asset.clone(),
-        };
-        self.entries.push(entry);
-
-        Ok(asset)
-    }
 }
 
 impl AssetCache {
     pub fn with_root(root: PathBuf) -> Self {
         assert!(root.is_absolute());
+        log::trace!("Given asset root {}", root.display());
+
         Self {
+            resolver: Resolver { root },
             caches: HashMap::with_capacity(16),
-            root,
         }
     }
 
@@ -426,7 +355,6 @@ impl AssetCache {
 
     pub fn add_cache<T: AssetItem>(&mut self, loader: T::Loader) {
         let mut cache = AssetCacheT::<T>::new(loader);
-        cache.any_cache = unsafe { Cheat::new(self) };
         self.caches.insert(TypeId::of::<T>(), Box::new(cache));
     }
 
@@ -440,17 +368,19 @@ impl AssetCache {
         key: K,
     ) -> Result<Asset<T>> {
         let key = key.into();
-        self.cache_mut::<T>()
-            .ok_or_else(|| {
-                io::Error::new(
-                    io::ErrorKind::Other,
-                    format!(
-                        "Non-existing asset cache for type {}",
-                        std::any::type_name::<T>()
-                    ),
-                )
-            })?
-            .load_sync(key)
+        let cheat = unsafe { Cheat::new(self) };
+
+        let cache_t = self.cache_mut::<T>().ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                format!(
+                    "Non-existing asset cache for type {}",
+                    std::any::type_name::<T>()
+                ),
+            )
+        })?;
+
+        cache_t.load_sync(key, cheat)
     }
 
     pub fn load_sync_preserve<'a, T: AssetItem, K: Into<AssetKey<'a>>>(
@@ -469,7 +399,7 @@ impl AssetCache {
 impl AssetCache {
     /// Resolves asset path into an absolute path
     pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
-        self.root.join(key.into().path)
+        self.resolver.resolve(key)
     }
 
     pub fn read_to_string<'a>(&self, key: impl Into<AssetKey<'a>>) -> io::Result<String> {
@@ -498,6 +428,106 @@ impl AssetCache {
                     std::any::type_name::<T>()
                 )
             })
+    }
+}
+
+/// Access to an [`AssetItem`] with metadata
+#[derive(Debug)]
+struct AssetCacheEntry<T: AssetItem> {
+    id: ResolvedPath,
+    path: Rc<PathBuf>,
+    asset: Asset<T>,
+}
+
+/// Cache of specific [`AssetItem`] type items
+#[derive(Debug)]
+struct AssetCacheT<T: AssetItem> {
+    entries: Vec<AssetCacheEntry<T>>,
+    loader: T::Loader,
+    gen: Gen,
+}
+
+impl<T: AssetItem> AssetCacheT<T> {
+    pub(crate) fn new(loader: T::Loader) -> Self {
+        Self {
+            entries: Vec::with_capacity(16),
+            loader,
+            gen: 0,
+        }
+    }
+
+    pub(crate) fn load_sync<'a>(
+        &mut self,
+        key: impl Into<AssetKey<'a>>,
+        any_cache: Cheat<AssetCache>,
+    ) -> Result<Asset<T>> {
+        let key = key.into();
+
+        // FIXME: remove on release build
+        let repr = key.to_string();
+
+        let id = ResolvedPath {
+            path: any_cache.resolve(key),
+        };
+
+        if let Some(entry) = self.entries.iter().find(|a| a.id == id) {
+            log::trace!(
+                "(cache found for `{}` of type `{}`)",
+                repr,
+                any::type_name::<T>()
+            );
+
+            Ok(entry.asset.clone())
+        } else {
+            log::debug!(
+                "loading asset `{}` of type `{}`",
+                repr,
+                any::type_name::<T>()
+            );
+
+            self.load_new_sync(id, any_cache)
+        }
+    }
+
+    pub(crate) fn load_sync_preserve<'a>(
+        &mut self,
+        key: impl Into<AssetKey<'a>>,
+        any_cache: Cheat<AssetCache>,
+    ) -> Result<Asset<T>> {
+        let mut res = self.load_sync(key, any_cache);
+        if let Ok(asset) = res.as_mut() {
+            asset.set_preserved(true);
+        }
+        res
+    }
+
+    fn load_new_sync(
+        &mut self,
+        id: ResolvedPath,
+        any_cache: Cheat<AssetCache>,
+    ) -> Result<Asset<T>> {
+        let key = AssetKey::from_path(id.path.clone());
+        let path = Rc::new(any_cache.resolve(key));
+
+        let asset = Asset {
+            item: {
+                let item = self.loader.load(&path, any_cache.as_mut())?;
+                Some(Arc::new(Mutex::new(item)))
+            },
+            preserved: Arc::new(Mutex::new(false)),
+            path: Rc::clone(&path),
+            identity: self.gen,
+        };
+        self.gen += 1;
+
+        let entry = AssetCacheEntry {
+            id,
+            path: Rc::clone(&path),
+            asset: asset.clone(),
+        };
+        self.entries.push(entry);
+
+        Ok(asset)
     }
 }
 

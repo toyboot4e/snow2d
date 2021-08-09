@@ -249,7 +249,7 @@ impl GameRunner {
 }
 
 impl GameRunner {
-    /// Watch window focus state
+    /// Watch window focus state on event poll
     #[inline(always)]
     pub fn event(&mut self, ev: &Event) {
         match ev {
