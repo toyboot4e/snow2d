@@ -118,7 +118,7 @@ pub struct TypeObjectStorageBuilder {
 }
 
 impl TypeObjectStorageBuilder {
-    pub fn register<'a, T: TypeObject + 'static + DeserializeOwned, U: Into<AssetKey<'a>>>(
+    pub fn add<'a, T: TypeObject + 'static + DeserializeOwned, U: Into<AssetKey<'a>>>(
         &self,
         key: U,
         cache: &mut AssetCache,
