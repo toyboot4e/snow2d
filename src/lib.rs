@@ -59,7 +59,7 @@ pub struct Ice {
 impl Ice {
     pub fn new(snow: Snow2d, asset_root: PathBuf) -> Self {
         // TODO: don't unwrap
-        let audio = unsafe { Audio::create().unwrap() };
+        let audio = unsafe { Audio::create().expect("Don't create Audio twice") };
 
         Self {
             pa_blue: rg::PassAction::clear(Color::CORNFLOWER_BLUE.to_normalized_array()),

@@ -106,6 +106,11 @@ impl<T: TypeObject> TypeObjectId<T> {
     }
 }
 
+pub fn storage_builder() -> Result<TypeObjectStorageBuilder, ()> {
+    TypeObjectStorage::init().map_err(|_e| ())?;
+    Ok(TypeObjectStorageBuilder { _ty: PhantomData })
+}
+
 /// Utility for initializing static [`TypeObjectStorage`]
 #[derive(Debug)]
 pub struct TypeObjectStorageBuilder {
@@ -113,12 +118,6 @@ pub struct TypeObjectStorageBuilder {
 }
 
 impl TypeObjectStorageBuilder {
-    /// Unwrap the return value since [`TypeObjectStorage`] doesn't implement `Display`
-    pub unsafe fn begin() -> Result<Self, TypeObjectStorage> {
-        TypeObjectStorage::init()?;
-        Ok(Self { _ty: PhantomData })
-    }
-
     pub fn register<'a, T: TypeObject + 'static + DeserializeOwned, U: Into<AssetKey<'a>>>(
         &self,
         key: U,

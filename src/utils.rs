@@ -24,12 +24,12 @@ pub mod tyobj;
 
 pub mod arena {
     /*!
-     Non-reference-counted pool
+    Non-reference-counted pool
 
-     This is a fork of [`thunderdome`]. Changes:
+    This is a fork of [`thunderdome`]. Changes:
 
-     * `Index` has type parameter `T`
-     * `Arena::insert` accepts `impl Into<T>`
+    * `Index` has type parameter `T`
+    * `Arena::insert` accepts `impl Into<T>`
     */
 
     pub use thunderdome::*;
