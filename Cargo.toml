@@ -10,23 +10,33 @@ edition = "2018"
 # repository = "https://github.com/toyboot4e/snow_rl"
 # description = ""
 
+[workspace]
+members = [
+    "crates/snow2d_derive",
+    "crates/snow2d_macros",
+]
+
+exclude = [
+    "crates/rokol",
+]
+
 [features]
+default = ["use-imgui"]
 use-imgui = ["imgui"]
 no-imgui = ["snow2d_derive/dummy"]
 
 [dependencies]
 sdl2 = "0.34.5"
-rokol = { path = "rokol/rokol", features = ["glcore33", "impl-gfx", "sdl2", "fontstash"] }
-xdl = { path = "xdl", features = ["sdl2", "serde"] }
-
 imgui = { version = "0.7.0", optional = true }
+
+rokol = { path = "crates/rokol/rokol", features = ["glcore33", "impl-gfx", "sdl2", "fontstash"] }
+xdl = { path = "crates/xdl", features = ["sdl2", "serde"] }
+snow2d_macros = { path = "crates/snow2d_macros" }
+snow2d_derive = { path = "crates/snow2d_derive" }
 
 soloud = "0.4.0"
 image = "0.23.14"
 glam = "0.16.0"
-
-snow2d_macros = { path = "snow2d_macros" }
-snow2d_derive = { path = "snow2d_derive" }
 
 anyhow = "1.0.41"
 ron = "0.6.4"
