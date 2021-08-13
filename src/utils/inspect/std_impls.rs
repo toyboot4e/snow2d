@@ -2,7 +2,9 @@
 `paste::paste!` concats identifiers in declarative macro with `[< .. >]` syntax
 */
 
-use std::{collections::VecDeque, marker::PhantomData, num::NonZeroU32, ops::DerefMut};
+use std::{
+    borrow::Cow, collections::VecDeque, marker::PhantomData, num::NonZeroU32, ops::DerefMut,
+};
 
 use imgui::{im_str, Ui};
 
@@ -63,21 +65,21 @@ macro_rules! im_input_array {
     };
 }
 
-macro_rules! im_drag {
-    ($ty:ty, $N:expr, $as:ty) => {
-        impl Inspect for [$ty; $N] {
-            #[allow(warnings)]
-            fn inspect(&mut self, ui: &Ui, label: &str) {
-                use arraytools::ArrayTools;
-                let mut xs = self.map(|x| x as $as);
-                let label = &im_str!("{}", label);
-                if imgui::Drag::new(label).build_array(ui, &mut xs) {
-                    *self = xs.map(|x| x as $ty);
-                }
-            }
-        }
-    };
-}
+// macro_rules! im_drag {
+//     ($ty:ty, $N:expr, $as:ty) => {
+//         impl Inspect for [$ty; $N] {
+//             #[allow(warnings)]
+//             fn inspect(&mut self, ui: &Ui, label: &str) {
+//                 use arraytools::ArrayTools;
+//                 let mut xs = self.map(|x| x as $as);
+//                 let label = &im_str!("{}", label);
+//                 if imgui::Drag::new(label).build_array(ui, &mut xs) {
+//                     *self = xs.map(|x| x as $ty);
+//                 }
+//             }
+//         }
+//     };
+// }
 
 impl<T> Inspect for [T; 0] {
     fn inspect(&mut self, _ui: &Ui, _label: &str) {}
@@ -118,7 +120,7 @@ macro_rules! impl_tuple {
                 fn inspect(&mut self, ui: &Ui, label: &str) {
                     inspect::nest(ui, label, || {
                         $(
-                            &mut self.$i.inspect(ui, stringify!($i));
+                            self.$i.inspect(ui, stringify!($i));
                         )*
                     });
                 }
@@ -182,6 +184,12 @@ impl Inspect for std::time::Duration {
     fn inspect(&mut self, ui: &Ui, label: &str) {
         let time = self.as_secs_f32();
         ui.label_text(&im_str!("{}", label), &im_str!("{}", time));
+    }
+}
+
+impl<'a, T: Inspect + ?Sized + Clone> Inspect for Cow<'a, T> {
+    fn inspect(&mut self, ui: &Ui, label: &str) {
+        self.to_mut().inspect(ui, label);
     }
 }
 

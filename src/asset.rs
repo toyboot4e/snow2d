@@ -354,7 +354,7 @@ impl AssetCache {
     }
 
     pub fn add_cache<T: AssetItem>(&mut self, loader: T::Loader) {
-        let mut cache = AssetCacheT::<T>::new(loader);
+        let cache = AssetCacheT::<T>::new(loader);
         self.caches.insert(TypeId::of::<T>(), Box::new(cache));
     }
 

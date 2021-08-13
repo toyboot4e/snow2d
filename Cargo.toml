@@ -14,6 +14,7 @@ edition = "2018"
 members = [
     "crates/snow2d_derive",
     "crates/snow2d_macros",
+    "example-tetris",
 ]
 
 exclude = [
@@ -33,6 +34,7 @@ rokol = { path = "crates/rokol/rokol", features = ["glcore33", "impl-gfx", "sdl2
 xdl = { path = "crates/xdl", features = ["sdl2", "serde"] }
 snow2d_macros = { path = "crates/snow2d_macros" }
 snow2d_derive = { path = "crates/snow2d_derive" }
+toy_arena = { path = "crates/toy_arena" }
 
 soloud = "0.4.0"
 image = "0.23.14"
@@ -41,7 +43,6 @@ glam = "0.16.0"
 anyhow = "1.0.41"
 ron = "0.6.4"
 serde = "1.0.126"
-thunderdome = { git = "https://github.com/toyboot4e/thunderdome", branch = "snowrl" }
 
 log = "0.4.14"
 env_logger = "0.8.4"

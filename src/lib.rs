@@ -189,7 +189,7 @@ pub fn run<S>(
 
         if !tick {
             // not focused: wait polling events
-            thread::sleep(std::time::Duration::from_secs_f32(0.2));
+            thread::sleep(Duration::from_secs_f32(0.2));
             continue;
         }
 
@@ -216,7 +216,7 @@ fn accurate_sleep(dt: Duration) {
     // discrete sleep loop for most of the time
     if dt > hi {
         while Instant::now() - now < dt - hi {
-            std::thread::sleep(hi);
+            thread::sleep(hi);
         }
     }
 
@@ -224,7 +224,7 @@ fn accurate_sleep(dt: Duration) {
     while Instant::now() - now < dt {
         // TODO: more accurately?
         let small = Duration::from_micros(1);
-        std::thread::sleep(small);
+        thread::sleep(small);
     }
 }
 

@@ -453,22 +453,19 @@ impl AnimStorage {
         }
 
         // update `running` animations
-        let _ = self
-            .running
-            .drain_filter(|anim| {
-                // TODO: active property not needed?
-                if !anim.is_active() {
-                    return false;
-                }
-
-                if anim.is_end() {
-                    return true; // drain
-                }
-
-                anim.tick(dt);
-                anim.apply(nodes);
-                false
-            })
-            .collect::<Vec<_>>();
+        let mut drain = Vec::new();
+        for mut entry in self.running.entries_mut() {
+            let anim = entry.get_mut();
+            if !anim.is_active() {
+                continue;
+            }
+            if anim.is_end() {
+                let anim = entry.remove();
+                drain.push(anim);
+                continue;
+            }
+            anim.tick(dt);
+            anim.apply(nodes);
+        }
     }
 }

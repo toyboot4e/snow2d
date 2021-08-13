@@ -19,10 +19,8 @@ impl<T: Inspect> Inspect for arena::Arena<T> {
         imgui::TreeNode::new(&imgui::im_str!("{}", label))
             .flags(imgui::TreeNodeFlags::OPEN_ON_ARROW | imgui::TreeNodeFlags::OPEN_ON_DOUBLE_CLICK)
             .build(ui, || {
-                for i in 0..self.capacity() {
-                    if let Some((_index, item)) = self.get_by_slot_mut(i as u32) {
-                        item.inspect(ui, im_str!("{}", i).to_str());
-                    }
+                for (i, item) in self.items_mut().enumerate() {
+                    item.inspect(ui, im_str!("{}", i).to_str());
                 }
             });
     }

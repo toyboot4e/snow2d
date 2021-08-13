@@ -16,24 +16,14 @@ pub use inspect::Inspect;
 #[cfg(feature = "no-imgui")]
 pub use snow2d_derive::Inspect;
 
+#[doc(inline)]
+pub use toy_arena as arena;
+
 pub mod ez;
 pub mod pool;
 pub mod smpsc;
 
 pub mod tyobj;
-
-pub mod arena {
-    /*!
-    Non-reference-counted pool
-
-    This is a fork of [`thunderdome`]. Changes:
-
-    * `Index` has type parameter `T`
-    * `Arena::insert` accepts `impl Into<T>`
-    */
-
-    pub use thunderdome::*;
-}
 
 pub mod tweak {
     /*!
