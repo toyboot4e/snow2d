@@ -12,7 +12,7 @@ use crate::{
 /// Creates a null-terminated string from static string
 macro_rules! c_str {
     ($s:expr) => {
-        concat!($s, "\0");
+        concat!($s, "\0")
     };
 }
 

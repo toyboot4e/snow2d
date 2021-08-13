@@ -36,23 +36,23 @@ impl_simple_lerp!(u8, f32);
 
 impl Lerp for [f32; 2] {
     fn lerp(a: Self, b: Self, t: f32) -> Self {
-        [f32::lerp(a[0], b[0], t), f32::lerp(a[1], b[1], t)]
+        [Lerp::lerp(a[0], b[0], t), Lerp::lerp(a[1], b[1], t)]
     }
 }
 
 impl Lerp for crate::gfx::geom2d::Vec2f {
     fn lerp(a: Self, b: Self, t: f32) -> Self {
-        Self::new(f32::lerp(a.x, b.x, t), f32::lerp(a.y, b.y, t))
+        Self::new(Lerp::lerp(a.x, b.x, t), Lerp::lerp(a.y, b.y, t))
     }
 }
 
 impl Lerp for crate::gfx::Color {
     fn lerp(a: Self, b: Self, t: f32) -> Self {
         Self::rgba(
-            u8::lerp(a.r, b.r, t),
-            u8::lerp(a.g, b.g, t),
-            u8::lerp(a.b, b.b, t),
-            u8::lerp(a.a, b.a, t),
+            Lerp::lerp(a.r, b.r, t),
+            Lerp::lerp(a.g, b.g, t),
+            Lerp::lerp(a.b, b.b, t),
+            Lerp::lerp(a.a, b.a, t),
         )
     }
 }
