@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/asset.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>asset.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;asset.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>asset.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -625,6 +623,41 @@
 <span id="623">623</span>
 <span id="624">624</span>
 <span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
 Asset management
@@ -655,6 +688,7 @@ deserialization.
 
 * async loading
 * hot reloading (tiled map, actor image, etc.)
+* force `/` as path separateor
 
 # Problems
 
@@ -667,10 +701,10 @@ deserialization.
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span> <span class="op">=</span> <span class="ident">Error</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">any::TypeId</span>,
+    <span class="ident">any</span>::{<span class="self">self</span>, <span class="ident">TypeId</span>},
     <span class="ident">borrow::Cow</span>,
     <span class="ident">collections::HashMap</span>,
-    <span class="ident">fmt</span>, <span class="ident">io</span>,
+    <span class="ident">fmt</span>, <span class="ident">fs</span>, <span class="ident">io</span>,
     <span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>},
     <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
     <span class="ident">rc::Rc</span>,
@@ -852,6 +886,7 @@ deserialization.
         } <span class="kw">else</span> {
             <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">display</span>())<span class="question-mark">?</span>;
         }
+
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -933,111 +968,42 @@ deserialization.
     }
 }
 
-<span class="doccomment">/// [`AssetKey`] resolved to be a [`PathBuf`]</span>
+<span class="doccomment">/// [`AssetKey`] resolved as an absolute path</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">struct</span> <span class="ident">ResolvedPath</span> {
     <span class="ident">path</span>: <span class="ident">PathBuf</span>,
 }
 
-<span class="doccomment">/// Access to an [`AssetItem`] with metadata</span>
+<span class="doccomment">/// Resolves asset path to absolute path</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">AssetCacheEntry</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
-    <span class="ident">id</span>: <span class="ident">ResolvedPath</span>,
-    <span class="ident">path</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="ident">asset</span>: <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">struct</span> <span class="ident">Resolver</span> {
+    <span class="ident">root</span>: <span class="ident">PathBuf</span>,
+    <span class="comment">// schemes: Vec&lt;(String, PathBuf)&gt;,</span>
 }
 
-<span class="doccomment">/// Cache of specific [`AssetItem`] type items</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
-    <span class="ident">any_cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCache</span><span class="op">&gt;</span>,
-    <span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AssetCacheEntry</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">loader</span>: <span class="ident">T::Loader</span>,
-    <span class="ident">gen</span>: <span class="ident">Gen</span>,
+<span class="kw">impl</span> <span class="ident">Resolver</span> {
+    <span class="comment">// TODO: return ResolvedPath?</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">into</span>();
+        <span class="comment">// TODO: handle scheme</span>
+        <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">key</span>.<span class="ident">path</span>)
+    }
 }
 
 <span class="doccomment">/// All assets on memory</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AssetCache</span> {
+    <span class="ident">resolver</span>: <span class="ident">Resolver</span>,
     <span class="ident">caches</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">TypeId</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FreeUnused</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">loader</span>: <span class="ident">T::Loader</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">any_cache</span>: <span class="kw">unsafe</span> { <span class="ident">Cheat::null</span>() },
-            <span class="ident">entries</span>: <span class="ident">Vec::with_capacity</span>(<span class="number">16</span>),
-            <span class="ident">loader</span>,
-            <span class="ident">gen</span>: <span class="number">0</span>,
-        }
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_sync</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">into</span>();
-
-        <span class="comment">// TODO: remove this code on release build</span>
-        <span class="kw">let</span> <span class="ident">repr</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_string</span>();
-
-        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ResolvedPath</span> {
-            <span class="ident">path</span>: <span class="self">self</span>.<span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>),
-        };
-
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">entry</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">id</span>) {
-            <span class="macro">log::trace!</span>(
-                <span class="string">&quot;(cache found for `{}` of type `{}`)&quot;</span>,
-                <span class="ident">repr</span>,
-                <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
-            );
-
-            <span class="prelude-val">Ok</span>(<span class="ident">entry</span>.<span class="ident">asset</span>.<span class="ident">clone</span>())
-        } <span class="kw">else</span> {
-            <span class="macro">log::debug!</span>(
-                <span class="string">&quot;loading asset `{}` of type `{}`&quot;</span>,
-                <span class="ident">repr</span>,
-                <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
-            );
-
-            <span class="self">self</span>.<span class="ident">load_new_sync</span>(<span class="ident">id</span>)
-        }
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_sync_preserve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">load_sync</span>(<span class="ident">key</span>);
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">asset</span>) <span class="op">=</span> <span class="ident">res</span>.<span class="ident">as_mut</span>() {
-            <span class="ident">asset</span>.<span class="ident">set_preserved</span>(<span class="bool-val">true</span>);
-        }
-        <span class="ident">res</span>
-    }
-
-    <span class="kw">fn</span> <span class="ident">load_new_sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">ResolvedPath</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">AssetKey::from_path</span>(<span class="ident">id</span>.<span class="ident">path</span>.<span class="ident">clone</span>());
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="self">self</span>.<span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>));
-
-        <span class="kw">let</span> <span class="ident">asset</span> <span class="op">=</span> <span class="ident">Asset</span> {
-            <span class="ident">item</span>: {
-                <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">loader</span>.<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">any_cache</span>)<span class="question-mark">?</span>;
-                <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">item</span>)))
-            },
-            <span class="ident">preserved</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="bool-val">false</span>)),
-            <span class="ident">path</span>: <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
-            <span class="ident">identity</span>: <span class="self">self</span>.<span class="ident">gen</span>,
-        };
-        <span class="self">self</span>.<span class="ident">gen</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-
-        <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="ident">AssetCacheEntry</span> {
-            <span class="ident">id</span>,
-            <span class="ident">path</span>: <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
-            <span class="ident">asset</span>: <span class="ident">asset</span>.<span class="ident">clone</span>(),
-        };
-        <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">push</span>(<span class="ident">entry</span>);
-
-        <span class="prelude-val">Ok</span>(<span class="ident">asset</span>)
-    }
-}
-
 <span class="kw">impl</span> <span class="ident">AssetCache</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_root</span>(<span class="ident">root</span>: <span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="macro">assert!</span>(<span class="ident">root</span>.<span class="ident">is_absolute</span>());
+        <span class="macro">log::trace!</span>(<span class="string">&quot;Given asset root {}&quot;</span>, <span class="ident">root</span>.<span class="ident">display</span>());
+
         <span class="self">Self</span> {
+            <span class="ident">resolver</span>: <span class="ident">Resolver</span> { <span class="ident">root</span> },
             <span class="ident">caches</span>: <span class="ident">HashMap::with_capacity</span>(<span class="number">16</span>),
         }
     }
@@ -1049,8 +1015,7 @@ deserialization.
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_cache</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">loader</span>: <span class="ident">T::Loader</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cache</span> <span class="op">=</span> <span class="ident">AssetCacheT</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">loader</span>);
-        <span class="ident">cache</span>.<span class="ident">any_cache</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">Cheat::new</span>(<span class="self">self</span>) };
+        <span class="kw">let</span> <span class="ident">cache</span> <span class="op">=</span> <span class="ident">AssetCacheT</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">loader</span>);
         <span class="self">self</span>.<span class="ident">caches</span>.<span class="ident">insert</span>(<span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">Box::new</span>(<span class="ident">cache</span>));
     }
 
@@ -1064,17 +1029,19 @@ deserialization.
         <span class="ident">key</span>: <span class="ident">K</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">cache_mut</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                <span class="ident">io::Error::new</span>(
-                    <span class="ident">io::ErrorKind::Other</span>,
-                    <span class="macro">format!</span>(
-                        <span class="string">&quot;Non-existing asset cache for type {}&quot;</span>,
-                        <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
-                    ),
-                )
-            })<span class="question-mark">?</span>
-            .<span class="ident">load_sync</span>(<span class="ident">key</span>)
+        <span class="kw">let</span> <span class="ident">cheat</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">Cheat::new</span>(<span class="self">self</span>) };
+
+        <span class="kw">let</span> <span class="ident">cache_t</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cache_mut</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+            <span class="ident">io::Error::new</span>(
+                <span class="ident">io::ErrorKind::Other</span>,
+                <span class="macro">format!</span>(
+                    <span class="string">&quot;Non-existing asset cache for type {}&quot;</span>,
+                    <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+                ),
+            )
+        })<span class="question-mark">?</span>;
+
+        <span class="ident">cache_t</span>.<span class="ident">load_sync</span>(<span class="ident">key</span>, <span class="ident">cheat</span>)
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_sync_preserve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">AssetItem</span>, <span class="ident">K</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(
@@ -1093,25 +1060,26 @@ deserialization.
 <span class="kw">impl</span> <span class="ident">AssetCache</span> {
     <span class="doccomment">/// Resolves asset path into an absolute path</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
-        <span class="comment">// FIXME: runtime asset root detection</span>
-        <span class="kw">let</span> <span class="ident">proj_root</span> <span class="op">=</span> <span class="ident">std::env::var</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">asset_root</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">proj_root</span>).<span class="ident">join</span>(<span class="string">&quot;assets&quot;</span>);
-        <span class="ident">asset_root</span>.<span class="ident">join</span>(<span class="ident">key</span>.<span class="ident">into</span>().<span class="ident">path</span>)
+        <span class="self">self</span>.<span class="ident">resolver</span>.<span class="ident">resolve</span>(<span class="ident">key</span>)
     }
 
-    <span class="doccomment">/// Deserialize asset path as a RON file</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize_ron</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">serde::de::DeserializeOwned</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_to_string</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">resolve</span>(<span class="ident">key</span>);
+        <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
+    }
+
+    <span class="doccomment">/// Deserialize asset file as RON</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_ron</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">serde::de::DeserializeOwned</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">std::fs</span>;
-
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">resolve</span>(<span class="ident">key</span>);
-        <span class="macro">log::trace!</span>(<span class="string">&quot;deserializing `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>());
-
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
             .<span class="ident">map_err</span>(<span class="ident">anyhow::Error::msg</span>)
-            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Unable to read asset file at `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
+            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;Unable to read asset file at `{}`&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>())
+            })<span class="question-mark">?</span>;
+
         <span class="ident">ron::de::from_str</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
             .<span class="ident">map_err</span>(<span class="ident">anyhow::Error::msg</span>)
             .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
@@ -1121,6 +1089,106 @@ deserialization.
                     <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
                 )
             })
+    }
+}
+
+<span class="doccomment">/// Access to an [`AssetItem`] with metadata</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">AssetCacheEntry</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
+    <span class="ident">id</span>: <span class="ident">ResolvedPath</span>,
+    <span class="ident">path</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="ident">asset</span>: <span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Cache of specific [`AssetItem`] type items</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> {
+    <span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AssetCacheEntry</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">loader</span>: <span class="ident">T::Loader</span>,
+    <span class="ident">gen</span>: <span class="ident">Gen</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AssetItem</span><span class="op">&gt;</span> <span class="ident">AssetCacheT</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">loader</span>: <span class="ident">T::Loader</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">entries</span>: <span class="ident">Vec::with_capacity</span>(<span class="number">16</span>),
+            <span class="ident">loader</span>,
+            <span class="ident">gen</span>: <span class="number">0</span>,
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">load_sync</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">any_cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCache</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">into</span>();
+
+        <span class="comment">// FIXME: remove on release build</span>
+        <span class="kw">let</span> <span class="ident">repr</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_string</span>();
+
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ResolvedPath</span> {
+            <span class="ident">path</span>: <span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>),
+        };
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">entry</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">id</span>) {
+            <span class="macro">log::trace!</span>(
+                <span class="string">&quot;(cache found for `{}` of type `{}`)&quot;</span>,
+                <span class="ident">repr</span>,
+                <span class="ident">any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+            );
+
+            <span class="prelude-val">Ok</span>(<span class="ident">entry</span>.<span class="ident">asset</span>.<span class="ident">clone</span>())
+        } <span class="kw">else</span> {
+            <span class="macro">log::debug!</span>(
+                <span class="string">&quot;loading asset `{}` of type `{}`&quot;</span>,
+                <span class="ident">repr</span>,
+                <span class="ident">any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+            );
+
+            <span class="self">self</span>.<span class="ident">load_new_sync</span>(<span class="ident">id</span>, <span class="ident">any_cache</span>)
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">load_sync_preserve</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">any_cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCache</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">load_sync</span>(<span class="ident">key</span>, <span class="ident">any_cache</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">asset</span>) <span class="op">=</span> <span class="ident">res</span>.<span class="ident">as_mut</span>() {
+            <span class="ident">asset</span>.<span class="ident">set_preserved</span>(<span class="bool-val">true</span>);
+        }
+        <span class="ident">res</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">load_new_sync</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">id</span>: <span class="ident">ResolvedPath</span>,
+        <span class="ident">any_cache</span>: <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">AssetCache</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Asset</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">AssetKey::from_path</span>(<span class="ident">id</span>.<span class="ident">path</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">any_cache</span>.<span class="ident">resolve</span>(<span class="ident">key</span>));
+
+        <span class="kw">let</span> <span class="ident">asset</span> <span class="op">=</span> <span class="ident">Asset</span> {
+            <span class="ident">item</span>: {
+                <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">loader</span>.<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">any_cache</span>.<span class="ident">as_mut</span>())<span class="question-mark">?</span>;
+                <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">item</span>)))
+            },
+            <span class="ident">preserved</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="bool-val">false</span>)),
+            <span class="ident">path</span>: <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
+            <span class="ident">identity</span>: <span class="self">self</span>.<span class="ident">gen</span>,
+        };
+        <span class="self">self</span>.<span class="ident">gen</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+
+        <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="ident">AssetCacheEntry</span> {
+            <span class="ident">id</span>,
+            <span class="ident">path</span>: <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
+            <span class="ident">asset</span>: <span class="ident">asset</span>.<span class="ident">clone</span>(),
+        };
+        <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">push</span>(<span class="ident">entry</span>);
+
+        <span class="prelude-val">Ok</span>(<span class="ident">asset</span>)
     }
 }
 
@@ -1252,4 +1320,6 @@ deserialization.
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="snow2d" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="snow2d" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>
