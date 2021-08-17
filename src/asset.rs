@@ -20,8 +20,8 @@ Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`].
 WARNING: Deserialization has to be done in [`with_cache`].
 
 Reason: [`Asset`] is a shared pointer and we need to take care to not create duplicates. But `serde`
-doesn't let us share states while deserialization. So we need a thread-local pointer for
-deserialization.
+doesn't let us share states while deserialization. So we need a thread-local pointer, which is only
+valid in the [`with_cache`] procedure.
 
 # TODOs
 

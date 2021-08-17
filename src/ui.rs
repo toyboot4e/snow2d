@@ -4,6 +4,7 @@ Retained-mode rendering
 UI (scene graph) is a container of sprites and animations.
 */
 
+// TODO: refactor with indextree-like arena on top of toy_arena
 // TODO: Consider whether animation arena should be handled equally as user data
 // The difference is that `ui::anim` doesn't need to refer to user data type to make changes
 
@@ -454,7 +455,7 @@ impl AnimStorage {
 
         // update `running` animations
         let mut drain = Vec::new();
-        for mut entry in self.running.entries_mut() {
+        for mut entry in self.running.bindings_mut() {
             let anim = entry.get_mut();
             if !anim.is_active() {
                 continue;

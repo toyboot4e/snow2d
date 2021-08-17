@@ -1,5 +1,6 @@
 /*!
-Cheat the borrow checker using raw pointer
+Cheat the borrow checker using raw pointer. It makes your code unsound and absolutely evil; it's not
+more than a hack for temporary use.
 */
 
 /// Cheat the borrow checker pretending it's safe Rust
@@ -7,11 +8,8 @@ pub fn cheat<T>(t: &T) -> Cheat<T> {
     unsafe { Cheat::new(t) }
 }
 
-/// Lifetime-free mutable reference to type `T`
-///
-/// # Safety
-///
-/// Make sure the pointer lives as long as required.
+/// Lifetime-free mutable reference to type `T`. It makes your code unsound and absolutely evil;
+/// it's not more than a hack for temporary use.
 #[derive(Debug)]
 pub struct Cheat<T> {
     ptr: *mut T,
