@@ -42,8 +42,9 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 use std::{
     any::{self, TypeId},
     borrow::Cow,
+    cell::UnsafeCell,
     collections::HashMap,
-    fmt, fs, io,
+    fmt, fs, io, mem,
     ops::{Deref, DerefMut},
     path::{Path, PathBuf},
     rc::Rc,
@@ -343,7 +344,7 @@ impl AssetCache {
 
         Self {
             resolver: Resolver { root },
-            caches: HashMap::with_capacity(16),
+            caches: HashMap::new(),
         }
     }
 
@@ -566,29 +567,52 @@ impl<T: AssetItem> FreeUnused for AssetCacheT<T> {
 /// Deserialize assets without making duplicates using thread-local variable
 #[derive(Debug)]
 struct AssetDeState {
-    cache: Cheat<AssetCache>,
+    cache: UnsafeCell<AssetCache>,
+}
+
+impl AssetDeState {
+    // fn cache(&self) -> &AssetCache {
+    //     unsafe { &*(self.cache.get()) }
+    // }
+
+    fn cache_mut(&self) -> &mut AssetCache {
+        unsafe { &mut *(self.cache.get()) }
+    }
 }
 
 /// TODO: Just use thread_local!
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 /// Run a procedure with deserialization support for [`Asset`]
-pub fn with_cache<T>(cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
+pub fn guarded_run<T>(
+    original_cache: &mut AssetCache,
+    proc: impl FnOnce(&mut AssetCache) -> T,
+) -> T {
+    // take the owner ship of original cache
+    let mut cache = AssetCache::with_root(PathBuf::new());
+    mem::swap(original_cache, &mut cache);
+    // and wrap it in `UnsafeCell`:
+    let cache = UnsafeCell::new(cache);
+
     unsafe {
         DE_STATE
-            .set(AssetDeState {
-                cache: Cheat::new(cache),
-            })
+            .set(AssetDeState { cache })
             .unwrap_or_else(|_old_value| {
                 unreachable!("DE_STATE is guarded by snow2d::asset::with_cache")
             });
     }
 
-    let res = proc(cache);
+    let res = proc(original_cache);
 
-    unsafe {
-        assert!(DE_STATE.take().is_some());
-    }
+    // give the AssetState back to the original place
+    let mut cache = unsafe {
+        match DE_STATE.take() {
+            Some(state) => state.cache.into_inner(),
+            None => unreachable!(),
+        }
+    };
+
+    mem::swap(&mut cache, original_cache);
 
     res
 }
@@ -603,7 +627,9 @@ impl<T: AssetItem> Serialize for Asset<T> {
     }
 }
 
-// TODO: Ensure to not panic while deserializing
+/// # Safety
+/// `Asset::deserialize` the only place `DE_STATE` is used and performs one-shot
+/// access to [`AssetDeState`]. So there's no overlapping borrow and it sounds!
 impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -621,16 +647,16 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
                 .unwrap()
         };
 
-        let item = state
-            .cache
-            .load_sync(AssetKey::from_path(&path))
-            .map_err(|e| {
-                de::Error::custom(format!(
-                    "Error while loading asset at `{}`: {}",
-                    path.display(),
-                    e
-                ))
-            })?;
+        // The only access to `DE_STATE`, which is one-shot and never overlap with other borrrow
+        let cache = state.cache_mut();
+        let item = cache.load_sync(AssetKey::from_path(&path)).map_err(|e| {
+            de::Error::custom(format!(
+                "Error while loading asset at `{}`: {}",
+                path.display(),
+                e
+            ))
+        })?;
+        drop(cache);
 
         Ok(item)
     }
