@@ -14,6 +14,7 @@ That is, [`soloud-rs`] re-exported with additional types and [`asset`](../asset)
 pub use soloud::{audio as src, filter, prelude, Handle, Soloud as AudioDrop};
 
 use std::{
+    cell::UnsafeCell,
     ops::{Deref, DerefMut},
     rc::Rc,
 };
@@ -21,8 +22,7 @@ use std::{
 /// Reference-counted ownership of [`AudioDrop`]
 #[derive(Debug, Clone)]
 pub struct Audio {
-    /// I wanted to use `RefCell` but then [`Deref`] can't be implemented
-    inner: Rc<AudioDrop>,
+    inner: Rc<UnsafeCell<AudioDrop>>,
 }
 
 impl Audio {
@@ -30,23 +30,30 @@ impl Audio {
     pub unsafe fn create() -> Result<Self, prelude::SoloudError> {
         let inner = AudioDrop::default()?;
         Ok(Self {
-            inner: Rc::new(inner),
+            inner: Rc::new(UnsafeCell::new(inner)),
         })
     }
 }
 
 // cheat the borrow checker..
 
+/// # Safety
+/// It's safe because every function of `AudioDrop` is one-shot and releases `self` immediately
+/// after the call
 impl Deref for Audio {
     type Target = AudioDrop;
     fn deref(&self) -> &Self::Target {
-        unsafe { &*Rc::as_ptr(&self.inner) }
+        unsafe { &*self.inner.get() }
     }
 }
 
+/// # Safety
+/// It's safe because every function of `AudioDrop` is one-shot and releases `self` immediately
+/// after the call
 impl DerefMut for Audio {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *(Rc::as_ptr(&self.inner) as *mut _) }
+        // unsafe { &mut *(Rc::as_ptr(&self.inner) as *mut _) }
+        unsafe { &mut *self.inner.get() }
     }
 }
 
