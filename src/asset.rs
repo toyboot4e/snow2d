@@ -17,7 +17,7 @@ TODO: `<asset_dir>/schemes.txt`
 
 Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`].
 
-WARNING: Deserialization has to be done in [`with_cache`].
+WARNING: Deserialization has to be done in a [`guarded`] scope.
 
 Reason: [`Asset`] is a shared pointer and we need to take care to not create duplicates. But `serde`
 doesn't let us share states while deserialization. So we need a thread-local pointer, which is only
@@ -25,12 +25,12 @@ valid in the [`with_cache`] procedure.
 
 # Context of asset loaders
 
-There basically two ways to gie context to asset loaders:
+There are basically two ways to give context to asset loaders:
 
-1. Contexts are shared among asset loaders other types
+1. Contexts are shared among asset loaders and other types
 2. Contexts are given to the loader from external
   2-1. As a concrete, user-defined type
-  2-2. As a kind of `AnyMap` (it may accept query type and returns requested contexts)
+  2-2. As a kind of `AnyMap` (with our without automatic query)
 
 # TODOs
 
@@ -615,7 +615,7 @@ impl AssetDeState {
 /// TODO: Just use thread_local!
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
-/// Run a procedure with deserialization support for [`Asset`]
+/// Run a procedure in a guarded scope where [`Asset`] can deserialize
 pub fn guarded<T>(original_cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
     // take the owner ship of original cache
     let mut cache = AssetCache::with_root(PathBuf::new());
@@ -693,7 +693,7 @@ mod test {
 
     #[test]
     fn key() {
-        let key = AssetKey::parse("schemed:path/to/asset");
+        let key: AssetKey = "schemed:path/to/asset".parse().unwrap();
 
         let correct = AssetKey {
             path: Cow::Owned(PathBuf::from("path/to/asset")),

@@ -455,7 +455,7 @@ impl AnimStorage {
 
         // update `running` animations
         let mut drain = Vec::new();
-        for mut entry in self.running.bindings_mut() {
+        for mut entry in self.running.bindings() {
             let anim = entry.get_mut();
             if !anim.is_active() {
                 continue;
