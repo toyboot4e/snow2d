@@ -23,6 +23,15 @@ Reason: [`Asset`] is a shared pointer and we need to take care to not create dup
 doesn't let us share states while deserialization. So we need a thread-local pointer, which is only
 valid in the [`with_cache`] procedure.
 
+# Context of asset loaders
+
+There basically two ways to gie context to asset loaders:
+
+1. Contexts are shared among asset loaders other types
+2. Contexts are given to the loader from external
+  2-1. As a concrete, user-defined type
+  2-2. As a kind of `AnyMap` (it may accept query type and returns requested contexts)
+
 # TODOs
 
 * async loading
