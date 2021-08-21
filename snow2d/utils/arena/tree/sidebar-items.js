@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["TraverseItem","Return value [`Traverse::next`]"]],"mod":[["iter","Iterator types for the [`Tree`]"]],"struct":[["Node","Node that is aware of siblings and chidren"],["Tree","Non-rooted tree layered on top of `Arena`. See [`NodeId`] for parenting methods."]],"type":[["NodeId","`Index` of node in [`Tree`]"]]});

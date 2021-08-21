@@ -59,11 +59,10 @@
 <span id="59">59</span>
 <span id="60">60</span>
 <span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
 </pre><pre class="rust">
 <span class="doccomment">/*!
-Cheat the borrow checker using raw pointer
+Cheat the borrow checker using raw pointer. It makes your code unsound and absolutely evil; it&#39;s not
+more than a hack for temporary use.
 */</span>
 
 <span class="doccomment">/// Cheat the borrow checker pretending it&#39;s safe Rust</span>
@@ -71,11 +70,8 @@ Cheat the borrow checker using raw pointer
     <span class="kw">unsafe</span> { <span class="ident">Cheat::new</span>(<span class="ident">t</span>) }
 }
 
-<span class="doccomment">/// Lifetime-free mutable reference to type `T`</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Make sure the pointer lives as long as required.</span>
+<span class="doccomment">/// Lifetime-free mutable reference to type `T`. It makes your code unsound and absolutely evil;</span>
+<span class="doccomment">/// it&#39;s not more than a hack for temporary use.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cheat</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span>,

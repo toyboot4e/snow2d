@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["serialize_as_is","Serialize the arena as is. If you want to shift entries and remove empty slots, use [`serialize_packed`]."],["serialize_packed","Serializes an arena shifting entries removing empty slots and initialzing generations without mutating the orignal arena."]]});
