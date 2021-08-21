@@ -22,6 +22,8 @@ use std::{
 /// Reference-counted ownership of [`AudioDrop`]
 #[derive(Debug, Clone)]
 pub struct Audio {
+    /// NOTE: We can't use `RefCell` if we want to implement `Deref` for `Audio`. We can d with
+    /// unsafe cell, but it requires us ensure we never break the aliasing rule.
     inner: Rc<UnsafeCell<AudioDrop>>,
 }
 
@@ -107,7 +109,7 @@ pub mod asset {
         T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
     {
         type Item = T;
-        fn load(&mut self, path: &Path, _cache: &mut AssetCache) -> io::Result<Self::Item> {
+        fn load(&self, path: &Path, _cache: &mut AssetCache) -> io::Result<Self::Item> {
             Self::Item::from_path(path).map_err(self::upcast_err)
         }
     }

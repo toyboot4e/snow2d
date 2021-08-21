@@ -139,7 +139,7 @@ pub struct TextureLoader;
 impl AssetLoader for TextureLoader {
     type Item = Texture2dDrop;
 
-    fn load(&mut self, path: &Path, _cache: &mut AssetCache) -> asset::Result<Self::Item> {
+    fn load(&self, path: &Path, _cache: &mut AssetCache) -> asset::Result<Self::Item> {
         use std::io::{Error, ErrorKind};
 
         let tex = TextureBuilder::from_path(path)

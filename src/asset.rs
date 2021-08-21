@@ -34,6 +34,11 @@ valid in the [`with_cache`] procedure.
 * `Asset` implements `Deref`, but they don't implement traits that the underlying data implements
 */
 
+// TODO: add entry type id
+// TODO: remove asset size
+// TODO: improve path interning
+// TODO: special asset key repr for Asset<T>
+
 #![allow(dead_code)]
 
 pub type Error = std::io::Error;
@@ -61,8 +66,6 @@ use serde::{
     Deserialize, Serialize,
 };
 
-use crate::utils::Cheat;
-
 /// Generational index or identity of assets
 type Gen = u32;
 
@@ -74,7 +77,20 @@ pub trait AssetItem: fmt::Debug + Sized + 'static {
 /// How to load an [`AssetItem`]
 pub trait AssetLoader: fmt::Debug + Sized + 'static {
     type Item: AssetItem;
-    fn load(&mut self, path: &Path, cache: &mut AssetCache) -> Result<Self::Item>;
+    fn load(&self, path: &Path, cache: &mut AssetCache) -> Result<Self::Item>;
+}
+
+/// Mutable access to multiple asset loaders at runtime
+#[derive(Debug)]
+pub struct AssetCacheCell<'a> {
+    cache: &'a mut AssetCache,
+    /// borrow checker for loaders at runtime
+    checker: Vec<(TypeId, Borrow)>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Borrow {
+    //
 }
 
 /// Shared ownership of an asset item. Be sure to call [`with_cache`] on deserialization.
@@ -82,8 +98,10 @@ pub trait AssetLoader: fmt::Debug + Sized + 'static {
 pub struct Asset<T: AssetItem> {
     item: Option<Arc<Mutex<T>>>,
     preserved: Arc<Mutex<bool>>,
-    // constant data is not put in shared memory:
-    path: Rc<PathBuf>,
+    /// TODO: Load path for hot reloading
+    load_path: Rc<PathBuf>,
+    /// Owned asset key for serde
+    serde_repr: Rc<AssetKey<'static>>,
     identity: Gen,
 }
 
@@ -92,7 +110,8 @@ impl<T: AssetItem> Clone for Asset<T> {
         Self {
             item: self.item.as_ref().map(|x| Arc::clone(x)),
             preserved: Arc::clone(&self.preserved),
-            path: Rc::clone(&self.path),
+            load_path: Rc::clone(&self.load_path),
+            serde_repr: Rc::clone(&self.serde_repr),
             identity: self.identity,
         }
     }
@@ -106,7 +125,7 @@ impl<T: AssetItem> std::cmp::PartialEq for Asset<T> {
 
 impl<T: AssetItem> Asset<T> {
     pub fn path(&self) -> &Path {
-        self.path.as_ref()
+        self.load_path.as_ref()
     }
 
     pub fn is_loaded(&self) -> bool {
@@ -146,8 +165,8 @@ impl<T: AssetItem> Asset<T> {
 /// directory or a directory specified by scheme.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AssetKey<'a> {
-    path: Cow<'a, Path>,
     scheme: Option<Cow<'a, Path>>,
+    path: Cow<'a, Path>,
 }
 
 impl<'a, 'de> Deserialize<'de> for AssetKey<'a> {
@@ -212,8 +231,16 @@ impl<'a> AssetKey<'a> {
         P2: Into<Cow<'a, Path>> + Clone,
     {
         AssetKey {
-            path: p.into(),
             scheme: s.map(|x| x.into()),
+            path: p.into(),
+        }
+    }
+
+    // FIXME:
+    fn to_static(&self) -> AssetKey<'static> {
+        AssetKey {
+            scheme: self.scheme.clone().map(|s| Cow::Owned(s.into_owned())),
+            path: Cow::Owned(self.path.clone().into_owned()),
         }
     }
 }
@@ -322,9 +349,9 @@ struct Resolver {
 }
 
 impl Resolver {
-    // TODO: return ResolvedPath?
+    // TODO: return AbsolutePath newtype
     pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
-        let key = key.into();
+        let key: AssetKey<'a> = key.into();
         // TODO: handle scheme
         self.root.join(key.path)
     }
@@ -356,7 +383,8 @@ impl AssetCache {
 
     pub fn add_cache<T: AssetItem>(&mut self, loader: T::Loader) {
         let cache = AssetCacheT::<T>::new(loader);
-        self.caches.insert(TypeId::of::<T>(), Box::new(cache));
+        let existing = self.caches.insert(TypeId::of::<T>(), Box::new(cache));
+        assert!(existing.is_none(), "Duplicate cache creation");
     }
 
     fn cache_mut<T: AssetItem>(&mut self) -> Option<&mut AssetCacheT<T>> {
@@ -364,12 +392,28 @@ impl AssetCache {
         boxed.downcast_mut::<AssetCacheT<T>>()
     }
 
-    pub fn load_sync<'a, T: AssetItem, K: Into<AssetKey<'a>>>(
+    pub fn load_sync<'key, T: AssetItem, K: Into<AssetKey<'key>>>(
         &mut self,
         key: K,
     ) -> Result<Asset<T>> {
-        let key = key.into();
-        let cheat = unsafe { Cheat::new(self) };
+        self.load_sync_impl(key, false)
+    }
+
+    pub fn load_sync_preserve<'key, T: AssetItem, K: Into<AssetKey<'key>>>(
+        &mut self,
+        key: K,
+    ) -> Result<Asset<T>> {
+        self.load_sync_impl(key, true)
+    }
+
+    fn load_sync_impl<'key, T: AssetItem, K: Into<AssetKey<'key>>>(
+        &mut self,
+        key: K,
+        preserve: bool,
+    ) -> Result<Asset<T>> {
+        let key: AssetKey<'key> = key.into();
+        let serde_repr = key.to_static();
+        let entry_id = self.resolve(key.clone());
 
         let cache_t = self.cache_mut::<T>().ok_or_else(|| {
             io::Error::new(
@@ -381,37 +425,52 @@ impl AssetCache {
             )
         })?;
 
-        cache_t.load_sync(key, cheat)
-    }
+        if let Some(asset) = cache_t.lookup_cache(&entry_id) {
+            log::trace!(
+                "(cache found for `{}` of type `{}`)",
+                entry_id.display(),
+                any::type_name::<T>()
+            );
 
-    pub fn load_sync_preserve<'a, T: AssetItem, K: Into<AssetKey<'a>>>(
-        &mut self,
-        key: K,
-    ) -> Result<Asset<T>> {
-        let mut res = self.load_sync(key);
-        if let Ok(asset) = res.as_mut() {
-            asset.set_preserved(true);
+            Ok(asset)
+        } else {
+            log::debug!(
+                "loading asset `{}` of type `{}`",
+                entry_id.display(),
+                any::type_name::<T>()
+            );
+
+            let loader = Rc::clone(&cache_t.loader);
+            drop(cache_t);
+
+            let load_path = entry_id.clone();
+            let item = loader.load(&load_path, self)?;
+            let cache_t = self.cache_mut::<T>().unwrap();
+
+            let asset = cache_t.insert(entry_id, item, preserve, load_path, serde_repr);
+
+            Ok(asset)
         }
-        res
     }
 }
 
 /// Aseet path handling
 impl AssetCache {
     /// Resolves asset path into an absolute path
-    pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
+    // pub fn resolve<'key>(&self, key: impl Into<AssetKey<'key>>) -> PathBuf {
+    pub fn resolve<'key>(&self, key: impl Into<AssetKey<'key>>) -> PathBuf {
         self.resolver.resolve(key)
     }
 
-    pub fn read_to_string<'a>(&self, key: impl Into<AssetKey<'a>>) -> io::Result<String> {
+    pub fn read_to_string<'key>(&self, key: impl Into<AssetKey<'key>>) -> io::Result<String> {
         let path = self.resolve(key);
         fs::read_to_string(&path)
     }
 
     /// Deserialize asset file as RON
-    pub fn load_ron<'a, T: serde::de::DeserializeOwned>(
+    pub fn load_ron<'key, T: serde::de::DeserializeOwned>(
         &self,
-        key: impl Into<AssetKey<'a>>,
+        key: impl Into<AssetKey<'key>>,
     ) -> anyhow::Result<T> {
         let path = self.resolve(key);
         let s = fs::read_to_string(&path)
@@ -435,16 +494,18 @@ impl AssetCache {
 /// Access to an [`AssetItem`] with metadata
 #[derive(Debug)]
 struct AssetCacheEntry<T: AssetItem> {
-    id: ResolvedPath,
-    path: Rc<PathBuf>,
+    /// FIXME: Don't use absolute as identity
+    id: PathBuf,
+    /// Used for debug display. `Rc` since it's at least shared with the asset
+    load_path: Rc<PathBuf>,
     asset: Asset<T>,
 }
 
-/// Cache of specific [`AssetItem`] type items
+/// Cache of specific [`AssetItem`] type items. This is hidden from user, so it can be low-level item
 #[derive(Debug)]
 struct AssetCacheT<T: AssetItem> {
     entries: Vec<AssetCacheEntry<T>>,
-    loader: T::Loader,
+    loader: Rc<T::Loader>,
     gen: Gen,
 }
 
@@ -452,83 +513,45 @@ impl<T: AssetItem> AssetCacheT<T> {
     pub(crate) fn new(loader: T::Loader) -> Self {
         Self {
             entries: Vec::with_capacity(16),
-            loader,
+            loader: Rc::new(loader),
             gen: 0,
         }
     }
 
-    pub(crate) fn load_sync<'a>(
-        &mut self,
-        key: impl Into<AssetKey<'a>>,
-        any_cache: Cheat<AssetCache>,
-    ) -> Result<Asset<T>> {
-        let key = key.into();
-
-        // FIXME: remove on release build
-        let repr = key.to_string();
-
-        let id = ResolvedPath {
-            path: any_cache.resolve(key),
-        };
-
-        if let Some(entry) = self.entries.iter().find(|a| a.id == id) {
-            log::trace!(
-                "(cache found for `{}` of type `{}`)",
-                repr,
-                any::type_name::<T>()
-            );
-
-            Ok(entry.asset.clone())
-        } else {
-            log::debug!(
-                "loading asset `{}` of type `{}`",
-                repr,
-                any::type_name::<T>()
-            );
-
-            self.load_new_sync(id, any_cache)
-        }
+    pub(crate) fn lookup_cache(&mut self, entry_id: &PathBuf) -> Option<Asset<T>> {
+        self.entries
+            .iter()
+            .find(|entry| &entry.id == entry_id)
+            .map(|entry| entry.asset.clone())
     }
 
-    pub(crate) fn load_sync_preserve<'a>(
+    pub(crate) fn insert(
         &mut self,
-        key: impl Into<AssetKey<'a>>,
-        any_cache: Cheat<AssetCache>,
-    ) -> Result<Asset<T>> {
-        let mut res = self.load_sync(key, any_cache);
-        if let Ok(asset) = res.as_mut() {
-            asset.set_preserved(true);
-        }
-        res
-    }
-
-    fn load_new_sync(
-        &mut self,
-        id: ResolvedPath,
-        any_cache: Cheat<AssetCache>,
-    ) -> Result<Asset<T>> {
-        let key = AssetKey::from_path(id.path.clone());
-        let path = Rc::new(any_cache.resolve(key));
+        id: PathBuf,
+        item: T,
+        preserved: bool,
+        load_path: PathBuf,
+        serde_repr: AssetKey<'static>,
+    ) -> Asset<T> {
+        let load_path = Rc::new(load_path);
 
         let asset = Asset {
-            item: {
-                let item = self.loader.load(&path, any_cache.as_mut())?;
-                Some(Arc::new(Mutex::new(item)))
-            },
-            preserved: Arc::new(Mutex::new(false)),
-            path: Rc::clone(&path),
+            item: Some(Arc::new(Mutex::new(item))),
+            preserved: Arc::new(Mutex::new(preserved)),
+            load_path: Rc::clone(&load_path),
+            serde_repr: Rc::new(serde_repr),
             identity: self.gen,
         };
         self.gen += 1;
 
         let entry = AssetCacheEntry {
             id,
-            path: Rc::clone(&path),
+            load_path: Rc::clone(&load_path),
             asset: asset.clone(),
         };
         self.entries.push(entry);
 
-        Ok(asset)
+        asset
     }
 }
 
@@ -551,7 +574,7 @@ impl<T: AssetItem> FreeUnused for AssetCacheT<T> {
                 if Arc::strong_count(item) == 1 && !*entry.asset.preserved.lock().unwrap() {
                     log::debug!(
                         "free asset at `{}` in slot `{}` of cache for type `{}`",
-                        self.entries[i].path.display(),
+                        self.entries[i].load_path.display(),
                         i,
                         std::any::type_name::<T>(),
                     );
@@ -584,10 +607,7 @@ impl AssetDeState {
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 /// Run a procedure with deserialization support for [`Asset`]
-pub fn guarded_run<T>(
-    original_cache: &mut AssetCache,
-    proc: impl FnOnce(&mut AssetCache) -> T,
-) -> T {
+pub fn guarded<T>(original_cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
     // take the owner ship of original cache
     let mut cache = AssetCache::with_root(PathBuf::new());
     mem::swap(original_cache, &mut cache);
@@ -623,7 +643,7 @@ impl<T: AssetItem> Serialize for Asset<T> {
         S: Serializer,
     {
         // serialize as PathBuf
-        self.path.serialize(serializer)
+        self.serde_repr.serialize(serializer)
     }
 }
 
@@ -635,8 +655,8 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
     where
         D: Deserializer<'de>,
     {
-        // deserialize as PathBuf
-        let path = <PathBuf as Deserialize>::deserialize(deserializer)
+        // deserialize as AssetKey
+        let key = <AssetKey as Deserialize>::deserialize(deserializer)
             .map_err(|e| de::Error::custom(format!("Unable to load asset as `PathBuf`: {}", e)))?;
 
         // then load asset
@@ -649,12 +669,8 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
 
         // The only access to `DE_STATE`, which is one-shot and never overlap with other borrrow
         let cache = state.cache_mut();
-        let item = cache.load_sync(AssetKey::from_path(&path)).map_err(|e| {
-            de::Error::custom(format!(
-                "Error while loading asset at `{}`: {}",
-                path.display(),
-                e
-            ))
+        let item = cache.load_sync(key.clone()).map_err(|e| {
+            de::Error::custom(format!("Error while loading asset at `{}`: {}", key, e))
         })?;
         drop(cache);
 
