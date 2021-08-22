@@ -11,15 +11,19 @@ That is, [`soloud-rs`] re-exported with additional types and [`asset`](../asset)
 [SoLoud]: https://sol.gfxile.net/soloud/
 */
 
-pub use soloud::{audio as src, filter, prelude, Handle, Soloud as AudioDrop};
-
 use std::{
     cell::UnsafeCell,
     ops::{Deref, DerefMut},
     rc::Rc,
 };
 
-/// Reference-counted ownership of [`AudioDrop`]
+use anyhow::*;
+
+pub use soloud::{audio as src, filter, prelude, Handle, Soloud as AudioDrop};
+
+use crate::asset::{Asset, AssetCache, AssetKey};
+
+/// Shared audio context
 #[derive(Debug, Clone)]
 pub struct Audio {
     /// NOTE: We can't use `RefCell` if we want to implement `Deref` for `Audio`. We can d with
@@ -59,127 +63,64 @@ impl DerefMut for Audio {
     }
 }
 
-pub mod asset {
-    //! [`snow2d::asset`](crate::asset) integration
+// --------------------------------------------------------------------------------
+// Extensions
 
-    use std::{fmt, io, path::Path};
+/// Playback handle for [`MusicPlayer`]
+#[derive(Debug)]
+pub struct Playback {
+    pub handle: Handle,
+    pub song: Asset<src::WavStream>,
+}
 
-    use anyhow::*;
+/// Background music player
+#[derive(Debug)]
+pub struct MusicPlayer {
+    pub audio: Audio,
+    /// [`Playback`] of current music
+    pub current: Option<Playback>,
+}
 
-    use crate::{
-        asset::{Asset, AssetCache, AssetItem, AssetKey, AssetLoader},
-        audio::{src, Audio, Handle},
-    };
-
-    /// Adds audio asset loaders to [`AssetCache`]
-    pub fn register_asset_loaders(assets: &mut AssetCache, audio: &Audio) {
-        reg::<src::Wav>(assets, audio.clone());
-        reg::<src::WavStream>(assets, audio.clone());
-
-        fn reg<T>(assets: &mut AssetCache, audio: Audio)
-        where
-            T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
-        {
-            assets.add_cache::<T>(AudioLoader {
-                audio,
-                _ty: std::marker::PhantomData,
-            });
+impl MusicPlayer {
+    pub fn new(audio: Audio) -> Self {
+        Self {
+            audio,
+            current: None,
         }
     }
 
-    /// [`AssetLoader`] for most of the audio source types
-    #[derive(Debug)]
-    pub struct AudioLoader<Src>
-    where
-        Src: crate::audio::prelude::FromExt + fmt::Debug + 'static,
-    {
-        audio: Audio,
-        _ty: std::marker::PhantomData<Src>,
-    }
-
-    impl<T> AssetItem for T
-    where
-        T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
-    {
-        type Loader = AudioLoader<T>;
-    }
-
-    impl<T> AssetLoader for AudioLoader<T>
-    where
-        T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
-    {
-        type Item = T;
-        fn load(&self, path: &Path, _cache: &mut AssetCache) -> io::Result<Self::Item> {
-            Self::Item::from_path(path).map_err(self::upcast_err)
-        }
-    }
-
-    fn upcast_err<E>(e: E) -> std::io::Error
-    where
-        E: Into<Box<dyn std::error::Error + Send + Sync>>,
-    {
-        std::io::Error::new(std::io::ErrorKind::Other, e)
-    }
-
-    /// Playback handle for [`MusicPlayer`]
-    #[derive(Debug)]
-    pub struct Playback {
-        pub handle: Handle,
-        pub song: Asset<src::WavStream>,
-    }
-
-    /// Background music player
-    #[derive(Debug)]
-    pub struct MusicPlayer {
-        pub audio: Audio,
-        /// [`Playback`] of current music
-        pub current: Option<Playback>,
-    }
-
-    impl MusicPlayer {
-        pub fn new(audio: Audio) -> Self {
-            Self {
-                audio,
-                current: None,
-            }
+    pub fn play_song(&mut self, mut song: Asset<src::WavStream>) {
+        if let Some(_playback) = self.current.as_mut() {
+            // TODO: fade out
         }
 
-        pub fn play_song(&mut self, mut song: Asset<src::WavStream>) {
-            if let Some(_playback) = self.current.as_mut() {
-                // TODO: fade out
-            }
+        // TODO: fade in
+        let handle =
+            self.audio
+                .play_background_ex(&*song.get_mut().unwrap(), 1.0, false, Handle::PRIMARY);
 
-            // TODO: fade in
-            let handle = self.audio.play_background_ex(
-                &*song.get_mut().unwrap(),
-                1.0,
-                false,
-                Handle::PRIMARY,
-            );
+        self.current = Some(Playback { handle, song })
+    }
+}
 
-            self.current = Some(Playback { handle, song })
-        }
+impl AssetCache {
+    /// Play sound
+    pub fn play<'a>(&mut self, sound: impl Into<AssetKey<'a>>, audio: &Audio) -> Result<()> {
+        let mut se: Asset<src::Wav> = self.load_sync(sound)?;
+        let se = se.get_mut().unwrap();
+        audio.play(&*se);
+        Ok(())
     }
 
-    impl AssetCache {
-        /// Play sound
-        pub fn play<'a>(&mut self, sound: impl Into<AssetKey<'a>>, audio: &Audio) -> Result<()> {
-            let mut se: Asset<src::Wav> = self.load_sync(sound)?;
-            let se = se.get_mut().unwrap();
-            audio.play(&*se);
-            Ok(())
-        }
-
-        /// Play sound and set the preserve flag on the asset
-        pub fn play_preserve<'a>(
-            &mut self,
-            sound: impl Into<AssetKey<'a>>,
-            audio: &Audio,
-        ) -> Result<()> {
-            let mut se: Asset<src::Wav> = self.load_sync_preserve(sound)?;
-            let se = se.get_mut().unwrap();
-            audio.play(&*se);
-            Ok(())
-        }
+    /// Play sound and set the preserve flag on the asset
+    pub fn play_preserve<'a>(
+        &mut self,
+        sound: impl Into<AssetKey<'a>>,
+        audio: &Audio,
+    ) -> Result<()> {
+        let mut se: Asset<src::Wav> = self.load_sync_preserve(sound)?;
+        let se = se.get_mut().unwrap();
+        audio.play(&*se);
+        Ok(())
     }
 }

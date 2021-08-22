@@ -49,13 +49,15 @@ asset loaders from external, which is not available in `snow2d`:
 
 #![allow(dead_code)]
 
+pub mod loaders;
+
 pub type Error = std::io::Error;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 use std::{
     any::{self, TypeId},
     borrow::Cow,
-    cell::UnsafeCell,
+    cell::RefCell,
     collections::HashMap,
     fmt, fs, io, mem,
     ops::{Deref, DerefMut},
@@ -85,7 +87,7 @@ pub trait AssetItem: fmt::Debug + Sized + 'static {
 /// How to load an [`AssetItem`]
 pub trait AssetLoader: fmt::Debug + Sized + 'static {
     type Item: AssetItem;
-    fn load(&self, path: &Path, cache: &mut AssetCache) -> Result<Self::Item>;
+    fn load(&self, bytes: Vec<u8>, context: &mut AssetCache) -> Result<Self::Item>;
 }
 
 /// Mutable access to multiple asset loaders at runtime
@@ -374,12 +376,26 @@ pub struct AssetCache {
 
 impl AssetCache {
     pub fn with_root(root: PathBuf) -> Self {
-        assert!(root.is_absolute());
+        assert!(
+            root.is_absolute(),
+            "Given non-absolute path as asset root: {}",
+            root.display()
+        );
         log::trace!("Given asset root {}", root.display());
 
         Self {
             resolver: Resolver { root },
             caches: HashMap::new(),
+        }
+    }
+
+    // For hack in making [`guarded`] scope
+    pub(crate) fn dangling() -> Self {
+        Self {
+            resolver: Resolver {
+                root: PathBuf::from("<DANGLING>"),
+            },
+            caches: HashMap::with_capacity(0),
         }
     }
 
@@ -452,9 +468,13 @@ impl AssetCache {
             drop(cache_t);
 
             let load_path = entry_id.clone();
-            let item = loader.load(&load_path, self)?;
-            let cache_t = self.cache_mut::<T>().unwrap();
+            let bytes = fs::read(&load_path)?;
+            // Here we _move_ the bytes to the loader.
+            // This is mainly because SoLoud takes the ownership of the memory and I wanted to avoid
+            // cloning the sound data bytes.
+            let item = loader.load(bytes, self)?;
 
+            let cache_t = self.cache_mut::<T>().unwrap();
             let asset = cache_t.insert(entry_id, item, preserve, load_path, serde_repr);
 
             Ok(asset)
@@ -603,48 +623,43 @@ impl<T: AssetItem> FreeUnused for AssetCacheT<T> {
 /// Deserialize assets without making duplicates using thread-local variable
 #[derive(Debug)]
 struct AssetDeState {
-    cache: UnsafeCell<AssetCache>,
-}
-
-impl AssetDeState {
-    // fn cache(&self) -> &AssetCache {
-    //     unsafe { &*(self.cache.get()) }
-    // }
-
-    fn cache_mut(&self) -> &mut AssetCache {
-        unsafe { &mut *(self.cache.get()) }
-    }
+    /// Shared by asset deserializer and guarderd user procedure
+    cache: Rc<RefCell<AssetCache>>,
 }
 
 /// TODO: Just use thread_local!
 static mut DE_STATE: OnceCell<AssetDeState> = OnceCell::new();
 
 /// Run a procedure in a guarded scope where [`Asset`] can deserialize
-pub fn guarded<T>(original_cache: &mut AssetCache, proc: impl FnOnce(&mut AssetCache) -> T) -> T {
-    // take the owner ship of original cache
-    let mut cache = AssetCache::with_root(PathBuf::new());
+pub fn guarded<T>(
+    original_cache: &mut AssetCache,
+    proc: impl FnOnce(&RefCell<AssetCache>) -> T,
+) -> T {
+    let mut cache = AssetCache::dangling();
     mem::swap(original_cache, &mut cache);
-    // and wrap it in `UnsafeCell`:
-    let cache = UnsafeCell::new(cache);
+    let cache = Rc::new(RefCell::new(cache));
 
     unsafe {
         DE_STATE
-            .set(AssetDeState { cache })
+            .set(AssetDeState {
+                cache: cache.clone(),
+            })
             .unwrap_or_else(|_old_value| {
                 unreachable!("DE_STATE is guarded by snow2d::asset::with_cache")
             });
     }
 
-    let res = proc(original_cache);
+    let res = proc(&cache);
 
-    // give the AssetState back to the original place
+    // Take the wrapped asset cache
     let mut cache = unsafe {
         match DE_STATE.take() {
-            Some(state) => state.cache.into_inner(),
+            Some(state) => state.cache.replace(AssetCache::dangling()),
             None => unreachable!(),
         }
     };
 
+    // Give the AssetState back to the original place:
     mem::swap(&mut cache, original_cache);
 
     res
@@ -661,8 +676,8 @@ impl<T: AssetItem> Serialize for Asset<T> {
 }
 
 /// # Safety
-/// `Asset::deserialize` the only place `DE_STATE` is used and performs one-shot
-/// access to [`AssetDeState`]. So there's no overlapping borrow and it sounds!
+/// `Asset::deserialize` the only place `DE_STATE` (`static mut` internal) is used and performs
+/// one-shot access `DE_STATE`. So there's no overlapping borrow and it sounds!
 impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -674,14 +689,14 @@ impl<'de, T: AssetItem> Deserialize<'de> for Asset<T> {
 
         // then load asset
         let state = unsafe {
-            DE_STATE
-                .get_mut()
-                .ok_or_else(|| "Unable to find asset cache")
-                .unwrap()
+            use serde::de::Error;
+            DE_STATE.get_mut().ok_or_else(|| {
+                D::Error::custom("Asset is being deserialized in non-guarded scope")
+            })?
         };
 
-        // The only access to `DE_STATE`, which is one-shot and never overlap with other borrrow
-        let cache = state.cache_mut();
+        // access the guarded cache
+        let mut cache = state.cache.borrow_mut();
         let item = cache.load_sync(key.clone()).map_err(|e| {
             de::Error::custom(format!("Error while loading asset at `{}`: {}", key, e))
         })?;

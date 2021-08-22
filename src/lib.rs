@@ -28,8 +28,8 @@ use sdl2::event::{Event, WindowEvent};
 
 use crate::{
     asset::AssetCache,
-    audio::asset::MusicPlayer,
     audio::Audio,
+    audio::MusicPlayer,
     gfx::{Color, Snow2d, WindowState},
     input::Input,
 };
@@ -58,15 +58,16 @@ pub struct Ice {
 
 impl Ice {
     pub fn new(snow: Snow2d, asset_root: PathBuf) -> Self {
-        // TODO: don't unwrap
         let audio = unsafe { Audio::create().expect("Don't create Audio twice") };
+        let mut assets = AssetCache::with_root(asset_root);
+        crate::asset::loaders::register(&mut assets, audio.clone());
 
         Self {
             pa_blue: rg::PassAction::clear(Color::CORNFLOWER_BLUE.to_normalized_array()),
             snow,
             audio: audio.clone(),
+            assets,
             music: MusicPlayer::new(audio.clone()),
-            assets: AssetCache::with_root(asset_root),
             input: Input::new(),
             dt: Duration::new(0, 0),
             frame_count: 0,

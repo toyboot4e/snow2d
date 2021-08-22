@@ -106,33 +106,34 @@ impl<T: TypeObject> TypeObjectId<T> {
     }
 }
 
-pub fn storage_builder() -> Result<TypeObjectStorageBuilder, ()> {
+pub fn storage_builder<'c>(cache: &'c mut AssetCache) -> Result<TypeObjectStorageBuilder<'c>, ()> {
     TypeObjectStorage::init().map_err(|_e| ())?;
-    Ok(TypeObjectStorageBuilder { _ty: PhantomData })
+    Ok(TypeObjectStorageBuilder { cache })
 }
 
 /// Utility for initializing static [`TypeObjectStorage`]
 #[derive(Debug)]
-pub struct TypeObjectStorageBuilder {
-    _ty: PhantomData<()>,
+pub struct TypeObjectStorageBuilder<'c> {
+    cache: &'c mut AssetCache,
 }
 
-impl TypeObjectStorageBuilder {
+impl<'c> TypeObjectStorageBuilder<'c> {
     pub fn add<'a, T: TypeObject + 'static + DeserializeOwned, U: Into<AssetKey<'a>>>(
-        &self,
+        &mut self,
         key: U,
-        cache: &mut AssetCache,
-    ) -> anyhow::Result<&Self> {
+    ) -> anyhow::Result<&mut Self> {
         log::trace!(
             "registering type object storage for type `{}`",
             std::any::type_name::<T>()
         );
-        TypeObjectStorage::register_type_objects::<T, U>(key, cache)?;
+
+        TypeObjectStorage::register_type_objects::<T, U>(key, &mut self.cache).unwrap();
+
         Ok(self)
     }
 }
 
-impl Drop for TypeObjectStorageBuilder {
+impl<'c> Drop for TypeObjectStorageBuilder<'c> {
     fn drop(&mut self) {
         log::trace!("loaded type objects");
     }
@@ -168,16 +169,19 @@ impl TypeObjectStorage {
                 .get_mut()
                 .expect("TypeObjectStorage is not initialized");
 
+            // we might accesst oa
             let map: HashMap<TypeObjectId<T>, T> = cache.load_ron(key)?;
+
             let map: HashMap<TypeObjectId<T>, Rc<T>> = map
                 .into_iter()
                 .map(|(key, value)| (key, Rc::new(value)))
                 .collect::<HashMap<_, _>>();
 
+            let dup = s
+                .maps
+                .insert(TypeId::of::<T>(), Box::new(TypeObjectMap { data: map }));
             anyhow::ensure!(
-                s.maps
-                    .insert(TypeId::of::<T>(), Box::new(TypeObjectMap { data: map }),)
-                    .is_none(),
+                dup.is_none(),
                 "Registring type objects twice for type `{}`",
                 std::any::type_name::<T>(),
             );
@@ -199,6 +203,7 @@ impl TypeObjectStorage {
         }
     }
 
+    /// TODO: Use guard instead
     pub fn get_map<T: TypeObject>() -> Option<&'static TypeObjectMap<T>> {
         Self::get_any::<T>().downcast_ref::<TypeObjectMap<T>>()
     }
