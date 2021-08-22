@@ -21,16 +21,15 @@ WARNING: Deserialization has to be done in a [`guarded`] scope.
 
 Reason: [`Asset`] is a shared pointer and we need to take care to not create duplicates. But `serde`
 doesn't let us share states while deserialization. So we need a thread-local pointer, which is only
-valid in the [`with_cache`] procedure.
+valid in the [`guarded`] procedure.
 
 # Context of asset loaders
 
-There are basically two ways to give context to asset loaders:
+`snow2d`'s asset contexts are based on shared references. Other options would be giving context to
+asset loaders from external, which is not available in `snow2d`:
 
-1. Contexts are shared among asset loaders and other types
-2. Contexts are given to the loader from external
-  2-1. As a concrete, user-defined type
-  2-2. As a kind of `AnyMap` (with our without automatic query)
+1. As a concrete, user-defined type
+2. As a kind of `AnyMap` (with our without automatic query)
 
 # TODOs
 
@@ -102,7 +101,7 @@ enum Borrow {
     //
 }
 
-/// Shared ownership of an asset item. Be sure to call [`with_cache`] on deserialization.
+/// Shared ownership of an asset item. Be sure to call [`guarded`] on deserialization.
 #[derive(Debug)]
 pub struct Asset<T: AssetItem> {
     item: Option<Arc<Mutex<T>>>,
@@ -478,25 +477,30 @@ impl AssetCache {
 
     /// Deserialize asset file as RON
     pub fn load_ron<'key, T: serde::de::DeserializeOwned>(
-        &self,
+        // the target type may contain asset hadnel, so mut ref
+        &mut self,
         key: impl Into<AssetKey<'key>>,
     ) -> anyhow::Result<T> {
         let path = self.resolve(key);
+
         let s = fs::read_to_string(&path)
             .map_err(anyhow::Error::msg)
             .with_context(|| {
                 anyhow::anyhow!("Unable to read asset file at `{}`", path.display())
             })?;
 
-        ron::de::from_str::<T>(&s)
-            .map_err(anyhow::Error::msg)
-            .with_context(|| {
-                format!(
-                    "Unable deserialize `{}` for type {}",
-                    path.display(),
-                    std::any::type_name::<T>()
-                )
-            })
+        // the target type may contain asset handle, so guard!
+        guarded(self, |_cache| {
+            ron::de::from_str::<T>(&s)
+                .map_err(anyhow::Error::msg)
+                .with_context(|| {
+                    format!(
+                        "Unable to deserialize RON file `{}` for type {}",
+                        path.display(),
+                        std::any::type_name::<T>()
+                    )
+                })
+        })
     }
 }
 
