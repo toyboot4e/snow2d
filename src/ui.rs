@@ -198,7 +198,8 @@ impl Ui {
         // tick and apply animations. remove finished animations
         self.anims.update(dt, &mut self.nodes);
 
-        self.nodes.sync_refcounts();
+        // FIXME: Don't invalidate items with parent. Traverse and visit leaves first
+        self.nodes.sync_refcounts_and_invalidate();
 
         // calculate geometry
         unsafe {

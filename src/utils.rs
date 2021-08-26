@@ -19,8 +19,10 @@ pub use snow2d_derive::Inspect;
 #[doc(inline)]
 pub use toy_arena as arena;
 
+#[doc(inline)]
+pub use toy_pool as pool;
+
 pub mod ez;
-pub mod pool;
 pub mod smpsc;
 
 pub mod tyobj;
