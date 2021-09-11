@@ -87,7 +87,7 @@ impl TextureBuilder {
             img: rg::Image::create(&{
                 let mut desc = self::img_desc(self.size[0], self.size[1], self.filter, self.wrap);
                 desc.render_target = false;
-                desc.usage = rg::ResourceUsage::Immutable as u32;
+                desc.usage = rg::ResourceUsage::Immutable.to_ffi();
                 desc.data.subimage[0][0] = self.pixels.as_slice().into();
                 desc
             }),
@@ -100,21 +100,21 @@ impl TextureBuilder {
 /// Set usage and pixels or depth format
 fn img_desc(w: u32, h: u32, filter: rg::Filter, wrap: rg::Wrap) -> rg::ImageDesc {
     rg::ImageDesc {
-        type_: rg::ImageType::Dim2 as u32,
+        type_: rg::ImageType::Dim2.to_ffi(),
         width: w as i32,
         height: h as i32,
-        min_filter: filter as u32,
-        mag_filter: filter as u32,
-        wrap_u: wrap as u32,
-        wrap_v: wrap as u32,
-        wrap_w: wrap as u32,
+        min_filter: filter.to_ffi(),
+        mag_filter: filter.to_ffi(),
+        wrap_u: wrap.to_ffi(),
+        wrap_v: wrap.to_ffi(),
+        wrap_w: wrap.to_ffi(),
         ..Default::default()
     }
 }
 
 /// Owned 2D texture
 ///
-/// Frees GPU image on drop. It's an [`AssetItem`].
+/// Frees GPU image on drop. It's an [`AssetItem`](crate::asset::AssetItem).
 #[derive(Debug, PartialEq, Default)]
 pub struct Texture2dDrop {
     img: rg::Image,
@@ -438,7 +438,7 @@ impl RenderTextureBuilder {
         let mut img_desc = self::img_desc(self.size[0], self.size[1], self.filter, self.wrap);
         img_desc.render_target = true;
         // render target has to have `Immutable` usage
-        img_desc.usage = rg::ResourceUsage::Immutable as u32;
+        img_desc.usage = rg::ResourceUsage::Immutable.to_ffi();
 
         let tex = Texture2dDrop {
             img: rg::Image::create(&img_desc),
@@ -457,7 +457,7 @@ impl RenderTextureBuilder {
             pass_desc.depth_stencil_attachment.image = rg::Image::create(&rg::ImageDesc {
                 // NOTE: Both `PipelineDesc` and off-screen render target `ImageDesc`
                 //       must have `pixel_format` being `Depth`.
-                pixel_format: rg::PixelFormat::Depth as u32,
+                pixel_format: rg::PixelFormat::Depth.to_ffi(),
                 ..img_desc
             });
 

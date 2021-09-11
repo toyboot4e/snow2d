@@ -250,7 +250,7 @@ impl GameRunner {
 }
 
 impl GameRunner {
-    /// Watch window focus state on event poll
+    /// (SDL2) Watch window focus state on event poll
     #[inline(always)]
     pub fn event(&mut self, ev: &Event) {
         match ev {
@@ -263,24 +263,30 @@ impl GameRunner {
                 // keyborad focus
                 WindowEvent::FocusLost => {
                     // log::trace!("focus lost: {:?}", window_id);
-                    self.focus[1] = false;
+                    self.set_focus(false);
                 }
                 WindowEvent::FocusGained => {
                     // log::trace!("gain: {:?}", window_id);
-                    self.focus[1] = true;
+                    self.set_focus(true);
                 }
-                _ => {}
+                _ => {
+                    // NOTE: Don't do self.focus[1] = self.focus[0].
+                }
             },
             _ => {}
         }
     }
-}
 
-impl GameRunner {
+    /// Platform-independent form of event watch
+    #[inline(always)]
+    pub fn set_focus(&mut self, has_focus: bool) {
+        self.focus[1] = has_focus;
+    }
+
     /// Updates the accumulated duration
     #[inline(always)]
     pub fn update(&mut self) -> bool {
-        let tick = self.update_focus();
+        let tick = self.swap_focus_bufs();
 
         if tick {
             // tick
@@ -329,7 +335,7 @@ impl GameRunner {
     }
 
     #[inline(always)]
-    fn update_focus(&mut self) -> bool {
+    fn swap_focus_bufs(&mut self) -> bool {
         let tick = match (self.focus[0], self.focus[1]) {
             (false, true) => {
                 // on gain focus

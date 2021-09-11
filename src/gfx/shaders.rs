@@ -4,6 +4,8 @@
 
 use rokol::gfx::{self as rg, BakedResource, VertexLayout};
 
+use rokol::ffi::gfx as rfg;
+
 use crate::{
     gfx::Shader,
     utils::bytemuck::{Pod, Zeroable},
@@ -30,7 +32,7 @@ macro_rules! img_type {
     ($name:expr,$ty:expr) => {
         rg::ShaderImageDesc {
             name: c_str!($name).as_ptr() as *const _,
-            image_type: $ty as u32,
+            image_type: $ty.to_ffi(),
             ..Default::default()
         }
     };
@@ -43,7 +45,7 @@ macro_rules! ub {
 
         block.uniforms[0] = rg::ShaderUniformDesc {
             name: concat!($name, "\0").as_ptr() as *const _,
-            type_: $uniform_ty as u32,
+            type_: $uniform_ty.to_ffi(),
             ..Default::default()
         };
         block.size += std::mem::size_of::<$size_ty>() as u64;
@@ -97,12 +99,12 @@ where
 
 const ALPHA_BLEND: rg::BlendState = rg::BlendState {
     enabled: true,
-    src_factor_rgb: rg::BlendFactor::SrcAlpha as u32,
-    dst_factor_rgb: rg::BlendFactor::OneMinusSrcAlpha as u32,
-    op_rgb: 0,
-    src_factor_alpha: rg::BlendFactor::One as u32,
-    dst_factor_alpha: rg::BlendFactor::Zero as u32,
-    op_alpha: 0,
+    src_factor_rgb: rfg::sg_blend_factor::SG_BLENDFACTOR_SRC_ALPHA,
+    dst_factor_rgb: rfg::sg_blend_factor::SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+    op_rgb: rfg::sg_blend_op::_SG_BLENDOP_DEFAULT,
+    src_factor_alpha: rfg::sg_blend_factor::SG_BLENDFACTOR_ONE,
+    dst_factor_alpha: rfg::sg_blend_factor::SG_BLENDFACTOR_ZERO,
+    op_alpha: rfg::sg_blend_op::_SG_BLENDOP_DEFAULT,
 };
 
 pub fn default_screen() -> Shader {
@@ -114,9 +116,9 @@ pub fn default_screen() -> Shader {
         },
         &mut {
             let mut desc = rg::PipelineDesc {
-                index_type: rg::IndexType::UInt16 as u32,
+                index_type: rg::IndexType::UInt16.to_ffi(),
                 layout: DefaultVertex::layout_desc(),
-                cull_mode: rg::CullMode::None as u32,
+                cull_mode: rg::CullMode::None.to_ffi(),
                 ..Default::default()
             };
             desc.colors[0].blend = ALPHA_BLEND;
@@ -134,12 +136,12 @@ pub fn default_offscreen() -> Shader {
         },
         &mut {
             let mut desc = rg::PipelineDesc {
-                index_type: rg::IndexType::UInt16 as u32,
+                index_type: rg::IndexType::UInt16.to_ffi(),
                 layout: DefaultVertex::layout_desc(),
-                cull_mode: rg::CullMode::None as u32,
+                cull_mode: rg::CullMode::None.to_ffi(),
                 ..Default::default()
             };
-            desc.depth.pixel_format = rg::PixelFormat::Depth as u32;
+            desc.depth.pixel_format = rg::PixelFormat::Depth.to_ffi();
             desc
         },
     )
@@ -158,12 +160,12 @@ pub fn gauss() -> Shader {
         },
         &mut {
             let mut desc = rg::PipelineDesc {
-                index_type: rg::IndexType::UInt16 as u32,
+                index_type: rg::IndexType::UInt16.to_ffi(),
                 layout: DefaultVertex::layout_desc(),
-                cull_mode: rg::CullMode::None as u32,
+                cull_mode: rg::CullMode::None.to_ffi(),
                 ..Default::default()
             };
-            desc.depth.pixel_format = rg::PixelFormat::Depth as u32;
+            desc.depth.pixel_format = rg::PixelFormat::Depth.to_ffi();
             desc
         },
     )
@@ -189,9 +191,9 @@ pub fn snow() -> Shader {
         },
         &mut {
             let mut desc = rg::PipelineDesc {
-                index_type: rg::IndexType::UInt16 as u32,
+                index_type: rg::IndexType::UInt16.to_ffi(),
                 layout: PosUvVert::layout_desc(),
-                cull_mode: rg::CullMode::None as u32,
+                cull_mode: rg::CullMode::None.to_ffi(),
                 ..Default::default()
             };
             desc.colors[0].blend = ALPHA_BLEND;
