@@ -22,8 +22,6 @@ exclude = [
 ]
 
 [features]
-default = ["use-imgui"]
-use-imgui = []
 no-imgui = ["igri_derive/dummy"]
 
 [dependencies]
