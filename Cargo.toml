@@ -14,30 +14,32 @@ edition = "2018"
 members = [
     "crates/snow2d_derive",
     "crates/snow2d_macros",
-    "example-tetris",
 ]
 
 exclude = [
     "crates/rokol",
+    "crates/igri",
 ]
 
 [features]
 default = ["use-imgui"]
-use-imgui = ["imgui"]
-no-imgui = ["snow2d_derive/dummy"]
+use-imgui = []
+no-imgui = ["igri_derive/dummy"]
 
 [dependencies]
 sdl2 = "0.34.5"
-imgui = { version = "0.7.0", optional = true }
 
 rokol = { path = "crates/rokol/rokol", features = ["glcore33", "impl-gfx", "sdl2", "fontstash"] }
-xdl = { path = "crates/xdl", features = ["sdl2", "serde"] }
+xdl = { path = "crates/xdl", features = ["sdl2", "serde", "igri"] }
 
 snow2d_macros = { path = "crates/snow2d_macros" }
 snow2d_derive = { path = "crates/snow2d_derive" }
 
-toy_arena = { path = "crates/toy_arena" }
-toy_pool = { path = "crates/toy_pool" }
+igri = { path = "crates/igri/igri" }
+igri_derive = { path = "crates/igri/igri_derive" }
+
+toy_arena = { path = "crates/toy_arena", features = ["igri"] }
+toy_pool = { path = "crates/toy_pool", features = ["igri"] }
 
 soloud = "0.4.0"
 image = "0.23.14"

@@ -7,14 +7,8 @@ Core utilities and handy tools
 mod cheat;
 pub use cheat::{cheat, Cheat};
 
-#[cfg(feature = "use-imgui")]
 pub mod inspect;
-
-#[cfg(feature = "use-imgui")]
 pub use inspect::Inspect;
-
-#[cfg(feature = "no-imgui")]
-pub use snow2d_derive::Inspect;
 
 #[doc(inline)]
 pub use toy_arena as arena;

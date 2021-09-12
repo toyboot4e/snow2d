@@ -1,33 +1,12 @@
 /*!
-Procedual macros
-
-`Inspect` macro does nothing if `dummy` feature is specified.
+Procedural macros
 */
-
-#[cfg(not(feature = "dummy"))]
-mod inspect;
 
 mod tyobj;
 mod via_tyobj;
 
-use {
-    proc_macro::TokenStream,
-    syn::{parse_macro_input, DeriveInput},
-};
-
-/// Implements `Inspect` trait
-#[proc_macro_derive(Inspect, attributes(inspect))]
-pub fn inspect(input: TokenStream) -> TokenStream {
-    #[cfg(feature = "dummy")]
-    {
-        TokenStream::new()
-    }
-    #[cfg(not(feature = "dummy"))]
-    {
-        let ast = parse_macro_input!(input as DeriveInput);
-        TokenStream::from(inspect::impl_inspect(ast))
-    }
-}
+use proc_macro::TokenStream;
+use syn::{parse_macro_input, DeriveInput};
 
 /// Implements `TypeObject` trait
 #[proc_macro_derive(TypeObject)]

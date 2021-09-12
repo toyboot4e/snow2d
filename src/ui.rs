@@ -12,15 +12,16 @@ pub mod anim;
 pub mod anim_builder;
 pub mod node;
 
+use igri::{imgui, Inspect};
 use std::time::Duration;
 
 use crate::{
     gfx::{draw::*, geom2d::Vec2f, RenderPass},
     utils::{
         arena::Arena,
-        enum_dispatch, ez, inspect,
+        enum_dispatch, ez,
         pool::{Handle, Pool, Slot, WeakHandle},
-        Cheat, Inspect,
+        Cheat,
     },
 };
 
@@ -382,14 +383,14 @@ pub struct AnimStorage {
 
 impl Inspect for AnimStorage {
     fn inspect(&mut self, ui: &imgui::Ui, label: &str) {
-        inspect::nest(ui, label, || {
-            inspect::nest(ui, "running", || {
+        igri::nest(ui, label, || {
+            igri::nest(ui, "running", || {
                 for (i, (_index, x)) in self.running.iter_mut().enumerate() {
-                    Inspect::inspect(x, ui, imgui::im_str!("{}", i).to_str());
+                    Inspect::inspect(x, ui, &format!("{}", i));
                 }
             });
 
-            inspect::inspect_seq(self.delayed.iter_mut().map(|x| x), ui, "delayed");
+            igri::seq(self.delayed.iter_mut().map(|x| x), ui, "delayed");
         });
     }
 }

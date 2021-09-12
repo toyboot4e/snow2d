@@ -13,13 +13,13 @@ UI nodes (renderables)
 // Re-exported as [`Node`] variants
 pub use crate::gfx::tex::{NineSliceSprite, SpriteData};
 
+use igri::{imgui, Inspect};
 use imgui::{im_str, Ui};
 use rokol::fons::{fontstash::FontIx, FontTexture};
 
 use crate::{
     gfx::{draw::*, geom2d::*, text::FontHandle, Color},
     ui::Node,
-    utils::Inspect,
 };
 
 /// Rendering order [0, 1] (the higher, the latter)
