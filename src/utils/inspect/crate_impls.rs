@@ -1,5 +1,7 @@
 /*!
-[`Inspect`] implementations for external crates that `snow2d` is dependent on
+[`Inspect`] implementations
+
+My crates optionally depend on `igri` and derives `Inspect`, so there's not so much work left.
 */
 
 use igri::{imgui, Inspect};

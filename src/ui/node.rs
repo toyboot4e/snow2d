@@ -14,7 +14,7 @@ UI nodes (renderables)
 pub use crate::gfx::tex::{NineSliceSprite, SpriteData};
 
 use igri::{imgui, Inspect};
-use imgui::{im_str, Ui};
+use imgui::Ui;
 use rokol::fons::{fontstash::FontIx, FontTexture};
 
 use crate::{
@@ -77,7 +77,7 @@ impl Inspect for Surface {
             Self::Sprite(x) => x.inspect(ui, label),
             Self::NineSlice(x) => x.inspect(ui, label),
             Self::Text(x) => x.inspect(ui, label),
-            Self::None => ui.label_text(&im_str!("{}", label), &im_str!("None")),
+            Self::None => ui.label_text(label, "None"),
         }
     }
 }
