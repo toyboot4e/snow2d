@@ -27,7 +27,7 @@ no-imgui = ["igri_derive/dummy"]
 [dependencies]
 sdl2 = "0.34.5"
 
-rokol = { path = "crates/rokol/rokol", features = ["glcore33", "impl-gfx", "sdl2", "fontstash"] }
+rokol = { path = "crates/rokol/rokol", features = ["sdl2", "glcore33", "impl-gfx", "serde", "fontstash"] }
 xdl = { path = "crates/xdl", features = ["sdl2", "serde", "igri"] }
 
 snow2d_macros = { path = "crates/snow2d_macros" }

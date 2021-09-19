@@ -351,49 +351,54 @@ struct ResolvedPath {
     path: PathBuf,
 }
 
-/// Resolves asset path to absolute path
+/// Asset root directory that can solve asset paths
 #[derive(Debug)]
-struct Resolver {
-    root: PathBuf,
+pub struct AssetRoot {
+    path: PathBuf,
     // schemes: Vec<(String, PathBuf)>,
 }
 
-impl Resolver {
+impl AssetRoot {
+    pub fn new(root: PathBuf) -> Self {
+        assert!(
+            root.is_absolute(),
+            "Given non-absolute path as asset root: {}",
+            root.display()
+        );
+
+        Self { path: root }
+    }
+
     // TODO: return AbsolutePath newtype
     pub fn resolve<'a>(&self, key: impl Into<AssetKey<'a>>) -> PathBuf {
         let key: AssetKey<'a> = key.into();
         // TODO: handle scheme
-        self.root.join(key.path)
+        self.path.join(key.path)
     }
 }
 
 /// All assets on memory
 #[derive(Debug)]
 pub struct AssetCache {
-    resolver: Resolver,
+    root: AssetRoot,
     caches: HashMap<TypeId, Box<dyn FreeUnused>>,
 }
 
 impl AssetCache {
-    pub fn with_root(root: PathBuf) -> Self {
-        assert!(
-            root.is_absolute(),
-            "Given non-absolute path as asset root: {}",
-            root.display()
-        );
-        log::trace!("Given asset root {}", root.display());
+    pub fn with_root(root: AssetRoot) -> Self {
+        log::trace!("Given asset root {}", root.path.display());
 
         Self {
-            resolver: Resolver { root },
+            root,
             caches: HashMap::new(),
         }
     }
 
     // For hack in making [`guarded`] scope
-    pub(crate) fn dangling() -> Self {
+    fn dangling() -> Self {
         Self {
-            resolver: Resolver {
-                root: PathBuf::from("<DANGLING>"),
+            root: AssetRoot {
+                path: PathBuf::from("<DANGLING>"),
             },
             caches: HashMap::with_capacity(0),
         }
@@ -487,7 +492,7 @@ impl AssetCache {
     /// Resolves asset path into an absolute path
     // pub fn resolve<'key>(&self, key: impl Into<AssetKey<'key>>) -> PathBuf {
     pub fn resolve<'key>(&self, key: impl Into<AssetKey<'key>>) -> PathBuf {
-        self.resolver.resolve(key)
+        self.root.resolve(key)
     }
 
     pub fn read_to_string<'key>(&self, key: impl Into<AssetKey<'key>>) -> io::Result<String> {

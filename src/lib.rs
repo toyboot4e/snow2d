@@ -57,7 +57,7 @@ pub struct Ice {
 }
 
 impl Ice {
-    pub fn new(snow: Snow2d, asset_root: PathBuf) -> Self {
+    pub fn new(snow: Snow2d, asset_root: asset::AssetRoot) -> Self {
         let audio = unsafe { Audio::create().expect("Don't create Audio twice") };
         let mut assets = AssetCache::with_root(asset_root);
         crate::asset::loaders::register(&mut assets, audio.clone());
