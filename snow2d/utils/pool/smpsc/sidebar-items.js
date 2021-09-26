@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["unbounded",""]],"struct":[["Receiver","Receiver. Often referred to as `rx` (receiver)"],["Sender","Sender. Often referred to as `tx` (transmission)"]]});

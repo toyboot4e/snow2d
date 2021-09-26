@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["snow2d"] = [{"text":"impl&lt;'a&gt; <a class=\"trait\" href=\"snow2d/utils/inspect/imgui/__core/str/trait.FromStr.html\" title=\"trait snow2d::utils::inspect::imgui::__core::str::FromStr\">FromStr</a> for <a class=\"struct\" href=\"snow2d/asset/struct.AssetKey.html\" title=\"struct snow2d::asset::AssetKey\">AssetKey</a>&lt;'a&gt;","synthetic":false,"types":["snow2d::asset::AssetKey"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

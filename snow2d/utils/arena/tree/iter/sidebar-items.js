@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["TraverseItem","Return value [`Traverse::next`]"]],"struct":[["NodeRef","Reference to a node and their children"],["SiblingsNext","Iterator that walks through siblings"],["Traverse","Iterator of a node and their children (depth-first search)"]]});
+initSidebarItems({"enum":[["TraverseItem","Return value of [`Traverse::next`]"]],"struct":[["NodeRef","Binding of existing node and their children"],["SiblingsNext","Iterator that walks through siblings"],["Traverse","Generic traersing utility"]]});

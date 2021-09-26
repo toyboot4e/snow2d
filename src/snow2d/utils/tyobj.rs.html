@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;utils&#x2F;tyobj.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tyobj.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;utils&#x2F;tyobj.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tyobj.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -290,8 +290,12 @@
 <span id="290">290</span>
 <span id="291">291</span>
 <span id="292">292</span>
-</pre><pre class="rust">
-<span class="doccomment">/*!
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+</pre><pre class="rust"><code><span class="doccomment">/*!
 [Type object][to] pattern with `serde` support
 
 [to]: https://gameprogrammingpatterns.com/type-object.html
@@ -399,33 +403,34 @@ The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] f
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">storage_builder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TypeObjectStorageBuilder</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">storage_builder</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>(<span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;c</span> <span class="kw-2">mut</span> <span class="ident">AssetCache</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TypeObjectStorageBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
     <span class="ident">TypeObjectStorage::init</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_e</span><span class="op">|</span> ())<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">TypeObjectStorageBuilder</span> { <span class="ident">_ty</span>: <span class="ident">PhantomData</span> })
+    <span class="prelude-val">Ok</span>(<span class="ident">TypeObjectStorageBuilder</span> { <span class="ident">cache</span> })
 }
 
 <span class="doccomment">/// Utility for initializing static [`TypeObjectStorage`]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TypeObjectStorageBuilder</span> {
-    <span class="ident">_ty</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TypeObjectStorageBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span> {
+    <span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;c</span> <span class="kw-2">mut</span> <span class="ident">AssetCache</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">TypeObjectStorageBuilder</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span> <span class="ident">TypeObjectStorageBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">TypeObject</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">DeserializeOwned</span>, <span class="ident">U</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">AssetKey</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">U</span>,
-        <span class="ident">cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AssetCache</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="macro">log::trace!</span>(
             <span class="string">&quot;registering type object storage for type `{}`&quot;</span>,
             <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
         );
-        <span class="ident">TypeObjectStorage::register_type_objects</span>::<span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">key</span>, <span class="ident">cache</span>)<span class="question-mark">?</span>;
+
+        <span class="ident">TypeObjectStorage::register_type_objects</span>::<span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">cache</span>).<span class="ident">unwrap</span>();
+
         <span class="prelude-val">Ok</span>(<span class="self">self</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">TypeObjectStorageBuilder</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">TypeObjectStorageBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="macro">log::trace!</span>(<span class="string">&quot;loaded type objects&quot;</span>);
     }
@@ -461,16 +466,19 @@ The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] f
                 .<span class="ident">get_mut</span>()
                 .<span class="ident">expect</span>(<span class="string">&quot;TypeObjectStorage is not initialized&quot;</span>);
 
+            <span class="comment">// we might accesst oa</span>
             <span class="kw">let</span> <span class="ident">map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">TypeObjectId</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">cache</span>.<span class="ident">load_ron</span>(<span class="ident">key</span>)<span class="question-mark">?</span>;
+
             <span class="kw">let</span> <span class="ident">map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">TypeObjectId</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">map</span>
                 .<span class="ident">into_iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="ident">value</span>)<span class="op">|</span> (<span class="ident">key</span>, <span class="ident">Rc::new</span>(<span class="ident">value</span>)))
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
+            <span class="kw">let</span> <span class="ident">dup</span> <span class="op">=</span> <span class="ident">s</span>
+                .<span class="ident">maps</span>
+                .<span class="ident">insert</span>(<span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">Box::new</span>(<span class="ident">TypeObjectMap</span> { <span class="ident">data</span>: <span class="ident">map</span> }));
             <span class="macro">anyhow::ensure!</span>(
-                <span class="ident">s</span>.<span class="ident">maps</span>
-                    .<span class="ident">insert</span>(<span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">Box::new</span>(<span class="ident">TypeObjectMap</span> { <span class="ident">data</span>: <span class="ident">map</span> }),)
-                    .<span class="ident">is_none</span>(),
+                <span class="ident">dup</span>.<span class="ident">is_none</span>(),
                 <span class="string">&quot;Registring type objects twice for type `{}`&quot;</span>,
                 <span class="ident">std::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(),
             );
@@ -492,12 +500,13 @@ The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] f
         }
     }
 
+    <span class="doccomment">/// TODO: Use guard instead</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_map</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TypeObject</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">TypeObjectMap</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">Self</span><span class="ident">::get_any</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>().<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">TypeObjectMap</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+        <span class="ident"><span class="self">Self</span>::get_any</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>().<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">TypeObjectMap</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>()
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_type_object</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TypeObject</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">TypeObjectId</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::get_map</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_map</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">map</span>.<span class="ident">get</span>(<span class="ident">id</span>)
     }
 }
@@ -543,17 +552,17 @@ The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] f
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SerdeViaTyObj</span> {
     <span class="kw">type</span> <span class="ident">TypeObject</span>: <span class="ident">TypeObject</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>;
 
-    <span class="kw">fn</span> <span class="ident">_repr_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">SerdeRepr</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::TypeObject</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">_repr_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">SerdeRepr</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::TypeObject</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">None</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">from_tyobj</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::TypeObject</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">from_tyobj</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::TypeObject</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
-    <span class="kw">fn</span> <span class="ident">_from_tyobj_with_id</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::TypeObject</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">TypeObjectId</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::TypeObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">_from_tyobj_with_id</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::TypeObject</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">TypeObjectId</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::TypeObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">target</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::from_tyobj</span>(<span class="kw-2">&amp;</span><span class="ident">obj</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::from_tyobj</span>(<span class="kw-2">&amp;</span><span class="ident">obj</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">repr</span>) <span class="op">=</span> <span class="ident">target</span>.<span class="ident">_repr_mut</span>() {
             <span class="kw-2">*</span><span class="ident">repr</span> <span class="op">=</span> <span class="ident">SerdeRepr::Reference</span>(<span class="ident">id</span>.<span class="ident">clone</span>());
         }
@@ -561,7 +570,7 @@ The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] f
     }
 
     <span class="doccomment">/// `Into&lt;SerdeRepr&lt;TargetType&gt;` implementation</span>
-    <span class="kw">fn</span> <span class="ident">into_tyobj_repr</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SerdeRepr</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::TypeObject</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">into_tyobj_repr</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SerdeRepr</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::TypeObject</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
@@ -569,21 +578,21 @@ The idea is to have a [static storage][TypeObjectStorage] of [`TypeObjectMap`] f
     }
 
     <span class="doccomment">/// `From&lt;SerdeRepr&lt;TargetType&gt;&gt;` implementation</span>
-    <span class="kw">fn</span> <span class="ident">from_tyobj_repr</span>(<span class="ident">repr</span>: <span class="ident">SerdeRepr</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::TypeObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">from_tyobj_repr</span>(<span class="ident">repr</span>: <span class="ident">SerdeRepr</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::TypeObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
         <span class="kw">match</span> <span class="ident">repr</span> {
             <span class="comment">// no ID</span>
-            <span class="ident">SerdeRepr::Embedded</span>(<span class="ident">tyobj</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::from_tyobj</span>(<span class="kw-2">&amp;</span><span class="ident">tyobj</span>),
+            <span class="ident">SerdeRepr::Embedded</span>(<span class="ident">tyobj</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::from_tyobj</span>(<span class="kw-2">&amp;</span><span class="ident">tyobj</span>),
             <span class="comment">// some ID</span>
             <span class="ident">SerdeRepr::Reference</span>(<span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="self">Self</span><span class="ident">::_from_tyobj_with_id</span>(<span class="ident">id</span>.<span class="ident">try_retrieve</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">id</span>)
+                <span class="ident"><span class="self">Self</span>::_from_tyobj_with_id</span>(<span class="ident">id</span>.<span class="ident">try_retrieve</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">id</span>)
             }
         }
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="snow2d" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>

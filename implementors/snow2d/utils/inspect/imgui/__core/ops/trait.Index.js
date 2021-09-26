@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["snow2d"] = [{"text":"impl <a class=\"trait\" href=\"snow2d/utils/inspect/imgui/__core/ops/trait.Index.html\" title=\"trait snow2d::utils::inspect::imgui::__core::ops::Index\">Index</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/nightly/std/primitive.usize.html\">usize</a>&gt; for <a class=\"struct\" href=\"snow2d/gfx/batch/struct.QuadData.html\" title=\"struct snow2d::gfx::batch::QuadData\">QuadData</a>","synthetic":false,"types":["snow2d::gfx::batch::QuadData"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

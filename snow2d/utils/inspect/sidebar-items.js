@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["Inspect","Implements `Inspect` trait"]],"fn":[["inspect_seq",""],["nest",""]],"trait":[["Inspect","Derive ImGUI runtime inspector"]]});
+initSidebarItems({"derive":[["Inspect","Derive macro for the `Inspect` trait. NOTE: `igri` must be in scope to use this macro."]],"fn":[["nest","Standard method to nest a tree node"],["seq","Standard method to inspect a sequence of inspectable items"],["seq_indexed","Standard method to inspect a sequence of indexed, inspectable items"]],"mod":[["imgui",""]],"trait":[["Inspect","ImGUI runtime inspection"]]});

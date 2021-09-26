@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NodeMut","Binding of an existing node and their children"],["SiblingsMutNext","Iterator that walks through siblings"]]});

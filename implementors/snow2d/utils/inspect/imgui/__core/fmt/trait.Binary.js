@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["snow2d"] = [{"text":"impl <a class=\"trait\" href=\"snow2d/utils/inspect/imgui/__core/fmt/trait.Binary.html\" title=\"trait snow2d::utils::inspect::imgui::__core::fmt::Binary\">Binary</a> for <a class=\"struct\" href=\"snow2d/gfx/geom2d/struct.Flips.html\" title=\"struct snow2d::gfx::geom2d::Flips\">Flips</a>","synthetic":false,"types":["snow2d::gfx::geom2d::Flips"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

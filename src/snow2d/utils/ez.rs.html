@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;utils&#x2F;ez.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ez.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;utils&#x2F;ez.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ez.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -624,8 +624,7 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
-</pre><pre class="rust">
-<span class="doccomment">/*!
+</pre><pre class="rust"><code><span class="doccomment">/*!
 [Easing] and tweening
 
 [easing]: https://easings.net/
@@ -667,15 +666,15 @@ TIP: Exponential tween can be replaced with simple calculation in every frame.
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Lerp</span> <span class="kw">for</span> <span class="kw">crate</span><span class="ident">::gfx::geom2d::Vec2f</span> {
+<span class="kw">impl</span> <span class="ident">Lerp</span> <span class="kw">for</span> <span class="ident"><span class="kw">crate</span>::gfx::geom2d::Vec2f</span> {
     <span class="kw">fn</span> <span class="ident">lerp</span>(<span class="ident">a</span>: <span class="self">Self</span>, <span class="ident">b</span>: <span class="self">Self</span>, <span class="ident">t</span>: <span class="ident">f32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">x</span>, <span class="ident">b</span>.<span class="ident">x</span>, <span class="ident">t</span>), <span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">y</span>, <span class="ident">b</span>.<span class="ident">y</span>, <span class="ident">t</span>))
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">x</span>, <span class="ident">b</span>.<span class="ident">x</span>, <span class="ident">t</span>), <span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">y</span>, <span class="ident">b</span>.<span class="ident">y</span>, <span class="ident">t</span>))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Lerp</span> <span class="kw">for</span> <span class="kw">crate</span><span class="ident">::gfx::Color</span> {
+<span class="kw">impl</span> <span class="ident">Lerp</span> <span class="kw">for</span> <span class="ident"><span class="kw">crate</span>::gfx::Color</span> {
     <span class="kw">fn</span> <span class="ident">lerp</span>(<span class="ident">a</span>: <span class="self">Self</span>, <span class="ident">b</span>: <span class="self">Self</span>, <span class="ident">t</span>: <span class="ident">f32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::rgba</span>(
+        <span class="ident"><span class="self">Self</span>::rgba</span>(
             <span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">r</span>, <span class="ident">b</span>.<span class="ident">r</span>, <span class="ident">t</span>),
             <span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">g</span>, <span class="ident">b</span>.<span class="ident">g</span>, <span class="ident">t</span>),
             <span class="ident">Lerp::lerp</span>(<span class="ident">a</span>.<span class="ident">b</span>, <span class="ident">b</span>.<span class="ident">b</span>, <span class="ident">t</span>),
@@ -684,7 +683,7 @@ TIP: Exponential tween can be replaced with simple calculation in every frame.
     }
 }
 
-<span class="kw">impl</span> <span class="kw">crate</span><span class="ident">::utils::ez::Lerp</span> <span class="kw">for</span> <span class="ident">Dir8</span> {
+<span class="kw">impl</span> <span class="ident"><span class="kw">crate</span>::utils::ez::Lerp</span> <span class="kw">for</span> <span class="ident">Dir8</span> {
     <span class="kw">fn</span> <span class="ident">lerp</span>(<span class="ident">a</span>: <span class="self">Self</span>, <span class="ident">b</span>: <span class="self">Self</span>, <span class="ident">t</span>: <span class="ident">f32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Dir8</span> {
         <span class="kw">let</span> <span class="ident">n_steps</span> <span class="op">=</span> (<span class="ident">b</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="number">8</span> <span class="op">-</span> <span class="ident">a</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">%</span> <span class="number">8</span>;
 
@@ -697,7 +696,7 @@ TIP: Exponential tween can be replaced with simple calculation in every frame.
         <span class="kw">let</span> <span class="ident">current_step</span> <span class="op">=</span> (<span class="ident">n_steps</span> <span class="kw">as</span> <span class="ident">f32</span> <span class="op">*</span> <span class="ident">t</span>) <span class="kw">as</span> <span class="ident">u8</span>;
 
         <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="ident">a</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="ident">current_step</span> <span class="op">*</span> <span class="ident">step_size</span>) <span class="op">%</span> <span class="number">8</span>;
-        <span class="self">Self</span><span class="ident">::CLOCKWISE</span>[<span class="ident">slot</span> <span class="kw">as</span> <span class="ident">usize</span>]
+        <span class="ident"><span class="self">Self</span>::CLOCKWISE</span>[<span class="ident">slot</span> <span class="kw">as</span> <span class="ident">usize</span>]
     }
 }
 
@@ -982,47 +981,47 @@ TIP: Exponential tween can be replaced with simple calculation in every frame.
     <span class="doccomment">/// t: [0.0, 1.0] → t&#39;: [0.0 1.0]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">f32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f32</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Linear</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::linear</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::Linear</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::linear</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::QuadIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quad_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::QuadOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quad_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::QuadIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quad_inout</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuadIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quad_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuadOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quad_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuadIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quad_inout</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::CubicInt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::cubic_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::CubicOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::cubic_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::CubicIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::cubic_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::CubicInt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::cubic_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::CubicOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::cubic_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::CubicIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::cubic_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::QuartIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quart_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::QuartOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quart_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::QuartIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quart_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuartIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quart_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuartOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quart_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuartIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quart_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::QuintIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quint_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::QuintOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quint_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::QuintIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::quint_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuintIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quint_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuintOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quint_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::QuintIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::quint_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::SinIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::sin_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::SinOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::sin_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::SinIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::sin_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::SinIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::sin_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::SinOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::sin_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::SinIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::sin_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::CircIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::circ_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::CircOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::circ_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::CircIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::circ_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::CircIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::circ_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::CircOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::circ_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::CircIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::circ_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::ExpIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::exp_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::ExpOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::exp_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::ExpIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::exp_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::ExpIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::exp_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::ExpOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::exp_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::ExpIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::exp_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::ElasticIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::elastic_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::ElasticOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::elastic_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::ElasticIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::elastic_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::ElasticIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::elastic_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::ElasticOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::elastic_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::ElasticIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::elastic_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::BackIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::back_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::BackOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::back_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::BackIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::back_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::BackIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::back_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::BackOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::back_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::BackIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::back_io</span>(<span class="ident">t</span>),
             <span class="comment">//</span>
-            <span class="self">Self</span><span class="ident">::BounceIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::bounce_in</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::BounceOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::bounce_out</span>(<span class="ident">t</span>),
-            <span class="self">Self</span><span class="ident">::BounceIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span><span class="ident">::bounce_io</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::BounceIn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::bounce_in</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::BounceOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::bounce_out</span>(<span class="ident">t</span>),
+            <span class="ident"><span class="self">Self</span>::BounceIo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">self</span>::bounce_io</span>(<span class="ident">t</span>),
         }
     }
 }
@@ -1251,7 +1250,7 @@ TIP: Exponential tween can be replaced with simple calculation in every frame.
         <span class="number">0.5</span> <span class="op">*</span> <span class="ident">bounce_out</span>(<span class="ident">t</span> <span class="op">*</span> <span class="number">2.0</span> <span class="op">-</span> <span class="number">1.0</span>) <span class="op">+</span> <span class="number">0.5</span>
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="snow2d" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>

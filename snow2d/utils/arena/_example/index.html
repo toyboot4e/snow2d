@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Example code and documentation"><meta name="keywords" content="rust, rustlang, rust-lang, _example"><title>snow2d::utils::arena::_example - Rust</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../snow2d/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a><h2 class="location">Module _example</h2><div class="sidebar-elems"><div id="sidebar-vars" data-name="_example" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../../../index.html">snow2d</a>::<wbr><a href="../../index.html">utils</a>::<wbr><a href="../index.html">arena</a>::<wbr><a class="mod" href="#">_example</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Example code and documentation</p>
+<h1 id="basic-usage" class="section-header"><a href="#basic-usage">Basic usage</a></h1>
+<p><a href="../struct.Arena.html" title="Arena&lt;T&gt;"><code>Arena&lt;T&gt;</code></a> is basically a vec, but with fixed item positions and generation value per slot:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">toy_arena</span>::{<span class="ident">arena</span>, <span class="ident">Arena</span>, <span class="ident">Index</span>};
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">xs</span> <span class="op">=</span> <span class="ident">Arena</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="ident">::with_capacity</span>(<span class="number">1</span>);
+
+<span class="comment">// Arena returns item index on insertion:</span>
+<span class="kw">let</span> <span class="ident">x0</span>: <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">xs</span>.<span class="ident">insert</span>(<span class="number">0</span>);
+
+<span class="comment">// Retrieve the item with index:</span>
+<span class="macro">assert_eq!</span>(<span class="ident">xs</span>.<span class="ident">get</span>(<span class="ident">x0</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>));
+<span class="macro">assert_eq!</span>(<span class="ident">xs</span>.<span class="ident">get_mut</span>(<span class="ident">x0</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="number">0</span>));
+<span class="macro">assert_eq!</span>(<span class="ident">xs</span>[<span class="ident">x0</span>], <span class="number">0</span>);
+
+<span class="comment">// If we `remove` or `invaldate` the entry, the old index no longer works:</span>
+<span class="ident">xs</span>.<span class="ident">invalidate</span>(<span class="ident">x0</span>);
+<span class="macro">assert_eq!</span>(<span class="ident">xs</span>.<span class="ident">get</span>(<span class="ident">x0</span>), <span class="prelude-val">None</span>);
+
+<span class="comment">// Insert new item (to the same slot since the capacity is 1):</span>
+<span class="kw">let</span> <span class="ident">x0_new</span> <span class="op">=</span> <span class="ident">xs</span>.<span class="ident">insert</span>(<span class="number">10</span>);
+<span class="macro">assert_eq!</span>(<span class="ident">xs</span>.<span class="ident">get</span>(<span class="ident">x0_new</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">10</span>));
+
+<span class="comment">// The old index doesn&#39;t work..</span>
+<span class="macro">assert_eq!</span>(<span class="ident">xs</span>.<span class="ident">get</span>(<span class="ident">x0</span>), <span class="prelude-val">None</span>);
+<span class="comment">// ..because the generation of the index doesn&#39;t match to the</span>
+<span class="comment">// generation of the current entry.</span></code></pre></div>
+<p>See <a href="../struct.Arena.html" title="Arena"><code>Arena</code></a> for more information.</p>
+<h1 id="tip-mutable-binding-iterators" class="section-header"><a href="#tip-mutable-binding-iterators">Tip: mutable binding iterators</a></h1>
+<p>For example, when you want to remove some kind of items from <a href="../struct.Arena.html" title="Arena"><code>Arena</code></a>, use <a href="../struct.Arena.html#method.bindings" title="Arena::bindings"><code>Arena::bindings</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">toy_arena</span>::{<span class="ident">arena</span>, <span class="ident">Arena</span>};
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">arena</span>: <span class="ident">Arena</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">arena!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">drain</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+<span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="ident">arena</span>.<span class="ident">bindings</span>() {
+    <span class="kw">if</span> <span class="ident">entry</span>.<span class="ident">get</span>() <span class="op">%</span> <span class="number">2</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">remove</span>();
+        <span class="ident">drain</span>.<span class="ident">push</span>(<span class="ident">data</span>);
+    }
+}
+
+<span class="macro">assert!</span>(<span class="ident">drain</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">%</span> <span class="number">2</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>));
+<span class="macro">assert!</span>(<span class="ident">arena</span>.<span class="ident">items</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">%</span> <span class="number">2</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span>));</code></pre></div>
+<p>We can also do <a href="../struct.Slot.html" title="Slot"><code>Slot</code></a>-based iteration, but it’s not so handy, so I don’t recommend.</p>
+<h1 id="feature-distinct-type-parameter-d" class="section-header"><a href="#feature-distinct-type-parameter-d">Feature: Distinct type parameter <code>D</code></a></h1>
+<p><a href="../struct.Arena.html" title="Arena&lt;T, D, G&gt;"><code>Arena&lt;T, D, G&gt;</code></a> accetpts type parameter <code>D</code> for creating distinct arena types:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">toy_arena</span>::{<span class="ident">Arena</span>, <span class="ident">Index</span>};
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EntityModel</span> {
+    <span class="ident">hp</span>: <span class="ident">u32</span>,
+}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Model</span> {
+    <span class="comment">// arena of `EntityModel` with distinct type parameter `Model`</span>
+    <span class="ident">entities</span>: <span class="ident">Arena</span><span class="op">&lt;</span><span class="ident">EntityModel</span>, <span class="self">Self</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EntityView</span> {
+    <span class="ident">model</span>: <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">EntityModel</span>, <span class="ident">Model</span><span class="op">&gt;</span>,
+    <span class="ident">name</span>: <span class="ident">String</span>,
+}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">View</span> {
+    <span class="comment">// arena of `EntityView` with distinct type parameter `View`</span>
+    <span class="ident">entities</span>: <span class="ident">Arena</span><span class="op">&lt;</span><span class="ident">EntityView</span>, <span class="self">Self</span><span class="op">&gt;</span>,
+}</code></pre></div>
+<p>We don’t need distinct type parameter in this example.. 😂 But if we have two arenas for the same
+type of items, we could distinguish item <a href="../struct.Index.html" title="Index"><code>Index</code></a> by the belonging container type.</p>
+</div></details></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="snow2d" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script>
+</body></html>

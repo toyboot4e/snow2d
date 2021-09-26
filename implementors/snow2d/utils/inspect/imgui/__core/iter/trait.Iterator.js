@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["snow2d"] = [{"text":"impl&lt;'a&gt; <a class=\"trait\" href=\"snow2d/utils/inspect/imgui/__core/iter/trait.Iterator.html\" title=\"trait snow2d::utils::inspect::imgui::__core::iter::Iterator\">Iterator</a> for <a class=\"struct\" href=\"snow2d/ui/struct.SortedNodesMut.html\" title=\"struct snow2d::ui::SortedNodesMut\">SortedNodesMut</a>&lt;'a&gt;","synthetic":false,"types":["snow2d::ui::SortedNodesMut"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
