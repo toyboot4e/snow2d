@@ -7,6 +7,7 @@ It's a 2D framework specific for my roguelike game. **It doesn't meet others' ne
 #![feature(drain_filter)]
 
 pub extern crate rokol;
+pub extern crate sdl2;
 
 pub mod asset;
 pub mod audio;
@@ -18,7 +19,6 @@ pub mod ui;
 pub mod utils;
 
 use std::{
-    path::PathBuf,
     thread,
     time::{Duration, Instant},
 };

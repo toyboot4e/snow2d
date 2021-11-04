@@ -8,28 +8,30 @@ Asset management
 
 Asset directory is assumed to be at `manifest_dir/assets`. [`AssetKey`] is either of the two:
 
-* "relative/path/to/the/asset/directory"
-* "scheme:relative/path/to/the/scheme/directory"
+* "relative/path/from/the/asset/directory"
+* "scheme:relative/path/from/the/scheme/directory"
 
 TODO: `<asset_dir>/schemes.txt`
 
 # Serde support
 
-Every [`Asset`] is serialized as [`PathBuf`] and deserialiezd as [`Asset`].
+Every [`Asset`] is serialized as [`PathBuf`] and deserialiezed as [`Asset`].
 
 WARNING: Deserialization has to be done in a [`guarded`] scope.
 
-Reason: [`Asset`] is a shared pointer and we need to take care to not create duplicates. But `serde`
-doesn't let us share states while deserialization. So we need a thread-local pointer, which is only
+Reason: [`Asset`] is a shared pointer and must not be duplicated. But `serde` doesn't let us share
+states while deserialization. So we need a thread-local pointer, which is only
 valid in the [`guarded`] procedure.
 
-# Context of asset loaders
+# Custom asset asset loaders
 
-`snow2d`'s asset contexts are based on shared references. Other options would be giving context to
-asset loaders from external, which is not available in `snow2d`:
+[`AssetLoader`] can have access to
 
-1. As a concrete, user-defined type
-2. As a kind of `AnyMap` (with our without automatic query)
+[`AssetLoader`] doesn't have access to global resources and the loader's context is based on shared
+references. Tha is possible in `snow2d` since it's making use of C libraries where internally global
+variables are used.
+
+This might change in future (when I need custom asste loader for other types).
 
 # TODOs
 
@@ -87,7 +89,7 @@ pub trait AssetItem: fmt::Debug + Sized + 'static {
 /// How to load an [`AssetItem`]
 pub trait AssetLoader: fmt::Debug + Sized + 'static {
     type Item: AssetItem;
-    fn load(&self, bytes: Vec<u8>, context: &mut AssetCache) -> Result<Self::Item>;
+    fn load(&self, bytes: &[u8], context: &mut AssetCache) -> Result<Self::Item>;
 }
 
 /// Mutable access to multiple asset loaders at runtime

@@ -1,5 +1,5 @@
 /*!
-Builtin asset loaders
+Builtin asset loaders, registered automatically
 */
 
 use std::{fmt, io};
@@ -40,10 +40,11 @@ impl AssetItem for Texture2dDrop {
 impl AssetLoader for TextureLoader {
     type Item = Texture2dDrop;
 
-    fn load(&self, bytes: Vec<u8>, _context: &mut AssetCache) -> asset::Result<Self::Item> {
+    /// It's taking `bytes` **by value**.
+    fn load(&self, bytes: &[u8], _context: &mut AssetCache) -> asset::Result<Self::Item> {
         use std::io::{Error, ErrorKind};
 
-        let tex = TextureBuilder::from_encoded_bytes(&bytes)
+        let tex = TextureBuilder::from_encoded_bytes(bytes)
             .map_err(|e| Error::new(ErrorKind::Other, e))?
             .build_texture();
 
@@ -76,7 +77,7 @@ where
     T: crate::audio::prelude::FromExt + fmt::Debug + 'static,
 {
     type Item = T;
-    fn load(&self, bytes: Vec<u8>, _context: &mut AssetCache) -> io::Result<Self::Item> {
+    fn load(&self, bytes: &[u8], _context: &mut AssetCache) -> io::Result<Self::Item> {
         Self::Item::from_mem(bytes).map_err(self::upcast_err)
     }
 }

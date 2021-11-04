@@ -67,9 +67,17 @@ pub struct Node {
     /// Local rendering order in range [0, 1] (the higher, the latter drawn)
     pub z_order: Order,
     /// NOTE: Parents are alive if any children is alive
+    #[inspect(with = "inspect_option")]
     pub(super) parent: Option<Handle<Node>>,
     pub(super) children: Vec<WeakHandle<Node>>,
     // TODO: dirty flag,
+}
+
+fn inspect_option<T: Inspect>(x: &mut Option<T>, ui: &imgui::Ui, label: &str) {
+    match x {
+        Some(x) => x.inspect(ui, label),
+        None => ui.label_text(label, "None"),
+    }
 }
 
 impl From<Surface> for Node {
@@ -134,6 +142,7 @@ impl Node {
 /// One of [`AnimImpl`] impls
 #[enum_dispatch(AnimImpl)]
 #[derive(Debug, Clone, Inspect)]
+#[inspect(no_tag)]
 pub enum Anim {
     DynAnim,
     // tweens

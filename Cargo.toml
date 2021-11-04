@@ -22,6 +22,7 @@ exclude = [
 ]
 
 [features]
+# FIXME: disable toy_arena/igri, toy_pool/igri
 no-imgui = ["igri_derive/dummy"]
 
 [dependencies]
@@ -39,7 +40,7 @@ igri_derive = { path = "crates/igri/igri_derive" }
 toy_arena = { path = "crates/toy_arena", features = ["igri"] }
 toy_pool = { path = "crates/toy_pool", features = ["igri"] }
 
-soloud = "0.4.0"
+soloud = "1.0.0"
 image = "0.23.14"
 glam = "0.16.0"
 
