@@ -479,7 +479,7 @@ impl AssetCache {
             // Here we _move_ the bytes to the loader.
             // This is mainly because SoLoud takes the ownership of the memory and I wanted to avoid
             // cloning the sound data bytes.
-            let item = loader.load(bytes, self)?;
+            let item = loader.load(&bytes, self)?;
 
             let cache_t = self.cache_mut::<T>().unwrap();
             let asset = cache_t.insert(entry_id, item, preserve, load_path, serde_repr);
