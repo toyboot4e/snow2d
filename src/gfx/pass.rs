@@ -17,7 +17,7 @@ pub trait RenderPassBuilderState {}
 /// Builder for [`RenderPass`]
 #[derive(Debug)]
 pub struct RenderPassBuilder<'a, 'b, T: RenderPassBuilderState> {
-    pub snow: &'a mut Snow2d,
+    pub gfx: &'a mut Snow2d,
     pub pa: Option<&'b rg::PassAction>,
     pub state: T,
 }
@@ -25,7 +25,7 @@ pub struct RenderPassBuilder<'a, 'b, T: RenderPassBuilderState> {
 impl<'a, 'b, T: RenderPassBuilderState> RenderPassBuilder<'a, 'b, T> {
     pub fn pa(self, pa: Option<&'b rg::PassAction>) -> Self {
         Self {
-            snow: self.snow,
+            gfx: self.gfx,
             pa,
             state: self.state,
         }
@@ -47,7 +47,7 @@ impl<'a> RenderPassBuilderState for ScreenPass<'a> {}
 impl<'a, 'b, 'c> RenderPassBuilder<'a, 'b, ScreenPass<'c>> {
     pub fn new(snow: &'a mut Snow2d) -> Self {
         Self {
-            snow,
+            gfx: snow,
             pa: None,
             state: ScreenPass {
                 tfm: None,
@@ -58,7 +58,7 @@ impl<'a, 'b, 'c> RenderPassBuilder<'a, 'b, ScreenPass<'c>> {
 
     pub fn shader(self, shd: Option<&'c Shader>) -> Self {
         Self {
-            snow: self.snow,
+            gfx: self.gfx,
             pa: self.pa,
             state: ScreenPass {
                 tfm: self.state.tfm,
@@ -69,7 +69,7 @@ impl<'a, 'b, 'c> RenderPassBuilder<'a, 'b, ScreenPass<'c>> {
 
     pub fn transform(self, tfm: Option<glam::Mat4>) -> Self {
         Self {
-            snow: self.snow,
+            gfx: self.gfx,
             pa: self.pa,
             state: ScreenPass {
                 tfm,
@@ -80,16 +80,16 @@ impl<'a, 'b, 'c> RenderPassBuilder<'a, 'b, ScreenPass<'c>> {
 
     pub fn build(self) -> RenderPass<'a> {
         {
-            let fbuf = self.snow.window.framebuf_size_u32();
+            let fbuf = self.gfx.window.framebuf_size_u32();
             let pa = self.pa.unwrap_or(&rg::PassAction::LOAD);
             rg::begin_default_pass(pa, fbuf[0], fbuf[1]);
         }
 
-        let shd = self.state.shd.unwrap_or(&self.snow.ons_shd);
+        let shd = self.state.shd.unwrap_or(&self.gfx.ons_shd);
         shd.apply_pip();
 
         // left, right, bottom, top, near, far
-        let win_size = self.snow.window.size_f32();
+        let win_size = self.gfx.window.size_f32();
         let mut proj = glam::Mat4::orthographic_rh_gl(0.0, win_size[0], win_size[1], 0.0, 0.0, 1.0);
 
         if let Some(tfm) = self.state.tfm {
@@ -104,7 +104,7 @@ impl<'a, 'b, 'c> RenderPassBuilder<'a, 'b, ScreenPass<'c>> {
         };
         shd.set_vs_uniform(0, bytes);
 
-        RenderPass { snow: self.snow }
+        RenderPass { snow: self.gfx }
     }
 }
 
@@ -124,7 +124,7 @@ impl<'a, 'b> RenderPassBuilderState for OffscreenPass<'a, 'b> {}
 impl<'a, 'b, 'c, 'd> RenderPassBuilder<'a, 'b, OffscreenPass<'c, 'd>> {
     pub fn new(snow: &'a mut Snow2d, target: &'d mut RenderTexture) -> Self {
         Self {
-            snow,
+            gfx: snow,
             pa: None,
             state: OffscreenPass {
                 tfm: None,
@@ -136,7 +136,7 @@ impl<'a, 'b, 'c, 'd> RenderPassBuilder<'a, 'b, OffscreenPass<'c, 'd>> {
 
     pub fn shader(self, shd: Option<&'c Shader>) -> Self {
         Self {
-            snow: self.snow,
+            gfx: self.gfx,
             pa: self.pa,
             state: OffscreenPass {
                 tfm: self.state.tfm,
@@ -148,7 +148,7 @@ impl<'a, 'b, 'c, 'd> RenderPassBuilder<'a, 'b, OffscreenPass<'c, 'd>> {
 
     pub fn transform(self, tfm: Option<glam::Mat4>) -> Self {
         Self {
-            snow: self.snow,
+            gfx: self.gfx,
             pa: self.pa,
             state: OffscreenPass {
                 tfm,
@@ -164,11 +164,11 @@ impl<'a, 'b, 'c, 'd> RenderPassBuilder<'a, 'b, OffscreenPass<'c, 'd>> {
             rg::begin_pass(self.state.target.pass(), pa);
         }
 
-        let shd = self.state.shd.unwrap_or(&self.snow.ons_shd);
+        let shd = self.state.shd.unwrap_or(&self.gfx.ons_shd);
         shd.apply_pip();
 
         // left, right, bottom, top, near, far
-        let win_size = self.snow.window.size_f32();
+        let win_size = self.gfx.window.size_f32();
         let mut proj = glam::Mat4::orthographic_rh_gl(0.0, win_size[0], win_size[1], 0.0, 0.0, 1.0);
 
         // [OpenGL] invert/flip y (TODO: why?)
@@ -186,6 +186,6 @@ impl<'a, 'b, 'c, 'd> RenderPassBuilder<'a, 'b, OffscreenPass<'c, 'd>> {
         };
         shd.set_vs_uniform(0, bytes);
 
-        RenderPass { snow: self.snow }
+        RenderPass { snow: self.gfx }
     }
 }

@@ -329,7 +329,7 @@ impl Snow2d {
     /// Returns builder for on-screen rendering pass
     pub fn screen(&mut self) -> RenderPassBuilder<'_, '_, pass::ScreenPass> {
         RenderPassBuilder {
-            snow: self,
+            gfx: self,
             pa: None,
             state: pass::ScreenPass {
                 tfm: None,
@@ -344,7 +344,7 @@ impl Snow2d {
         target: &'a mut RenderTexture,
     ) -> RenderPassBuilder<'_, '_, pass::OffscreenPass<'static, 'a>> {
         RenderPassBuilder {
-            snow: self,
+            gfx: self,
             pa: None,
             state: pass::OffscreenPass {
                 tfm: None,

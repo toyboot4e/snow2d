@@ -23,14 +23,13 @@ use std::{
     time::{Duration, Instant},
 };
 
-use rokol::gfx as rg;
 use sdl2::event::{Event, WindowEvent};
 
 use crate::{
     asset::AssetCache,
     audio::Audio,
     audio::MusicPlayer,
-    gfx::{Color, Snow2d, WindowState},
+    gfx::{Snow2d, WindowState},
     input::Input,
 };
 
@@ -39,10 +38,8 @@ use crate::{
 /// Bundle of graphics, input, audio, assets and utilities.
 #[derive(Debug)]
 pub struct Ice {
-    /// Clears target (frame buffer by default) with cornflower blue color
-    pa_blue: rg::PassAction,
     /// 2D renderer
-    pub snow: Snow2d,
+    pub gfx: Snow2d,
     /// All the input states
     pub input: Input,
     /// Audio context
@@ -57,14 +54,13 @@ pub struct Ice {
 }
 
 impl Ice {
-    pub fn new(snow: Snow2d, asset_root: asset::AssetRoot) -> Self {
+    pub fn new(gfx: Snow2d, asset_root: asset::AssetRoot) -> Self {
         let audio = unsafe { Audio::create().expect("Don't create Audio twice") };
         let mut assets = AssetCache::with_root(asset_root);
         crate::asset::loaders::register(&mut assets, audio.clone());
 
         Self {
-            pa_blue: rg::PassAction::clear(Color::CORNFLOWER_BLUE.to_normalized_array()),
-            snow,
+            gfx,
             audio: audio.clone(),
             assets,
             music: MusicPlayer::new(audio.clone()),
@@ -95,16 +91,16 @@ impl Ice {
     pub fn pre_update(&mut self, dt: Duration) {
         self.frame_count += 1;
         self.dt = dt;
-        self.snow.clock.tick(dt);
+        self.gfx.clock.tick(dt);
     }
 
     /// Updates font texture
     pub fn pre_render(&mut self, window: WindowState) {
-        self.snow.pre_render(window);
+        self.gfx.pre_render(window);
     }
 
     pub fn post_render(&mut self, dt: Duration) {
-        self.snow.post_render(dt);
+        self.gfx.post_render(dt);
     }
 
     /// TODO: Debug render?

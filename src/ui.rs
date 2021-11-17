@@ -163,7 +163,7 @@ struct OrderEntry {
     slot: Slot,
     /// Used to sort entries
     order: Order,
-    coord: CoordSystem,
+    // coord: CoordSystem,
 }
 
 pub struct SortedNodesMut<'a> {
@@ -258,7 +258,7 @@ impl Ui {
             self.ord_buf.push(OrderEntry {
                 slot,
                 order: node.global_z_order(),
-                coord: node.layer.coord,
+                // coord: node.layer.coord,
             });
         }
 
