@@ -17,8 +17,6 @@ use std::{
     rc::Rc,
 };
 
-use anyhow::*;
-
 pub use soloud::{audio as src, filter, prelude, Handle, Soloud as AudioDrop};
 
 use crate::asset::{Asset, AssetCache, AssetKey};
@@ -64,7 +62,7 @@ impl DerefMut for Audio {
 }
 
 // --------------------------------------------------------------------------------
-// Extensions
+// Extensions to soloud-rs
 
 /// Playback handle for [`MusicPlayer`]
 #[derive(Debug)]
@@ -105,7 +103,11 @@ impl MusicPlayer {
 
 impl AssetCache {
     /// Play sound
-    pub fn play<'a>(&mut self, sound: impl Into<AssetKey<'a>>, audio: &Audio) -> Result<()> {
+    pub fn play<'a>(
+        &mut self,
+        sound: impl Into<AssetKey<'a>>,
+        audio: &Audio,
+    ) -> anyhow::Result<()> {
         let mut se: Asset<src::Wav> = self.load_sync(sound)?;
         let se = se.get_mut().unwrap();
         audio.play(&*se);
@@ -117,7 +119,7 @@ impl AssetCache {
         &mut self,
         sound: impl Into<AssetKey<'a>>,
         audio: &Audio,
-    ) -> Result<()> {
+    ) -> anyhow::Result<()> {
         let mut se: Asset<src::Wav> = self.load_sync_preserve(sound)?;
         let se = se.get_mut().unwrap();
         audio.play(&*se);

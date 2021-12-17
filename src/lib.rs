@@ -227,7 +227,7 @@ fn accurate_sleep(dt: Duration) {
 
 /// Utility for updating the game at 60 FPS while the window has focus
 #[derive(Debug)]
-struct GameRunner {
+pub struct GameRunner {
     target_dt: Duration,
     now: Instant,
     accum: Duration,

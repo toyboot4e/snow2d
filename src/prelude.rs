@@ -3,6 +3,8 @@ Primary types and handy tools
 */
 
 pub use anyhow::{Result, *};
+pub use rokol;
+pub use sdl2;
 
 pub use crate::{
     asset::{self, Asset, AssetCache},
