@@ -1,5 +1,7 @@
 # snow2d ❄️
 
+**OUTDATED**: My framework is moving towards my own ECS (`toecs`) + `wgpu`.
+
 `snow2d` is a 2D framework built on top of `rokol`.
 
 `snow2d` is just for my roguelike game; **it doesn’t meet others’ needs**. You can find my video clips on [Youtube](https://www.youtube.com/channel/UCqNzSW4mFdpaRFPlU-J4_zA).
